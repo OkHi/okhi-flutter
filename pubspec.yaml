@@ -1,7 +1,7 @@
 name: okhi_flutter
-description: A new flutter plugin project.
+description: The official OkHi Flutter library will enable you to start collecting and verifying your user's addresses.
 version: 1.0.0
-homepage:
+homepage: https://github.com/OkHi/okhi-flutter
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
