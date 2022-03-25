@@ -1,0 +1,1 @@
+enum OkHiEnv { sandbox, prod }
