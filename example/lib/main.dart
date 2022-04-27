@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
+import 'package:okhi_flutter_example/screens/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,20 +17,21 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    final notification = OkHiAndroidNotification(
+      title: "Verification in progress",
+      text: "Verifying your address",
+      channelId: "okhi",
+      channelName: "OkHi",
+      channelDescription: "Verification alerts",
+    );
     final config = OkHiAppConfiguration(
-      branchId: "fIz39APVic",
-      clientKey: "f79e9963-1c8f-4c33-bc4e-5abf055137bb",
+      branchId: "xmdrV3xN1o",
+      clientKey: "f31bec5f-61b5-429e-838b-eb718959666d",
       env: OkHiEnv.sandbox,
-      notification: OkHiAndroidNotification(
-        title: "Verification in progress",
-        text: "Verifying your address",
-        channelId: "okhi",
-        channelName: "OkHi",
-        channelDescription: "Verification alerts",
-      ),
+      notification: notification,
     );
     OkHi.initialize(config).then((result) {
-      print(result);
+      print("initialization result: $result");
     }).onError((error, stackTrace) {
       print(error);
     });
@@ -37,22 +39,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Create an address"),
-        ),
-        body: OkHiLocationManager(
-          user: OkHiUser(phone: "+254712345678"),
-          onSucess: (response) {
-            response.startVerification(null);
-          },
-          onError: (error) {
-            print(error.code);
-            print(error.message);
-          },
-        ),
-      ),
+    return const MaterialApp(
+      home: Home(),
     );
   }
 }
