@@ -25,8 +25,8 @@ class _MyAppState extends State<MyApp> {
       channelDescription: "Verification alerts",
     );
     final config = OkHiAppConfiguration(
-      branchId: "xmdrV3xN1o",
-      clientKey: "f31bec5f-61b5-429e-838b-eb718959666d",
+      branchId: "<my_branch_id>",
+      clientKey: "<my_client_id>",
       env: OkHiEnv.sandbox,
       notification: notification,
     );
