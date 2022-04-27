@@ -24,6 +24,7 @@ class CreateAddress extends StatelessWidget {
                   print(error.code);
                   print(error.message);
                 },
+                onCloseRequest: () => _handleCloseRequest(context),
               ),
             ),
             Padding(
@@ -39,6 +40,10 @@ class CreateAddress extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  _handleCloseRequest(BuildContext context) {
+    Navigator.pop(context);
   }
 
   _handleOnButtonPress(BuildContext context) {
