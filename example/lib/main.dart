@@ -17,8 +17,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     final config = OkHiAppConfiguration(
-      branchId: "",
-      clientKey: "",
+      branchId: "<my_branch_id>",
+      clientKey: "<my_client_key_id>",
       env: OkHiEnv.sandbox,
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
