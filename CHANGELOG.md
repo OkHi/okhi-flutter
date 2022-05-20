@@ -1,3 +1,8 @@
-## 1.0.0
+## 1.0.1
 
-* Initial release 🥳
+* Fix Geolocation issue on Android
+* Upgraded native libraries
+
+## 0.0.1
+
+* Initial release

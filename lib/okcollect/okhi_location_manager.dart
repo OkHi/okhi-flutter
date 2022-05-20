@@ -179,7 +179,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       }
     };
     final payload = jsonEncode(data);
-    _controller?.evaluateJavascript("""
+    _controller?.runJavascript("""
     function receiveMessage (data) {
       if (FlutterOkHi && FlutterOkHi.postMessage) {
         FlutterOkHi.postMessage(data);
