@@ -174,6 +174,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           "appBar": {
             "color": widget.locationManagerConfiguration.color,
             "visible": widget.locationManagerConfiguration.withAppBar
+          },
+          "addressTypes": {
+            "home": widget.locationManagerConfiguration.withHomeAddressType,
+            "work": widget.locationManagerConfiguration.withWorkAddressType
           }
         }
       }
