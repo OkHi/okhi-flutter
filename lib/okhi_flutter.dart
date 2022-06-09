@@ -124,7 +124,6 @@ class OkHi {
       "environment": configuration.environmentRawValue,
       "notification": configuration.notification.toMap()
     };
-    print("hmm...");
     return await _channel.invokeMethod(
         OkHiNativeMethod.initialize, credentials);
   }
