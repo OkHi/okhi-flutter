@@ -1,3 +1,7 @@
+## 1.0.3
+
+* Enabled different address types for creation within OkHiLocationManager
+
 ## 1.0.2
 
 * Fixes and general improvements
