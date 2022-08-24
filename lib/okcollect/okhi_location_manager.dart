@@ -138,6 +138,13 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       lng = coords!["lng"];
       accuracy = coords!["accuracy"];
     }
+    var user = {"phone": widget.user.phone};
+    if (widget.user.firstName != null) {
+      user["firstName"] = widget.user.firstName!;
+    }
+    if (widget.user.lastName != null) {
+      user["lastName"] = widget.user.lastName!;
+    }
     var data = {
       "message": "select_location",
       "payload": {
@@ -148,7 +155,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             "name": "OkHi"
           }
         },
-        "user": {"phone": widget.user.phone},
+        "user": user,
         "auth": {"authToken": _authorizationToken},
         "context": {
           "container": {"name": _appIdentifier, "version": _appVersion},
