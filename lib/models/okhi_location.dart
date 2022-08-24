@@ -23,6 +23,8 @@ class OkHiLocation {
   String? title;
   String? url;
   String? userId;
+  String? neighborhood;
+  String? countryCode;
 
   OkHiLocation({
     this.id,
@@ -46,6 +48,8 @@ class OkHiLocation {
     this.title,
     this.url,
     this.userId,
+    this.neighborhood,
+    this.countryCode,
   });
 
   OkHiLocation.fromMap(Map<String, dynamic> data) {
@@ -77,6 +81,10 @@ class OkHiLocation {
     title = data.containsKey("title") ? data["title"] : null;
     url = data.containsKey("url") ? data["url"] : null;
     userId = data.containsKey("user_id") ? data["user_id"] : null;
+    neighborhood =
+        data.containsKey("neighborhood") ? data["neighborhood"] : null;
+    countryCode =
+        data.containsKey("country_code") ? data["country_code"] : null;
   }
 
   @override
@@ -103,6 +111,8 @@ class OkHiLocation {
       "title": title,
       "url": url,
       "userId": userId,
+      "neighborhood": neighborhood,
+      "countryCode": countryCode
     });
   }
 }
