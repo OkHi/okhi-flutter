@@ -27,6 +27,7 @@ import io.okhi.android_core.models.OkHiAuth;
 import io.okhi.android_core.models.OkHiException;
 import io.okhi.android_core.models.OkHiLocation;
 import io.okhi.android_core.models.OkHiLocationService;
+import io.okhi.android_core.models.OkHiPermissionService;
 import io.okhi.android_core.models.OkHiUser;
 import io.okhi.android_okverify.OkVerify;
 import io.okhi.android_okverify.interfaces.OkVerifyCallback;
@@ -128,6 +129,12 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
         break;
       case "getCurrentLocation":
         handleGetCurrentLocation(call, result);
+        break;
+      case "canOpenProtectedApps":
+        handleCanOpenProtectedApps(call, result);
+        break;
+      case "openProtectedApps":
+        handleOpenProtectedApps(call, result);
         break;
       default:
         result.notImplemented();
@@ -368,6 +375,19 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       });
     } else {
       result.error("permission_denied", "location permission is not granted", null);
+    }
+  }
+
+  private void handleCanOpenProtectedApps(MethodCall call, Result result) {
+    result.success(OkHiPermissionService.canOpenProtectedApps(context));
+  }
+
+  private void handleOpenProtectedApps(MethodCall call, Result result) {
+    try {
+      OkHiPermissionService.openProtectedAppsSettings(activity, 69);
+      result.success(true);
+    } catch (OkHiException e) {
+      result.error(e.getCode(), e.getMessage(), e);
     }
   }
 }
