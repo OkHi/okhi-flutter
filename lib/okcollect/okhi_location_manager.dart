@@ -1,18 +1,12 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 import '../okhi_flutter.dart';
-import '../models/okhi_user.dart';
 import '../models/okhi_constant.dart';
-import '../models/okhi_location_manager_configuration.dart';
-import '../models/okhi_location_manager_response.dart';
 import '../models/okhi_native_methods.dart';
-import '../models/okhi_exception.dart';
 
 /// The OkHiLocationManager enables you to launch OkHi from your app and collect accurate addresses from your users.
 class OkHiLocationManager extends StatefulWidget {
@@ -218,6 +212,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       case "fatal_exit":
         _handleMessageError(data["payload"]);
         break;
+      case "request_enable_protected_apps":
+        _handleRequestOpenProtectedApps();
+        break;
       case "exit_app":
         _handleMessageExit();
         break;
@@ -246,6 +243,13 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     if (widget.onCloseRequest != null) {
       widget.onCloseRequest!();
     }
+  }
+
+  _handleRequestOpenProtectedApps() {
+    try {
+      OkHi.openProtectedApps();
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   _getAppInformation() async {
