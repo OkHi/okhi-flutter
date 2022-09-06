@@ -50,6 +50,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   Map<String, Object>? coords;
   bool _isLoading = true;
   bool _locationPermissionGranted = false;
+  bool _canOpenProtectedApps = false;
 
   @override
   void initState() {
@@ -105,10 +106,13 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       _accessToken = 'Token ${base64.encode(bytes)}';
       await _signInUser();
       await _getAppInformation();
+      const MethodChannel _channel = MethodChannel('okhi_flutter');
       _locationPermissionGranted = await OkHi.isLocationPermissionGranted();
       if (_locationPermissionGranted) {
-        const MethodChannel _channel = MethodChannel('okhi_flutter');
         coords = await _channel.invokeMapMethod("getCurrentLocation");
+      }
+      if (Platform.isAndroid) {
+        _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
       }
       if (_authorizationToken != null) {
         setState(() {
@@ -178,6 +182,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         },
         "config": {
           "streetView": widget.locationManagerConfiguration.withStreetView,
+          "protectedApps": _canOpenProtectedApps,
           "appBar": {
             "color": widget.locationManagerConfiguration.color,
             "visible": widget.locationManagerConfiguration.withAppBar
