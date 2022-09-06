@@ -1,3 +1,10 @@
+## 1.0.5
+
+* Upgraded native OkHi libraries
+* Support up-to-date dependencies
+* Added improvements for chinese based android devices
+* General fixes and stability improvements
+
 ## 1.0.4
 
 * Android sdk 31 support
