@@ -217,4 +217,19 @@ class OkHi {
         Platform.isIOS ? true : await OkHi.requestEnableGooglePlayServices();
     return hasLocationServices && hasLocationPermission && hasGooglePlayService;
   }
+
+  /// Android Only - Checks whether current device can open "Protected Apps Settings" available in Transsion Group android devices such as Infinix and Tecno
+  /// When your application is included in protected apps, verification processes are less likely to be terminated by the OS. Increasing rate of users being verified.
+  static Future<bool> canOpenProtectedApps() async {
+    if (Platform.isAndroid) {
+      return await _channel.invokeMethod(OkHiNativeMethod.canOpenProtectedApps);
+    }
+    return false;
+  }
+
+  /// Android Only - Opens "Protected Apps Settings" available in Transsion Group android devices such as Infinix and Tecno
+  /// When your application is included in protected apps, verification processes are less likely to be terminated by the OS. Increasing rate of users being verified.
+  static Future<void> openProtectedApps() async {
+    await _channel.invokeMethod(OkHiNativeMethod.openProtectedApps);
+  }
 }
