@@ -43,7 +43,8 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   String _locationManagerUrl = OkHiConstant.sandboxLocationManagerUrl;
   Map<String, Object>? coords;
   bool _isLoading = true;
-  bool _locationPermissionGranted = false;
+  String _locationPermissionLevel = "denied";
+
   bool _canOpenProtectedApps = false;
 
   @override
@@ -101,8 +102,13 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       await _signInUser();
       await _getAppInformation();
       const MethodChannel _channel = MethodChannel('okhi_flutter');
-      _locationPermissionGranted = await OkHi.isLocationPermissionGranted();
-      if (_locationPermissionGranted) {
+      _locationPermissionLevel =
+          await OkHi.isBackgroundLocationPermissionGranted()
+              ? "always"
+              : await OkHi.isLocationPermissionGranted()
+                  ? "whenInUse"
+                  : "denied";
+      if (_locationPermissionLevel != "denied") {
         coords = await _channel.invokeMapMethod("getCurrentLocation");
       }
       if (Platform.isAndroid) {
@@ -163,9 +169,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             "version": OkHiConstant.libraryVersion
           },
           "platform": {"name": "flutter"},
-          "permissions": {
-            "location": _locationPermissionGranted ? "whenInUse" : "denied"
-          },
+          "permissions": {"location": _locationPermissionLevel},
           "coordinates": {
             "currentLocation": {
               "lat": lat,
