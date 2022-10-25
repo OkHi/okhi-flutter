@@ -44,7 +44,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   Map<String, Object>? coords;
   bool _isLoading = true;
   String _locationPermissionLevel = "denied";
-
+  final MethodChannel _channel = const MethodChannel('okhi_flutter');
   bool _canOpenProtectedApps = false;
 
   @override
@@ -101,7 +101,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       _accessToken = 'Token ${base64.encode(bytes)}';
       await _signInUser();
       await _getAppInformation();
-      const MethodChannel _channel = MethodChannel('okhi_flutter');
       _locationPermissionLevel =
           await OkHi.isBackgroundLocationPermissionGranted()
               ? "always"
@@ -109,7 +108,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
                   ? "whenInUse"
                   : "denied";
       if (_locationPermissionLevel != "denied") {
-        coords = await _channel.invokeMapMethod("getCurrentLocation");
+        coords = await _fetchCoords();
       }
       if (Platform.isAndroid) {
         _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
@@ -150,6 +149,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       user["lastName"] = widget.user.lastName!;
     }
     var data = {
+      "url": _locationManagerUrl,
       "message": "select_location",
       "payload": {
         "style": {
@@ -193,6 +193,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       }
     };
     final payload = jsonEncode(data);
+    _saveLaunchPayload(payload);
     _controller?.runJavascript("""
     function receiveMessage (data) {
       if (FlutterOkHi && FlutterOkHi.postMessage) {
@@ -322,5 +323,16 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         );
       }
     }
+  }
+
+  Future<Map<String, Object>?> _fetchCoords() async {
+    final Map<String, Object>? coords =
+        await _channel.invokeMapMethod("getCurrentLocation");
+    return coords;
+  }
+
+  _saveLaunchPayload(String payload) async {
+    await _channel.invokeMethod(
+        "setItem", {"key": "okcollect-launch-payload", "value": payload});
   }
 }
