@@ -29,10 +29,10 @@ import io.okhi.android_core.models.OkHiLocation;
 import io.okhi.android_core.models.OkHiLocationService;
 import io.okhi.android_core.models.OkHiPermissionService;
 import io.okhi.android_core.models.OkHiUser;
+import io.okhi.android_core.models.OkPreference;
 import io.okhi.android_okverify.OkVerify;
 import io.okhi.android_okverify.interfaces.OkVerifyCallback;
 import io.okhi.android_okverify.models.OkHiNotification;
-import androidx.annotation.NonNull;
 
 /** OkhiFlutterPlugin */
 public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -135,6 +135,9 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
         break;
       case "openProtectedApps":
         handleOpenProtectedApps(call, result);
+        break;
+      case "setItem":
+        handleSetItem(call, result);
         break;
       default:
         result.notImplemented();
@@ -387,6 +390,18 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       OkHiPermissionService.openProtectedAppsSettings(activity, 69);
       result.success(true);
     } catch (OkHiException e) {
+      result.error(e.getCode(), e.getMessage(), e);
+    }
+  }
+
+  private void handleSetItem(MethodCall call, Result result) {
+    String key = call.argument("key");
+    String value = call.argument("value");
+    try {
+      OkPreference.setItem(key, value, context);
+      result.success(true);
+    } catch (OkHiException e) {
+      e.printStackTrace();
       result.error(e.getCode(), e.getMessage(), e);
     }
   }
