@@ -1,3 +1,9 @@
+## 1.0.6
+
+* Upgraded native OkHi libraries
+* Support up-to-date dependencies
+* General fixes and stability improvements
+
 ## 1.0.5
 
 * Upgraded native OkHi libraries
