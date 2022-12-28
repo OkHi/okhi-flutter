@@ -1,5 +1,10 @@
 ## 1.0.7
 
+* Fix: Main thread warning with CLLocationManager.locationServicesEnabled()
+* Upgrade: Upgraded to flutter_weview v4+
+
+## 1.0.7
+
 * Upgraded native OkHi libraries
 * General fixes and stability improvements
 
