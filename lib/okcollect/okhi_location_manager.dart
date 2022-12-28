@@ -141,7 +141,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     }
     var data = {
       "url": _locationManagerUrl,
-      "message": "select_location",
+      "message": widget.locationManagerConfiguration.withCreateMode
+          ? "start_app"
+          : "select_location",
       "payload": {
         "style": {
           "base": {
