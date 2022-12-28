@@ -1,4 +1,4 @@
-## 1.0.7
+## 1.0.8
 
 * Fix: Main thread warning with CLLocationManager.locationServicesEnabled()
 * Upgrade: Upgraded to flutter_weview v4+
