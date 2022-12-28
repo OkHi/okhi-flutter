@@ -42,7 +42,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   String _signInUrl = OkHiConstant.sandboxSignInUrl;
   String _locationManagerUrl = OkHiConstant.sandboxLocationManagerUrl;
   Map<String, Object>? coords;
-  bool _isLoading = true;
   String _locationPermissionLevel = "denied";
   final MethodChannel _channel = const MethodChannel('okhi_flutter');
   bool _canOpenProtectedApps = false;
@@ -55,25 +54,14 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (_controller == null) {
       return const Center(
         child: CircularProgressIndicator.adaptive(),
       );
     }
     return WillPopScope(
       onWillPop: _handleWillPopScope,
-      child: WebView(
-        initialUrl: _locationManagerUrl,
-        javascriptMode: JavascriptMode.unrestricted,
-        javascriptChannels: {
-          JavascriptChannel(
-            name: 'FlutterOkHi',
-            onMessageReceived: _handleMessageReceived,
-          )
-        },
-        onWebViewCreated: _handleOnWebViewCreated,
-        onPageFinished: _handlePageLoaded,
-      ),
+      child: WebViewWidget(controller: _controller!),
     );
   }
 
@@ -86,7 +74,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handleInitState() async {
-    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    // if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     final configuration = OkHi.getConfiguration();
     if (configuration != null) {
       if (configuration.environmentRawValue == "dev") {
@@ -115,7 +103,14 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       }
       if (_authorizationToken != null) {
         setState(() {
-          _isLoading = false;
+          _controller = WebViewController()
+            ..loadRequest(Uri.parse(_locationManagerUrl))
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..addJavaScriptChannel("FlutterOkHi",
+                onMessageReceived: _handleMessageReceived)
+            ..setNavigationDelegate(
+              NavigationDelegate(onPageFinished: _handlePageLoaded),
+            );
         });
       }
     } else if (widget.onError != null) {
@@ -126,10 +121,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         ),
       );
     }
-  }
-
-  _handleOnWebViewCreated(WebViewController controller) {
-    _controller = controller;
   }
 
   _handlePageLoaded(String page) {
@@ -194,7 +185,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     };
     final payload = jsonEncode(data);
     _saveLaunchPayload(payload);
-    _controller?.runJavascript("""
+    _controller?.runJavaScript("""
     function receiveMessage (data) {
       if (FlutterOkHi && FlutterOkHi.postMessage) {
         FlutterOkHi.postMessage(data);
@@ -205,7 +196,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     """);
   }
 
-  _handleMessageReceived(JavascriptMessage jsMessage) {
+  _handleMessageReceived(JavaScriptMessage jsMessage) {
     final Map<String, dynamic> data = jsonDecode(jsMessage.message);
     final String message = data["message"];
     switch (message) {
