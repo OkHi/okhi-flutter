@@ -1,5 +1,6 @@
 ## 1.0.8
 
+* Feature: Enabled create only mode in OkHiLocationManager
 * Fix: Main thread warning with CLLocationManager.locationServicesEnabled()
 * Upgrade: Upgraded to flutter_weview v4+
 
