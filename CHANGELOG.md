@@ -1,4 +1,9 @@
-## 1.0.7
+## 1.0.9
+
+* Upgrade: Upgraded gradle to fix lStar issue. Requires setting compileSdkVersion + targetSdkVersion to 33
+* Upgrade: Upgraded webview_flutter to 4.0.2
+
+## 1.0.8
 
 * Fix: Main thread warning with CLLocationManager.locationServicesEnabled()
 * Upgrade: Upgraded to flutter_weview v4+
