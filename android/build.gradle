@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:7.2.2'
     }
 }
 
@@ -23,7 +23,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -36,6 +36,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.github.okhi:android-core:v1.4.8'
-    implementation 'com.github.okhi:android-okverify:v1.7.3'
+    implementation 'com.github.OkHi:android-core:v1.5.8'
+    implementation 'com.github.OkHi:android-okverify:v1.9.7'
 }
