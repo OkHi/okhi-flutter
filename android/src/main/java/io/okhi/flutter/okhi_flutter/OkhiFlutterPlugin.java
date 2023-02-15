@@ -177,7 +177,7 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
   }
 
   private void handleGetPlatformVersion(MethodCall call, Result result) {
-    result.success("Android " + android.os.Build.VERSION.SDK_INT);
+    result.success(android.os.Build.VERSION.SDK_INT + "");
   }
 
   private void handleIsLocationServicesEnabled(MethodCall call, Result result) {

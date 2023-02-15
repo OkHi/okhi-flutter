@@ -73,17 +73,45 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     return !canGoBack;
   }
 
+  _fetchSignInUrl(String env) {
+    if (env == "dev") {
+      return OkHiConstant.devSignInUrl;
+    } else if (env == "prod") {
+      return OkHiConstant.prodSignInUrl;
+    } else {
+      return OkHiConstant.sandboxSignInUrl;
+    }
+  }
+
+  Future<String> _fetchLocationManagerUrl(String env) async {
+    final platformVersion = await OkHi.platformVersion;
+    if (Platform.isIOS ||
+        (Platform.isAndroid && int.parse(platformVersion) > 23)) {
+      if (env == "dev") {
+        return OkHiConstant.devLocationManagerUrl;
+      } else if (env == "prod") {
+        return OkHiConstant.prodLocationManagerUrl;
+      } else {
+        return OkHiConstant.sandboxLocationManagerUrl;
+      }
+    } else {
+      if (env == "dev") {
+        return OkHiConstant.legacyDevLocationManagerUrl;
+      } else if (env == "prod") {
+        return OkHiConstant.legacyProdLocationManagerUrl;
+      } else {
+        return OkHiConstant.legacySandboxLocationManagerUrl;
+      }
+    }
+  }
+
   _handleInitState() async {
     // if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     final configuration = OkHi.getConfiguration();
     if (configuration != null) {
-      if (configuration.environmentRawValue == "dev") {
-        _signInUrl = OkHiConstant.devSignInUrl;
-        _locationManagerUrl = OkHiConstant.devLocationManagerUrl;
-      } else if (configuration.environmentRawValue == "prod") {
-        _signInUrl = OkHiConstant.prodSignInUrl;
-        _locationManagerUrl = OkHiConstant.prodLocationManagerUrl;
-      }
+      _signInUrl = _fetchSignInUrl(configuration.environmentRawValue);
+      _locationManagerUrl =
+          await _fetchLocationManagerUrl(configuration.environmentRawValue);
       final bytes =
           utf8.encode("${configuration.branchId}:${configuration.clientKey}");
       _accessToken = 'Token ${base64.encode(bytes)}';

@@ -36,6 +36,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.github.OkHi:android-core:v1.5.8'
-    implementation 'com.github.OkHi:android-okverify:v1.9.7'
+    implementation 'com.github.OkHi:android-core:v1.5.9'
+    implementation 'com.github.OkHi:android-okverify:v1.9.10'
 }
