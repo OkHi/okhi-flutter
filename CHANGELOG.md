@@ -1,3 +1,8 @@
+## 1.1.0
+
+* Upgrade: Upgraded native libraries dependancies
+* Feature: Enabled android 5+ devices to create and verify devices
+
 ## 1.0.9
 
 * Upgrade: Upgraded gradle to fix lStar issue. Requires setting compileSdkVersion + targetSdkVersion to 33
