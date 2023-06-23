@@ -16,7 +16,7 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url "https://repo.okhi.io/artifactory/maven" }
     }
 }
 
@@ -31,11 +31,11 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 19
     }
 }
 
 dependencies {
-    implementation 'com.github.OkHi:android-core:v1.5.9'
-    implementation 'com.github.OkHi:android-okverify:v1.9.10'
+    implementation 'io.okhi.android:core:1.7.15'
+    implementation 'io.okhi.android:okverify:1.9.31'
 }

@@ -1,3 +1,8 @@
+## 1.1.1
+
+* Migration: Migrated native android deps to okhi maven repo
+* Upgrade: Upgraded android native libraries dependancies
+
 ## 1.1.0
 
 * Upgrade: Upgraded native libraries dependancies
