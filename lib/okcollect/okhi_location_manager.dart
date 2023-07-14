@@ -152,20 +152,32 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handlePageLoaded(String page) {
-    Object? lat = 0;
-    Object? lng = 0;
-    Object? accuracy = 0;
-    if (coords != null) {
-      lat = coords!["lat"];
-      lng = coords!["lng"];
-      accuracy = coords!["accuracy"];
-    }
     var user = {"phone": widget.user.phone};
     if (widget.user.firstName != null) {
       user["firstName"] = widget.user.firstName!;
     }
     if (widget.user.lastName != null) {
       user["lastName"] = widget.user.lastName!;
+    }
+
+    Map<String, Map<String, Object?>> context = {
+      "container": {"name": _appIdentifier, "version": _appVersion},
+      "developer": {"name": "external"},
+      "library": {
+        "name": "okhiFlutter",
+        "version": OkHiConstant.libraryVersion
+      },
+      "platform": {"name": "flutter"},
+      "permissions": {"location": _locationPermissionLevel}
+    };
+    if (coords != null) {
+      context["coordinates"] = {
+        "currentLocation": {
+          "lat": coords!["lat"],
+          "lng": coords!["lng"],
+          "accuracy": coords!["accuracy"],
+        },
+      };
     }
     var data = {
       "url": _locationManagerUrl,
@@ -182,23 +194,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         },
         "user": user,
         "auth": {"authToken": _authorizationToken},
-        "context": {
-          "container": {"name": _appIdentifier, "version": _appVersion},
-          "developer": {"name": "external"},
-          "library": {
-            "name": "okhiFlutter",
-            "version": OkHiConstant.libraryVersion
-          },
-          "platform": {"name": "flutter"},
-          "permissions": {"location": _locationPermissionLevel},
-          "coordinates": {
-            "currentLocation": {
-              "lat": lat,
-              "lng": lng,
-              "accuracy": accuracy,
-            },
-          },
-        },
+        "context": context,
         "config": {
           "streetView": widget.locationManagerConfiguration.withStreetView,
           "protectedApps": _canOpenProtectedApps,
@@ -347,13 +343,20 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   Future<Map<String, Object>?> _fetchCoords() async {
-    final Map<String, Object>? coords =
-        await _channel.invokeMapMethod("getCurrentLocation");
-    return coords;
+    bool isServiceAvailable = await OkHi.isLocationPermissionGranted();
+    bool isPermissionGranted = await OkHi.isLocationPermissionGranted();
+    if (isServiceAvailable && isPermissionGranted) {
+      final Map<String, Object>? coords =
+          await _channel.invokeMapMethod("getCurrentLocation");
+      return coords;
+    }
+    return null;
   }
 
   _saveLaunchPayload(String payload) async {
-    await _channel.invokeMethod(
-        "setItem", {"key": "okcollect-launch-payload", "value": payload});
+    if (Platform.isAndroid) {
+      await _channel.invokeMethod(
+          "setItem", {"key": "okcollect-launch-payload", "value": payload});
+    }
   }
 }

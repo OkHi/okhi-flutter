@@ -364,7 +364,7 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
             HashMap<String, Double> coords = new HashMap<String, Double>();
             coords.put("lat", location.getLatitude());
             coords.put("lng", location.getLongitude());
-            coords.put("accuracy", location.getAltitude());
+            coords.put("accuracy", (double) location.getAccuracy());
             result.success(coords);
           } else {
             result.error("unknown_error", "could not retrive coordinates", null);

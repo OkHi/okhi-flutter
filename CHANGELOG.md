@@ -1,3 +1,8 @@
+## 1.1.2
+
+* Upgrade: ios native library
+* Minor bug fixes and stability improvments
+
 ## 1.1.1
 
 * Migration: Migrated native android deps to okhi maven repo
