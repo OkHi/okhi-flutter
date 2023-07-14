@@ -223,6 +223,10 @@ extension SwiftOkhiFlutterPlugin: OkVerifyDelegate {
     public func verify(_ okverify: OkVerify, didUpdateLocationPermissionStatus status: CLAuthorizationStatus) {
         // TODO: handle event transmission
     }
+    
+    public func verify(_ okverify: OkVerify, didUpdateNotificationPermissionStatus status: Bool) {
+        
+    }
 }
 
 extension SwiftOkhiFlutterPlugin: CLLocationManagerDelegate {
