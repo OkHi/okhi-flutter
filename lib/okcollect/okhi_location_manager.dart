@@ -354,7 +354,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _saveLaunchPayload(String payload) async {
-    await _channel.invokeMethod(
-        "setItem", {"key": "okcollect-launch-payload", "value": payload});
+    if (Platform.isAndroid) {
+      await _channel.invokeMethod(
+          "setItem", {"key": "okcollect-launch-payload", "value": payload});
+    }
   }
 }
