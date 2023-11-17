@@ -1,3 +1,8 @@
+## 1.1.3
+
+* Upgrade: android-okverify to v1.9.32
+* Minor bug fixes and stability improvments
+
 ## 1.1.2
 
 * Upgrade: ios native library
