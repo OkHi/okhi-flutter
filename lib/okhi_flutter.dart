@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location.dart';
 import 'package:okhi_flutter/models/okhi_user.dart';
@@ -124,8 +125,13 @@ class OkHi {
       "environment": configuration.environmentRawValue,
       "notification": configuration.notification.toMap()
     };
-    return await _channel.invokeMethod(
-        OkHiNativeMethod.initialize, credentials);
+    final initState =
+        await _channel.invokeMethod(OkHiNativeMethod.initialize, credentials);
+    if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
+        Platform.isIOS) {
+      await _channel.invokeMethod(OkHiNativeMethod.onStart);
+    }
+    return initState;
   }
 
   /// Returns the current configuration
