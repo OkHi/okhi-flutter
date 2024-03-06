@@ -1,3 +1,11 @@
+## 1.1.4
+
+* Feature: Enable apps targetting sdk 34 (Android 14)
+* Upgrade: android-core to v1.7.17
+* Upgrade: android-okverify to v1.9.39
+* Upgrade: OkHi-iOS to v1.9.34
+* Minor bug fixes and stability improvments
+
 ## 1.1.3
 
 * Upgrade: android-okverify to v1.9.32
