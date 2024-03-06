@@ -24,4 +24,5 @@ class OkHiNativeMethod {
   static const String stopForegroundService = "stopForegroundService";
   static const String canOpenProtectedApps = "canOpenProtectedApps";
   static const String openProtectedApps = "openProtectedApps";
+  static const String onStart = "onStart";
 }
