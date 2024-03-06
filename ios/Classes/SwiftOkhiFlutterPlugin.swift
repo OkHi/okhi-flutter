@@ -64,9 +64,18 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
         case "getCurrentLocation":
             handleGetCurrentLocation(call, result)
             break
+        case "onStart":
+            handleOnStart(call, result)
+            break
         default:
             result(FlutterMethodNotImplemented)
             break
+        }
+    }
+    
+    private func handleOnStart(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        OkVerify.onStart { initState in
+            result(initState)
         }
     }
     
@@ -134,7 +143,7 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
         self.flutterResult = result
         if let branchId = branchId, let clientKey = clientKey {
             okverify.delegate = self
-            okverify.initialize(with: branchId, clientKey: clientKey, environment: envRaw)
+            okverify.initialize(branchId: branchId, clientKey: clientKey, environment: envRaw)
             print("init started, \(branchId), \(clientKey), \(envRaw)")
         } else {
             result(FlutterError(code: "unauthorized", message: "invalid initialization credentials provided", details: nil))
