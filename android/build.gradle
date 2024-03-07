@@ -17,6 +17,7 @@ rootProject.allprojects {
         google()
         mavenCentral()
         maven { url "https://repo.okhi.io/artifactory/maven" }
+        maven { url "https://repo.okhi.io/artifactory/maven-dev" }
     }
 }
 
@@ -37,5 +38,5 @@ android {
 
 dependencies {
     implementation 'io.okhi.android:core:1.7.17'
-    implementation 'io.okhi.android:okverify:1.9.39'
+    implementation 'io.okhi.android:okverify:1.9.41'
 }

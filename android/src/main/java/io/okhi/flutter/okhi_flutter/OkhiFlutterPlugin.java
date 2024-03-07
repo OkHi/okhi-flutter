@@ -139,6 +139,9 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       case "setItem":
         handleSetItem(call, result);
         break;
+      case "exampleFN":
+        handleExampleFN(call, result);
+        break;
       default:
         result.notImplemented();
     }
@@ -404,5 +407,10 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       e.printStackTrace();
       result.error(e.getCode(), e.getMessage(), e);
     }
+  }
+
+  private void handleExampleFN(MethodCall call, Result result) {
+    String str = call.argument("str");
+    result.success(OkVerify.exampleFn(str));
   }
 }

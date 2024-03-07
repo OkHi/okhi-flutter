@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
+import 'package:okhi_flutter_example/screens/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,10 +17,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    final config = OkHiAppConfiguration(
-      branchId: "<my_branch_id>",
-      clientKey: "<my_client_key_id>",
-      env: OkHiEnv.sandbox,
+    final config = OkHiAppConfiguration.withRawValue(
+      branchId: "",
+      clientKey: "",
+      environmentRawValue: "dev",
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
         text: "Verifying your address",
@@ -29,7 +30,7 @@ class _MyAppState extends State<MyApp> {
       ),
     );
     OkHi.initialize(config).then((result) {
-      print(result);
+      print(">>>>>>: $result");
     }).onError((error, stackTrace) {
       print(error);
     });
@@ -37,22 +38,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Create an address"),
-        ),
-        body: OkHiLocationManager(
-          user: OkHiUser(phone: "+254712345678"),
-          onSucess: (response) {
-            response.startVerification(null);
-          },
-          onError: (error) {
-            print(error.code);
-            print(error.message);
-          },
-        ),
-      ),
+    return const MaterialApp(
+      home: Home(),
     );
   }
 }

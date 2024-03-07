@@ -238,4 +238,8 @@ class OkHi {
   static Future<void> openProtectedApps() async {
     await _channel.invokeMethod(OkHiNativeMethod.openProtectedApps);
   }
+
+  static Future<String> exampleFN(String str) async {
+    return await _channel.invokeMethod(OkHiNativeMethod.exampleFN, {str: str});
+  }
 }

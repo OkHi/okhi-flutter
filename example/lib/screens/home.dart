@@ -95,12 +95,20 @@ class _HomeState extends State<Home> {
                 title: "Is service running",
                 onPressed: _handleCheckForegroundService,
               ),
+              FullButton(
+                title: "ExampleFN",
+                onPressed: _handleExampleFN,
+              ),
               MessageBox(message: message)
             ],
           ),
         ),
       ),
     );
+  }
+
+  _handleExampleFN() async {
+    print(">>>>:${await OkHi.exampleFN("Hi")}");
   }
 
   _handlePlatformVersion() async {
