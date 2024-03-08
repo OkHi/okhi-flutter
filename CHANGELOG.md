@@ -1,3 +1,7 @@
+## 1.1.5
+
+* Upgrade: flutter dependencies to latest versions
+
 ## 1.1.4
 
 * Feature: Enable apps targetting sdk 34 (Android 14)
