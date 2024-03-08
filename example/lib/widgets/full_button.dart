@@ -15,7 +15,7 @@ class FullButton extends StatelessWidget {
       onPressed: _handlePress,
       child: Text(title),
       style: ElevatedButton.styleFrom(
-        primary: dis ? Colors.grey.shade300 : Colors.lightBlue,
+        backgroundColor: dis ? Colors.grey.shade300 : Colors.lightBlue,
         minimumSize: Size(
           width,
           35,
