@@ -139,6 +139,15 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       case "setItem":
         handleSetItem(call, result);
         break;
+      case "retrieveDeviceInfo":
+        handleRetrieveDeviceInfo(call, result);
+        break;
+      case "fetchLocationPermissionStatus":
+        handleFetchLocationPermissionStatus(call, result);
+        break;
+      case "fetchRegisteredGeofences":
+        handleFetchRegisteredGeofences(call, result);
+        break;
       default:
         result.notImplemented();
     }
@@ -404,5 +413,28 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       e.printStackTrace();
       result.error(e.getCode(), e.getMessage(), e);
     }
+  }
+
+  private void handleRetrieveDeviceInfo(MethodCall call, Result result) {
+    HashMap<String, Object> deviceInfo = new HashMap<String, Object>();
+    deviceInfo.put("manufacturer", Build.MANUFACTURER);
+    deviceInfo.put("model", Build.MODEL);
+    deviceInfo.put("osVersion", Build.VERSION.RELEASE);
+    deviceInfo.put("platform", "android");
+    result.success(deviceInfo);
+  }
+
+  private void handleFetchLocationPermissionStatus(MethodCall call, Result result) {
+    if (OkHi.isBackgroundLocationPermissionGranted(activity)) {
+      result.success("always");
+    } else if (OkHi.isLocationPermissionGranted(activity)) {
+      result.success("whenInUse");
+    } else {
+      result.success("denied");
+    }
+  }
+
+  private void handleFetchRegisteredGeofences(MethodCall call, Result result) {
+    result.success(OkVerify.fetchRegisteredGeofences(activity));
   }
 }
