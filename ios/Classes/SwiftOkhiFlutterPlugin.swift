@@ -67,10 +67,49 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
         case "onStart":
             handleOnStart(call, result)
             break
+        case "retrieveDeviceInfo":
+            handleRetrieveDeviceInfo(call, result)
+            break
+        case "fetchLocationPermissionStatus":
+            handleFetchLocationPermissionStatus(call, result)
+            break
+        case "fetchRegisteredGeofences":
+            handleFetchRegisteredGeofences(call, result)
+            break
         default:
             result(FlutterMethodNotImplemented)
             break
         }
+    }
+    
+    private func handleFetchRegisteredGeofences(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        do {
+            let geofences: [[String: Any]] = OkVerify.fetchRegisteredGeofences()
+            let jsonData = try JSONSerialization.data(withJSONObject: geofences, options: [])
+            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+                result(NSNull())
+                return
+            }
+            result(jsonString)
+        } catch {
+            result(NSNull())
+        }
+    }
+    
+    private func handleFetchLocationPermissionStatus(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        var status = fetchLocationPermissionStatus(status: getLocationAuthorizationStatus(manager: CLLocationManager()))
+        status = status == "notDetermined" ? "notDetermined" : status == "authorizedWhenInUse" ? "whenInuse" : status == "authorizedAlways" ? "always" : "denied"
+        result(status)
+    }
+    
+    private func handleRetrieveDeviceInfo(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let deviceInfoDict: NSDictionary = [
+            "manufacturer": "Apple",
+            "model": UIDevice.current.modelName,
+            "osVersion": UIDevice.current.systemVersion,
+            "platform": "ios"
+        ]
+        result(deviceInfoDict)
     }
     
     private func handleOnStart(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -189,6 +228,35 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
         }
     }
     
+    private func getLocationAuthorizationStatus(manager: CLLocationManager) -> CLAuthorizationStatus {
+        if #available(iOS 14.0, *) {
+            return manager.authorizationStatus
+        } else {
+            return CLLocationManager.authorizationStatus()
+        }
+    }
+    
+    private func fetchLocationPermissionStatus(status: CLAuthorizationStatus) -> String {
+            var str: String = ""
+            switch status {
+            case .notDetermined:
+                str = "notDetermined"
+            case .restricted:
+                str = "restricted"
+            case .denied:
+                str = "denied"
+            case .authorizedAlways:
+                str = "authorizedAlways"
+            case .authorizedWhenInUse:
+                str = "authorizedWhenInUse"
+            case .authorized:
+                str = "authorized"
+            @unknown default:
+                str = "unknown"
+            }
+            return str
+        }
+    
 }
 
 extension SwiftOkhiFlutterPlugin: OkVerifyDelegate {
@@ -258,5 +326,18 @@ extension SwiftOkhiFlutterPlugin: CLLocationManagerDelegate {
             result(FlutterError(code: "unknown_error", message: "unable to obtain location", details: nil))
             self.flutterResult = nil
         }
+    }
+}
+
+extension UIDevice {
+    var modelName: String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let machineMirror = Mirror(reflecting: systemInfo.machine)
+        let identifier = machineMirror.children.reduce("") { identifier, element in
+            guard let value = element.value as? Int8, value != 0 else { return identifier }
+            return identifier + String(UnicodeScalar(UInt8(value)))
+        }
+        return identifier
     }
 }
