@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
           title: const Text("Create an address"),
         ),
         body: OkHiLocationManager(
-          user: OkHiUser(phone: "+25471234578"),
+          user: OkHiUser(phone: "+254712345678"),
           onSucess: (response) {
             response.startVerification(null);
           },
