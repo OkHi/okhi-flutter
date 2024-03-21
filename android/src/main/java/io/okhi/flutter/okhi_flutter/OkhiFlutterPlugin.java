@@ -139,6 +139,9 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       case "setItem":
         handleSetItem(call, result);
         break;
+      case "fetchRegisteredLocationIds":
+        handleFetchRegisteredLocationIds(result);
+        break;
       default:
         result.notImplemented();
     }
@@ -402,6 +405,18 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       result.success(true);
     } catch (OkHiException e) {
       e.printStackTrace();
+      result.error(e.getCode(), e.getMessage(), e);
+    }
+  }
+
+  private void handleFetchRegisteredLocationIds(Result result) {
+    try {
+      String locations = OkPreference.getItem("registered_geofences", context);
+      if(locations == null){
+        locations = "[]";
+      }
+      result.success(locations);
+    } catch (OkHiException e) {
       result.error(e.getCode(), e.getMessage(), e);
     }
   }
