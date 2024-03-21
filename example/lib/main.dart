@@ -17,9 +17,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     final config = OkHiAppConfiguration(
-      branchId: "bWpVwm65jy",
-      clientKey: "3db1617f-b25b-4a80-8165-8077b4d1ea44",
-      env: OkHiEnv.prod,
+      branchId: "<my_branch_id>",
+      clientKey: "<my_client_key_id>",
+      env: OkHiEnv.sandbox,
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
         text: "Verifying your address",
@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
           title: const Text("Create an address"),
         ),
         body: OkHiLocationManager(
-          user: OkHiUser(phone: "+254712288371"),
+          user: OkHiUser(phone: "+25471234578"),
           onSucess: (response) {
             response.startVerification(null);
           },
