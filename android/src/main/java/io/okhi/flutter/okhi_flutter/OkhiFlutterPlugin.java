@@ -5,7 +5,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
@@ -147,6 +149,9 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
         break;
       case "fetchRegisteredGeofences":
         handleFetchRegisteredGeofences(call, result);
+        break;
+      case "openAppSettings":
+        handleOpenAppSettings(call, result);
         break;
       default:
         result.notImplemented();
@@ -436,5 +441,14 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
 
   private void handleFetchRegisteredGeofences(MethodCall call, Result result) {
     result.success(OkVerify.fetchRegisteredGeofences(activity));
+  }
+
+  private void handleOpenAppSettings(MethodCall call, Result result) {
+    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+    Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+    intent.setData(uri);
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    activity.startActivity(intent);
+    result.success(true);
   }
 }
