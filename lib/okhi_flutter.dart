@@ -257,4 +257,8 @@ class OkHi {
     }
     return [];
   }
+
+  static Future<bool> openAppSettings() async {
+    return await _channel.invokeMethod(OkHiNativeMethod.openAppSettings);
+  }
 }
