@@ -255,10 +255,58 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       case "request_enable_protected_apps":
         _handleRequestOpenProtectedApps();
         break;
+      case "request_location_permission":
+        _handleRequestLocationPermission(data["payload"]);
+        break;
       case "exit_app":
         _handleMessageExit();
         break;
       default:
+    }
+  }
+
+  _runWebViewCallback(String result) {
+    String jsString =
+        "(function (){ if (typeof runOkHiLocationManagerCallback === \"function\") { runOkHiLocationManagerCallback(\"$result\") } })()";
+    _controller?.runJavaScript(jsString);
+  }
+
+  _handleAndroidRequestLocationPermission(String level) async {
+    if (level == 'whenInUse') {
+      bool result = await OkHi.requestLocationPermission();
+      _runWebViewCallback(result ? 'whenInUse' : 'blocked');
+    } else if (level == 'always') {
+      bool result = await OkHi.requestBackgroundLocationPermission();
+      _runWebViewCallback(result ? 'always' : 'blocked');
+    }
+  }
+
+  _handleIOSRequestLocationPermission(String level) async {
+    bool isServiceAvailable = await OkHi.isLocationServicesEnabled();
+    if (!isServiceAvailable) {
+      await OkHi.openAppSettings();
+    } else if (level == 'whenInUse') {
+      bool result = await OkHi.requestLocationPermission();
+      _runWebViewCallback(result ? level : 'denied');
+    } else if (level == 'always') {
+      bool granted = await OkHi.isBackgroundLocationPermissionGranted();
+      if (granted) {
+        _runWebViewCallback(level);
+      } else {
+        await OkHi.openAppSettings();
+      }
+    }
+  }
+
+  _handleRequestLocationPermission(Map<String, dynamic> data) {
+    if (Platform.isAndroid) {
+      _handleAndroidRequestLocationPermission(data["level"]);
+    } else if (Platform.isIOS) {
+      _handleIOSRequestLocationPermission(data["level"]);
+    } else if (widget.onError != null) {
+      widget.onError!(OkHiException(
+          code: OkHiException.unsupportedPlatformCode,
+          message: "Platform not supported"));
     }
   }
 
