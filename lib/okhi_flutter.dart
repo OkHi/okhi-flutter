@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -237,5 +238,27 @@ class OkHi {
   /// When your application is included in protected apps, verification processes are less likely to be terminated by the OS. Increasing rate of users being verified.
   static Future<void> openProtectedApps() async {
     await _channel.invokeMethod(OkHiNativeMethod.openProtectedApps);
+  }
+
+  static Future<Map<String, Object>?> retrieveDeviceInfo() async {
+    return await _channel.invokeMapMethod(OkHiNativeMethod.retrieveDeviceInfo);
+  }
+
+  static Future<String> fetchLocationPermissionStatus() async {
+    return await _channel
+        .invokeMethod(OkHiNativeMethod.fetchLocationPermissionStatus);
+  }
+
+  static Future<List<dynamic>> fetchRegisteredGeofences() async {
+    final geofences =
+        await _channel.invokeMethod(OkHiNativeMethod.fetchRegisteredGeofences);
+    if (geofences != null) {
+      return jsonDecode(geofences);
+    }
+    return [];
+  }
+
+  static Future<bool> openAppSettings() async {
+    return await _channel.invokeMethod(OkHiNativeMethod.openAppSettings);
   }
 }

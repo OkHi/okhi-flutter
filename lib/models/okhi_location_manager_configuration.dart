@@ -9,6 +9,7 @@ class OkHiLocationManagerConfiguration {
   late bool withHomeAddressType;
   late bool withWorkAddressType;
   late bool withCreateMode;
+  late bool withPermissionsOnboarding;
 
   OkHiLocationManagerConfiguration({
     String? color,
@@ -18,6 +19,7 @@ class OkHiLocationManagerConfiguration {
     bool? withHomeAddressType,
     bool? withWorkAddressType,
     bool? withCreateMode,
+    bool? withPermissionsOnboarding,
   }) {
     this.color = color ?? "#005d67";
     this.withCreateMode = withCreateMode ?? false;
@@ -26,5 +28,6 @@ class OkHiLocationManagerConfiguration {
     this.withStreetView = withStreetView ?? true;
     this.withHomeAddressType = withHomeAddressType ?? true;
     this.withWorkAddressType = withWorkAddressType ?? true;
+    this.withPermissionsOnboarding = withPermissionsOnboarding ?? true;
   }
 }
