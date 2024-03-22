@@ -1,3 +1,11 @@
+## 1.1.6
+
+* Feature: Quickstart
+* Feature: OkCollect will now show addresses that are already being verified, preventing users from creating unnexessary duplicate addresses
+* Upgrade: android-okverify to v1.9.41
+* Upgrade: OkHi-iOS to v1.9.35
+* Minor bug fixes and stability improvements
+
 ## 1.1.5
 
 * Upgrade: flutter dependencies to latest versions
