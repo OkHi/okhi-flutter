@@ -76,10 +76,17 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
         case "fetchRegisteredGeofences":
             handleFetchRegisteredGeofences(call, result)
             break
+        case "openAppSettings":
+            handleOpenAppSettings(call, result)
         default:
             result(FlutterMethodNotImplemented)
             break
         }
+    }
+    
+    private func handleOpenAppSettings(_ call: FlutterMethodCall, _ result: FlutterResult) {
+        OkVerify.openAppSettings()
+        result(true)
     }
     
     private func handleFetchRegisteredGeofences(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
