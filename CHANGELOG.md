@@ -1,3 +1,9 @@
+## 1.1.7
+
+* Upgrade: android-okverify to v1.9.42
+* Fix: Geolocation services not available issue on Android
+* Minor bug fixes and stability improvements
+
 ## 1.1.6
 
 * Feature: Quickstart
