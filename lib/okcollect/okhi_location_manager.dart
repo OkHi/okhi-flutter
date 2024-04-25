@@ -412,9 +412,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     bool isServiceAvailable = await OkHi.isLocationPermissionGranted();
     bool isPermissionGranted = await OkHi.isLocationPermissionGranted();
     if (isServiceAvailable && isPermissionGranted) {
-      final Map<String, Object>? coords =
-          await _channel.invokeMapMethod("getCurrentLocation");
-      return coords;
+      return OkHi.getCurrentLocation();
     }
     return null;
   }
