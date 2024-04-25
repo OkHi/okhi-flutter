@@ -271,9 +271,27 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     _controller?.runJavaScript(jsString);
   }
 
+  /// This is due to an issue with the webview
+  /// It doesn't pick up the permission change during the active session i.e
+  /// Calling watchPosition / getCurrentPosition doesn't work until user closes webview and comes back
+  /// To fix that we override the implemntation and use coords retrived directly from phones GPS
+  _overrideGeolocation(WebViewController controller) async {
+    try {
+      Map<String, Object>? coords = await OkHi.getCurrentLocation();
+      String jsString =
+          "(function(){navigator.geolocation.watchPosition=function(s,e,o){return s({coords:{latitude:${coords!['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()},123)};navigator.geolocation.getCurrentPosition=function(s,e,o){return s({coords:{latitude:${coords!['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()})}})();";
+      await controller.runJavaScript(jsString);
+    } catch (e) {
+      print('An error occurred while overriding geolocation: $e');
+    }
+  }
+
   _handleAndroidRequestLocationPermission(String level) async {
     if (level == 'whenInUse') {
       bool result = await OkHi.requestLocationPermission();
+      if (result && _controller != null) {
+        await _overrideGeolocation(_controller!);
+      }
       _runWebViewCallback(result ? 'whenInUse' : 'blocked');
     } else if (level == 'always') {
       bool result = await OkHi.requestBackgroundLocationPermission();
