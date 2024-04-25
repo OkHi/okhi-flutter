@@ -30,4 +30,5 @@ class OkHiNativeMethod {
       "fetchLocationPermissionStatus";
   static const String fetchRegisteredGeofences = "fetchRegisteredGeofences";
   static const String openAppSettings = "openAppSettings";
+  static const String getCurrentLocation = "getCurrentLocation";
 }
