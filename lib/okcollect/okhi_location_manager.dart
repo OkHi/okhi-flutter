@@ -280,7 +280,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       String jsString =
           "(function(){navigator.geolocation.watchPosition=function(s,e,o){return s({coords:{latitude:${coords!['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()},123)};navigator.geolocation.getCurrentPosition=function(s,e,o){return s({coords:{latitude:${coords['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()})}})();";
       await controller.runJavaScript(jsString);
-    } catch (e) {}
+    } catch (e) {
+      return;
+    }
   }
 
   _handleAndroidRequestLocationPermission(String level) async {
