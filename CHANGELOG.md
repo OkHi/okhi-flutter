@@ -1,14 +1,9 @@
-## 1.1.7
-
-* Upgrade: android-okverify to v1.9.42
-* Fix: Geolocation services not available issue on Android
-* Minor bug fixes and stability improvements
-
 ## 1.1.6
 
 * Feature: Quickstart
 * Feature: OkCollect will now show addresses that are already being verified, preventing users from creating unnexessary duplicate addresses
-* Upgrade: android-okverify to v1.9.41
+* Fix: Geolocation services not available issue on Android
+* Upgrade: android-okverify to v1.9.42
 * Upgrade: OkHi-iOS to v1.9.35
 * Minor bug fixes and stability improvements
 

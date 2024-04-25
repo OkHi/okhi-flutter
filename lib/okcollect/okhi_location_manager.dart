@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -279,10 +278,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     try {
       Map<String, Object>? coords = await OkHi.getCurrentLocation();
       String jsString =
-          "(function(){navigator.geolocation.watchPosition=function(s,e,o){return s({coords:{latitude:${coords!['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()},123)};navigator.geolocation.getCurrentPosition=function(s,e,o){return s({coords:{latitude:${coords!['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()})}})();";
+          "(function(){navigator.geolocation.watchPosition=function(s,e,o){return s({coords:{latitude:${coords!['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()},123)};navigator.geolocation.getCurrentPosition=function(s,e,o){return s({coords:{latitude:${coords['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()})}})();";
       await controller.runJavaScript(jsString);
     } catch (e) {
-      print('An error occurred while overriding geolocation: $e');
+      return;
     }
   }
 
