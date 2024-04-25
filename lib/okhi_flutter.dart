@@ -261,4 +261,10 @@ class OkHi {
   static Future<bool> openAppSettings() async {
     return await _channel.invokeMethod(OkHiNativeMethod.openAppSettings);
   }
+
+  static Future<Map<String, Object>?> getCurrentLocation() async {
+    final Map<String, Object>? coords =
+        await _channel.invokeMapMethod(OkHiNativeMethod.getCurrentLocation);
+    return coords;
+  }
 }
