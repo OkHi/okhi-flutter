@@ -304,6 +304,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       await OkHi.openAppSettings();
     } else if (level == 'whenInUse') {
       bool result = await OkHi.requestLocationPermission();
+      if (result && _controller != null) {
+        await _overrideGeolocation(_controller!);
+      }
       _runWebViewCallback(result ? level : 'denied');
     } else if (level == 'always') {
       bool granted = await OkHi.isBackgroundLocationPermissionGranted();
