@@ -1,3 +1,7 @@
+## 1.1.7
+
+* Feature: Improved fetching of GPS coordinates during the address creation process on iOS.
+
 ## 1.1.6
 
 * Feature: Quickstart
