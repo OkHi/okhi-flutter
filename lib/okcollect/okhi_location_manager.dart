@@ -160,7 +160,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     }
   }
 
-  _handlePageLoaded(String page) {
+  _handlePageLoaded(String page) async {
     var user = {"phone": widget.user.phone};
     if (widget.user.firstName != null) {
       user["firstName"] = widget.user.firstName!;
@@ -228,7 +228,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     };
     final payload = jsonEncode(data);
     _saveLaunchPayload(payload);
-    _controller?.runJavaScript("""
+    await _controller?.runJavaScript("""
     function receiveMessage (data) {
       if (FlutterOkHi && FlutterOkHi.postMessage) {
         FlutterOkHi.postMessage(data);
@@ -237,6 +237,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     var bridge = { receiveMessage: receiveMessage };
     window.startOkHiLocationManager(bridge, $payload);
     """);
+    if (_controller != null) {
+      await _overrideGeolocation(_controller!);
+    }
   }
 
   _handleMessageReceived(JavaScriptMessage jsMessage) {
@@ -302,9 +305,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   _handleAndroidRequestLocationPermission(String level) async {
     if (level == 'whenInUse') {
       bool result = await OkHi.requestLocationPermission();
-      if (result && _controller != null) {
-        await _overrideGeolocation(_controller!);
-      }
       _runWebViewCallback(result ? 'whenInUse' : 'blocked');
     } else if (level == 'always') {
       bool result = await OkHi.requestBackgroundLocationPermission();
@@ -318,9 +318,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       await OkHi.openAppSettings();
     } else if (level == 'whenInUse') {
       bool result = await OkHi.requestLocationPermission();
-      if (result && _controller != null) {
-        await _overrideGeolocation(_controller!);
-      }
       _runWebViewCallback(result ? level : 'denied');
     } else if (level == 'always') {
       bool granted = await OkHi.isBackgroundLocationPermissionGranted();
