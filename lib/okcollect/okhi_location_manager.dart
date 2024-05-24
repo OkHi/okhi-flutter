@@ -257,10 +257,24 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       case "request_location_permission":
         _handleRequestLocationPermission(data["payload"]);
         break;
+      case "fetch_current_location":
+        _handleFetchCurrentLocation();
+        break;
       case "exit_app":
         _handleMessageExit();
         break;
       default:
+    }
+  }
+
+  _handleFetchCurrentLocation() async {
+    try {
+      Map<String, Object>? coords = await OkHi.getCurrentLocation();
+      String jsString =
+          "window.receiveCurrentLocation({lat: ${coords!['lat']},lng: ${coords['lng']},accuracy: ${coords['accuracy']}})";
+      _controller?.runJavaScript(jsString);
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -276,11 +290,11 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   /// To fix that we override the implemntation and use coords retrived directly from phones GPS
   _overrideGeolocation(WebViewController controller) async {
     try {
-      Map<String, Object>? coords = await OkHi.getCurrentLocation();
       String jsString =
-          "(function(){navigator.geolocation.watchPosition=function(s,e,o){return s({coords:{latitude:${coords!['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()},123)};navigator.geolocation.getCurrentPosition=function(s,e,o){return s({coords:{latitude:${coords['lat']},longitude:${coords['lng']},accuracy:${coords['accuracy']},altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()})}})();";
+          "(function(){navigator.geolocation.watchPosition=function(s,e,o){if(window.FlutterOkHi&&FlutterOkHi.postMessage){FlutterOkHi.postMessage(JSON.stringify({message:'fetch_current_location',payload:{}}));}window.receiveCurrentLocation=function(l){s({coords:{latitude:l.lat,longitude:l.lng,accuracy:l.accuracy,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()});};};navigator.geolocation.getCurrentPosition=function(s,e,o){if(window.FlutterOkHi&&FlutterOkHi.postMessage){FlutterOkHi.postMessage(JSON.stringify({message:'fetch_current_location',payload:{}}));}window.receiveCurrentLocation=function(l){s({coords:{latitude:l.lat,longitude:l.lng,accuracy:l.accuracy,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()});};};})();";
       await controller.runJavaScript(jsString);
     } catch (e) {
+      print(e);
       return;
     }
   }
