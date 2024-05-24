@@ -5,7 +5,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
@@ -139,8 +141,17 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       case "setItem":
         handleSetItem(call, result);
         break;
-      case "fetchRegisteredLocationIds":
-        handleFetchRegisteredLocationIds(result);
+      case "retrieveDeviceInfo":
+        handleRetrieveDeviceInfo(call, result);
+        break;
+      case "fetchLocationPermissionStatus":
+        handleFetchLocationPermissionStatus(call, result);
+        break;
+      case "fetchRegisteredGeofences":
+        handleFetchRegisteredGeofences(call, result);
+        break;
+      case "openAppSettings":
+        handleOpenAppSettings(call, result);
         break;
       default:
         result.notImplemented();
@@ -408,8 +419,27 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       result.error(e.getCode(), e.getMessage(), e);
     }
   }
+  
+  private void handleRetrieveDeviceInfo(MethodCall call, Result result) {
+    HashMap<String, Object> deviceInfo = new HashMap<String, Object>();
+    deviceInfo.put("manufacturer", Build.MANUFACTURER);
+    deviceInfo.put("model", Build.MODEL);
+    deviceInfo.put("osVersion", Build.VERSION.RELEASE);
+    deviceInfo.put("platform", "android");
+    result.success(deviceInfo);
+  }
 
-  private void handleFetchRegisteredLocationIds(Result result) {
+  private void handleFetchLocationPermissionStatus(MethodCall call, Result result) {
+    if (OkHi.isBackgroundLocationPermissionGranted(activity)) {
+      result.success("always");
+    } else if (OkHi.isLocationPermissionGranted(activity)) {
+      result.success("whenInUse");
+    } else {
+      result.success("denied");
+    }
+  }
+
+  private void handleFetchRegisteredGeofences(MethodCall call, Result result) {
     try {
       String locations = OkPreference.getItem("registered_geofences", context);
       if(locations == null){
@@ -419,5 +449,14 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     } catch (OkHiException e) {
       result.error(e.getCode(), e.getMessage(), e);
     }
+  }
+
+  private void handleOpenAppSettings(MethodCall call, Result result) {
+    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+    Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+    intent.setData(uri);
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    activity.startActivity(intent);
+    result.success(true);
   }
 }

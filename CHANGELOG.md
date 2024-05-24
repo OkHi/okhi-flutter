@@ -1,3 +1,16 @@
+## 1.1.7
+
+* Feature: Improved fetching of GPS coordinates during the address creation process on iOS.
+
+## 1.1.6
+
+* Feature: Quickstart
+* Feature: OkCollect will now show addresses that are already being verified, preventing users from creating unnexessary duplicate addresses
+* Fix: Geolocation services not available issue on Android
+* Upgrade: android-okverify to v1.9.42
+* Upgrade: OkHi-iOS to v1.9.35
+* Minor bug fixes and stability improvements
+
 ## 1.1.5
 
 * Upgrade: flutter dependencies to latest versions
@@ -37,6 +50,7 @@
 
 ## 1.0.8
 
+* Feature: Enabled create only mode in OkHiLocationManager
 * Fix: Main thread warning with CLLocationManager.locationServicesEnabled()
 * Upgrade: Upgraded to flutter_weview v4+
 

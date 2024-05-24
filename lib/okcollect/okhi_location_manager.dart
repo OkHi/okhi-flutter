@@ -42,7 +42,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   String _registeredLocationIds = "[]";
   String _signInUrl = OkHiConstant.sandboxSignInUrl;
   String _locationManagerUrl = OkHiConstant.sandboxLocationManagerUrl;
-  Map<String, Object>? coords;
+  Map<String, Object>? _coords;
+  Map<String, Object>? _deviceInfo;
+  List<dynamic>? _geofences;
   String _locationPermissionLevel = "denied";
   final MethodChannel _channel = const MethodChannel('okhi_flutter');
   bool _canOpenProtectedApps = false;
@@ -118,18 +120,24 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       _accessToken = 'Token ${base64.encode(bytes)}';
       await _signInUser();
       await _getAppInformation();
-      await _getRegisteredLocationIds();
-      _locationPermissionLevel =
-          await OkHi.isBackgroundLocationPermissionGranted()
-              ? "always"
-              : await OkHi.isLocationPermissionGranted()
-                  ? "whenInUse"
-                  : "denied";
+      _locationPermissionLevel = await OkHi.fetchLocationPermissionStatus();
+      _deviceInfo = await OkHi.retrieveDeviceInfo();
+      _geofences = await OkHi.fetchRegisteredGeofences();
       if (_locationPermissionLevel != "denied") {
-        coords = await _fetchCoords();
+        _coords = await _fetchCoords();
       }
       if (Platform.isAndroid) {
         _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
+      }
+      if (!widget.locationManagerConfiguration.withPermissionsOnboarding &&
+          _locationPermissionLevel != "always") {
+        if (widget.onError != null) {
+          widget.onError!(OkHiException(
+              code: OkHiException.permissionDeniedCode,
+              message:
+                  "Always location permission required to launch okcollect"));
+        }
+        return;
       }
       if (_authorizationToken != null) {
         setState(() {
@@ -161,7 +169,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     if (widget.user.lastName != null) {
       user["lastName"] = widget.user.lastName!;
     }
-
     Map<String, Map<String, Object?>> context = {
       "container": {"name": _appIdentifier, "version": _appVersion},
       "developer": {"name": "external"},
@@ -170,14 +177,20 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         "version": OkHiConstant.libraryVersion
       },
       "platform": {"name": "flutter"},
-      "permissions": {"location": _locationPermissionLevel}
+      "permissions": {"location": _locationPermissionLevel},
+      "device": {
+        "manufacturer": _deviceInfo!["manufacturer"],
+        "model": _deviceInfo!["model"],
+        "platform": _deviceInfo!["platform"],
+        "osVersion": _deviceInfo!["osVersion"],
+      }
     };
-    if (coords != null) {
+    if (_coords != null) {
       context["coordinates"] = {
         "currentLocation": {
-          "lat": coords!["lat"],
-          "lng": coords!["lng"],
-          "accuracy": coords!["accuracy"],
+          "lat": _coords!["lat"],
+          "lng": _coords!["lng"],
+          "accuracy": _coords!["accuracy"],
         },
       };
     }
@@ -189,6 +202,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           ? "start_app"
           : "select_location",
       "payload": {
+        "locations": _geofences,
         "style": {
           "base": {
             "color": widget.locationManagerConfiguration.color,
@@ -209,7 +223,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           "addressTypes": {
             "home": widget.locationManagerConfiguration.withHomeAddressType,
             "work": widget.locationManagerConfiguration.withWorkAddressType
-          }
+          },
+          "permissionsOnboarding":
+              widget.locationManagerConfiguration.withPermissionsOnboarding,
         }
       },
       "locations": registeredLocationList
@@ -242,10 +258,93 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       case "request_enable_protected_apps":
         _handleRequestOpenProtectedApps();
         break;
+      case "request_location_permission":
+        _handleRequestLocationPermission(data["payload"]);
+        break;
+      case "fetch_current_location":
+        _handleFetchCurrentLocation();
+        break;
       case "exit_app":
         _handleMessageExit();
         break;
       default:
+    }
+  }
+
+  _handleFetchCurrentLocation() async {
+    try {
+      Map<String, Object>? coords = await OkHi.getCurrentLocation();
+      String jsString =
+          "window.receiveCurrentLocation({lat: ${coords!['lat']},lng: ${coords['lng']},accuracy: ${coords['accuracy']}})";
+      _controller?.runJavaScript(jsString);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  _runWebViewCallback(String result) {
+    String jsString =
+        "(function (){ if (typeof runOkHiLocationManagerCallback === \"function\") { runOkHiLocationManagerCallback(\"$result\") } })()";
+    _controller?.runJavaScript(jsString);
+  }
+
+  /// This is due to an issue with the webview
+  /// It doesn't pick up the permission change during the active session i.e
+  /// Calling watchPosition / getCurrentPosition doesn't work until user closes webview and comes back
+  /// To fix that we override the implemntation and use coords retrived directly from phones GPS
+  _overrideGeolocation(WebViewController controller) async {
+    try {
+      String jsString =
+          "(function(){navigator.geolocation.watchPosition=function(s,e,o){if(window.FlutterOkHi&&FlutterOkHi.postMessage){FlutterOkHi.postMessage(JSON.stringify({message:'fetch_current_location',payload:{}}));}window.receiveCurrentLocation=function(l){s({coords:{latitude:l.lat,longitude:l.lng,accuracy:l.accuracy,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()});};};navigator.geolocation.getCurrentPosition=function(s,e,o){if(window.FlutterOkHi&&FlutterOkHi.postMessage){FlutterOkHi.postMessage(JSON.stringify({message:'fetch_current_location',payload:{}}));}window.receiveCurrentLocation=function(l){s({coords:{latitude:l.lat,longitude:l.lng,accuracy:l.accuracy,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()});};};})();";
+      await controller.runJavaScript(jsString);
+    } catch (e) {
+      print(e);
+      return;
+    }
+  }
+
+  _handleAndroidRequestLocationPermission(String level) async {
+    if (level == 'whenInUse') {
+      bool result = await OkHi.requestLocationPermission();
+      if (result && _controller != null) {
+        await _overrideGeolocation(_controller!);
+      }
+      _runWebViewCallback(result ? 'whenInUse' : 'blocked');
+    } else if (level == 'always') {
+      bool result = await OkHi.requestBackgroundLocationPermission();
+      _runWebViewCallback(result ? 'always' : 'blocked');
+    }
+  }
+
+  _handleIOSRequestLocationPermission(String level) async {
+    bool isServiceAvailable = await OkHi.isLocationServicesEnabled();
+    if (!isServiceAvailable) {
+      await OkHi.openAppSettings();
+    } else if (level == 'whenInUse') {
+      bool result = await OkHi.requestLocationPermission();
+      if (result && _controller != null) {
+        await _overrideGeolocation(_controller!);
+      }
+      _runWebViewCallback(result ? level : 'denied');
+    } else if (level == 'always') {
+      bool granted = await OkHi.isBackgroundLocationPermissionGranted();
+      if (granted) {
+        _runWebViewCallback(level);
+      } else {
+        await OkHi.openAppSettings();
+      }
+    }
+  }
+
+  _handleRequestLocationPermission(Map<String, dynamic> data) {
+    if (Platform.isAndroid) {
+      _handleAndroidRequestLocationPermission(data["level"]);
+    } else if (Platform.isIOS) {
+      _handleIOSRequestLocationPermission(data["level"]);
+    } else if (widget.onError != null) {
+      widget.onError!(OkHiException(
+          code: OkHiException.unsupportedPlatformCode,
+          message: "Platform not supported"));
     }
   }
 
@@ -356,9 +455,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     bool isServiceAvailable = await OkHi.isLocationPermissionGranted();
     bool isPermissionGranted = await OkHi.isLocationPermissionGranted();
     if (isServiceAvailable && isPermissionGranted) {
-      final Map<String, Object>? coords =
-          await _channel.invokeMapMethod("getCurrentLocation");
-      return coords;
+      return OkHi.getCurrentLocation();
     }
     return null;
   }
