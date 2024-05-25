@@ -47,6 +47,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   String _locationPermissionLevel = "denied";
   final MethodChannel _channel = const MethodChannel('okhi_flutter');
   bool _canOpenProtectedApps = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -56,14 +57,16 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null) {
+    if (_controller == null || _isLoading) {
       return const Center(
         child: CircularProgressIndicator.adaptive(),
       );
     }
     return WillPopScope(
       onWillPop: _handleWillPopScope,
-      child: WebViewWidget(controller: _controller!),
+      child: WebViewWidget(
+          controller: _controller!
+      ),
     );
   }
 
@@ -141,13 +144,22 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       if (_authorizationToken != null) {
         setState(() {
           _controller = WebViewController()
-            ..loadRequest(Uri.parse(_locationManagerUrl))
             ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..addJavaScriptChannel("FlutterOkHi",
-                onMessageReceived: _handleMessageReceived)
+            ..addJavaScriptChannel("FlutterOkHi", onMessageReceived: _handleMessageReceived)
             ..setNavigationDelegate(
-              NavigationDelegate(onPageFinished: _handlePageLoaded),
-            );
+              NavigationDelegate(
+                  onPageFinished: _handlePageLoaded,
+                  onWebResourceError: (WebResourceError error) {
+                    widget.onError!(
+                      OkHiException(
+                        code: OkHiException.unknownErrorCode,
+                        message: OkHiException.uknownErrorMessage,
+                      ),
+                    );
+                  },
+              ),
+            )
+            ..loadRequest(Uri.parse(_locationManagerUrl));
         });
       }
     } else if (widget.onError != null) {
@@ -161,6 +173,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handlePageLoaded(String page) {
+    setState(() { _isLoading = false; });
     var user = {"phone": widget.user.phone};
     if (widget.user.firstName != null) {
       user["firstName"] = widget.user.firstName!;

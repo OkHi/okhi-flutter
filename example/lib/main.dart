@@ -1,4 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
 void main() {
@@ -13,12 +16,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+  bool _startVerification = false;
+
   @override
   void initState() {
     super.initState();
     final config = OkHiAppConfiguration(
-      branchId: "<my_branch_id>",
-      clientKey: "<my_client_key_id>",
+      branchId: "<branchId>",
+      clientKey: "<clientKey>",
       env: OkHiEnv.sandbox,
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
@@ -42,17 +48,51 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text("Create an address"),
         ),
-        body: OkHiLocationManager(
-          user: OkHiUser(phone: "+254712345678"),
-          onSucess: (response) {
-            response.startVerification(null);
-          },
-          onError: (error) {
-            print(error.code);
-            print(error.message);
-          },
-        ),
+        body: displayHomePage()
       ),
     );
+  }
+
+  displayHomePage(){
+    if(_startVerification){
+      return OkHiLocationManager(
+        user: OkHiUser(phone: "+254712345678"),
+        onSucess: (response) {
+          response.startVerification(null);
+        },
+        onError: (error) {
+          print(error.code);
+          print(error.message);
+        },
+      );
+    } else {
+      return Center(
+        child: InkWell(
+          onTap: (){
+            setState(() {
+              _startVerification = true;
+            });
+          },
+          child: Center(
+            child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                color: Colors.teal,
+                child: const Padding(
+                  padding: EdgeInsets.all(13),
+                  child: Text(
+                    "Start Verification",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15
+                    ),
+                  ),
+                )
+            ),
+          )
+        ),
+      );
+    }
   }
 }
