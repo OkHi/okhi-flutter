@@ -145,6 +145,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             ..setJavaScriptMode(JavaScriptMode.unrestricted)
             ..addJavaScriptChannel("FlutterOkHi",
                 onMessageReceived: _handleMessageReceived)
+            ..setBackgroundColor(Colors.white)
             ..setNavigationDelegate(
               NavigationDelegate(onPageFinished: _handlePageLoaded),
             );
