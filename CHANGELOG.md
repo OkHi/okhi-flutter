@@ -1,3 +1,8 @@
+## 1.1.8
+
+* Feature: Improved fetching of GPS coordinates.
+* Fix: Black screen when OkCollect launches.
+
 ## 1.1.7
 
 * Feature: Improved fetching of GPS coordinates during the address creation process on iOS.
