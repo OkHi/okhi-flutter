@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -264,10 +265,26 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       case "fetch_current_location":
         _handleFetchCurrentLocation();
         break;
+      case "open_app_settings":
+        _handleOpenAppSettings();
+        break;
       case "exit_app":
         _handleMessageExit();
         break;
       default:
+    }
+  }
+
+  _handleOpenAppSettings() async {
+    try {
+      bool isPermGranted = await OkHi.isBackgroundLocationPermissionGranted();
+      if (isPermGranted) {
+        await _controller?.goBack();
+      } else {
+        await OkHi.openAppSettings();
+      }
+    } catch (e) {
+      return;
     }
   }
 
@@ -304,6 +321,14 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handleAndroidRequestLocationPermission(String level) async {
+    bool isServiceAvailable = await OkHi.isLocationServicesEnabled();
+    if (!isServiceAvailable) {
+      bool result = await OkHi.requestEnableLocationServices();
+      if (!result) {
+        _runWebViewCallback('blocked');
+        return;
+      }
+    }
     if (level == 'whenInUse') {
       bool result = await OkHi.requestLocationPermission();
       _runWebViewCallback(result ? 'whenInUse' : 'blocked');
@@ -441,7 +466,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   Future<Map<String, Object>?> _fetchCoords() async {
-    bool isServiceAvailable = await OkHi.isLocationPermissionGranted();
+    bool isServiceAvailable = await OkHi.isLocationServicesEnabled();
     bool isPermissionGranted = await OkHi.isLocationPermissionGranted();
     if (isServiceAvailable && isPermissionGranted) {
       return OkHi.getCurrentLocation();
