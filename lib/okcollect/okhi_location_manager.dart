@@ -40,6 +40,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   String? _authorizationToken;
   String? _appIdentifier;
   String? _appVersion;
+  String _registeredLocationIds = "[]";
   String _signInUrl = OkHiConstant.sandboxSignInUrl;
   String _locationManagerUrl = OkHiConstant.sandboxLocationManagerUrl;
   Map<String, Object>? _coords;
@@ -195,6 +196,8 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         },
       };
     }
+
+    List<Map<String, dynamic>> registeredLocationList = List<Map<String, dynamic>>.from(jsonDecode(_registeredLocationIds));
     var data = {
       "url": _locationManagerUrl,
       "message": widget.locationManagerConfiguration.withCreateMode
@@ -226,7 +229,8 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           "permissionsOnboarding":
               widget.locationManagerConfiguration.withPermissionsOnboarding,
         }
-      }
+      },
+      "locations": registeredLocationList
     };
     final payload = jsonEncode(data);
     _saveLaunchPayload(payload);
@@ -402,6 +406,11 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     _appIdentifier =
         await _channel.invokeMethod(OkHiNativeMethod.getAppIdentifier);
     _appVersion = await _channel.invokeMethod(OkHiNativeMethod.getAppVersion);
+  }
+
+  _getRegisteredLocationIds() async {
+    _registeredLocationIds =
+    await _channel.invokeMethod(OkHiNativeMethod.fetchRegisteredLocationIds);
   }
 
   _signInUser() async {

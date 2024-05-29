@@ -419,7 +419,7 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       result.error(e.getCode(), e.getMessage(), e);
     }
   }
-
+  
   private void handleRetrieveDeviceInfo(MethodCall call, Result result) {
     HashMap<String, Object> deviceInfo = new HashMap<String, Object>();
     deviceInfo.put("manufacturer", Build.MANUFACTURER);
@@ -440,7 +440,15 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
   }
 
   private void handleFetchRegisteredGeofences(MethodCall call, Result result) {
-    result.success(OkVerify.fetchRegisteredGeofences(activity));
+    try {
+      String locations = OkPreference.getItem("registered_geofences", context);
+      if(locations == null){
+        locations = "[]";
+      }
+      result.success(locations);
+    } catch (OkHiException e) {
+      result.error(e.getCode(), e.getMessage(), e);
+    }
   }
 
   private void handleOpenAppSettings(MethodCall call, Result result) {
