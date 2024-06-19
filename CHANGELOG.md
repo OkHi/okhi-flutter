@@ -1,3 +1,7 @@
+## 1.1.9
+
+* Upgrade: android-okverify to v1.9.44
+
 ## 1.1.8
 
 * Feature: Improved fetching of GPS coordinates.
