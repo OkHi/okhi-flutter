@@ -48,6 +48,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   String _locationPermissionLevel = "denied";
   final MethodChannel _channel = const MethodChannel('okhi_flutter');
   bool _canOpenProtectedApps = false;
+  bool _isLocationEnabled = false;
 
   @override
   void initState() {
@@ -112,6 +113,20 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     // if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     final configuration = OkHi.getConfiguration();
     if (configuration != null) {
+      _isLocationEnabled = await OkHi.isLocationServicesEnabled();
+      if (_locationPermissionLevel != "denied") {
+        if(_isLocationEnabled){
+          _coords = await _fetchCoords();
+        } else {
+          if (widget.onError != null) {
+            widget.onError!(OkHiException(
+                code: OkHiException.serviceUnavailableCode,
+                message: "Please enable your location to continue."));
+          }
+          return;
+        }
+      }
+
       _signInUrl = _fetchSignInUrl(configuration.environmentRawValue);
       _locationManagerUrl =
           await _fetchLocationManagerUrl(configuration.environmentRawValue);
@@ -123,9 +138,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       _locationPermissionLevel = await OkHi.fetchLocationPermissionStatus();
       _deviceInfo = await OkHi.retrieveDeviceInfo();
       _geofences = await OkHi.fetchRegisteredGeofences();
-      if (_locationPermissionLevel != "denied") {
-        _coords = await _fetchCoords();
-      }
       if (Platform.isAndroid) {
         _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
       }
