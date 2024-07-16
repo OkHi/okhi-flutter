@@ -379,8 +379,11 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handleMessageSuccess(Map<String, dynamic> data) {
+    final response = OkHiLocationManagerResponse(data);
+    debugPrint(
+        "[okhi_location_manager]: location created ${response.location.id}");
     if (widget.onSucess != null) {
-      widget.onSucess!(OkHiLocationManagerResponse(data));
+      widget.onSucess!(response);
     }
   }
 
