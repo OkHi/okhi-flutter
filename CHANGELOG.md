@@ -1,4 +1,8 @@
-## 1.1.9
+## 1.1.10
+
+* Upgrade: android-okverify to v1.9.45
+
+* ## 1.1.9
 
 * Upgrade: android-okverify to v1.9.44
 
