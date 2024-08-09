@@ -107,8 +107,46 @@ class _MyAppState extends State<MyApp> {
 ```
 ## Address Creation and Verification
 ```dart
-class CreateAddress extends StatelessWidget {
+import 'package:flutter/material.dart';
+
+class CreateAddress extends StatefulWidget {
   const CreateAddress({Key? key}) : super(key: key);
+
+  @override
+  _CreateAddressState createState() => _CreateAddressState();
+}
+
+class _CreateAddressState extends State<CreateAddress> {
+  String? _successMessage;
+
+  void _handleSuccess(response) async {
+    print(response.user); // user information
+    print(response.location); // address information
+    setState(() {
+      _successMessage = "Address successfully created: ${response.location.id}";
+    });
+    await response.startVerification(null);
+    print("verification started for ${response.location.id}")
+  }
+
+  void _handleError(error) {
+    print(error.code);
+    print(error.message);
+  }
+
+  Widget _buildBody() {
+    if (_successMessage != null) {
+      return Center(
+        child: Text(_successMessage!)
+      );
+    } else {
+      return OkHiLocationManager(
+        user: OkHiUser(phone: "+254712345678"),
+        onSuccess: _handleSuccess,
+        onError: _handleError,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,21 +154,10 @@ class CreateAddress extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Create an address"),
       ),
-      body: OkHiLocationManager(
-        user: OkHiUser(phone: "+254712345678"),
-        onSucess: (response) async {
-          print(response.user) // user information
-          print(response.location) // address information
-          await response.startVerification(null) // start verification with response
-        },
-        onError (error) {
-          print(error.code)
-          print(error.message)
-        }
-      ),
-    );
+      body: _buildBody(),
   }
 }
+
 ```
 # Documentation
 - [Guide](https://docs.okhi.co/v/v5.1-beta/okhi-on-your-flutter-app)
