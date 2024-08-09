@@ -1,6 +1,13 @@
-## 1.1.9
+## 1.1.11
 
-* Upgrade: android-okverify to v1.9.44
+* Upgrade: native ios library to 1.9.36
+* Docs: updated README.md
+
+## 1.1.10
+
+* Upgrade: android-okverify to v1.9.45
+
+* ## 1.1.9
 
 ## 1.1.8
 
