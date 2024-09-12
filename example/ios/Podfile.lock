@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - OkHi (1.9.35)
+  - OkHi (1.9.37-beta)
   - okhi_flutter (0.0.1):
     - Flutter
-    - OkHi (= 1.9.35)
+    - OkHi (= 1.9.37-beta)
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
 
@@ -26,8 +26,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  OkHi: 54dc547f189705fb55430697fba4b8b2cf1723e1
-  okhi_flutter: 9d9a060edd902dc2cd42f236769578648f991255
+  OkHi: d06f156a1f8762475675dba740a8ce4c67f529e8
+  okhi_flutter: 18b518640a853864fb5b44e0633b6bae7d8136f7
   webview_flutter_wkwebview: 2e2d318f21a5e036e2c3f26171342e95908bd60a
 
 PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
