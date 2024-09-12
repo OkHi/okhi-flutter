@@ -160,6 +160,9 @@ class OkHi {
       "lat": location.lat,
       "lon": location.lon,
       "withForegroundService": config.withForegroundService,
+      "verificationTypes": [
+        "physical"
+      ] // TODO: remove this, retrive verificationTypes from OkHiLocation
     });
   }
 
