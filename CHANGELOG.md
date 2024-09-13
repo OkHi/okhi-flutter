@@ -1,3 +1,7 @@
+## 1.1.12
+
+* Feature: added email to OkHiUser class
+
 ## 1.1.11
 
 * Upgrade: native ios library to 1.9.36

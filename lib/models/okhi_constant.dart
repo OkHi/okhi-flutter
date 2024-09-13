@@ -1,5 +1,5 @@
 class OkHiConstant {
-  static const String libraryVersion = "1.1.11";
+  static const String libraryVersion = "1.1.12";
   static const String devSignInUrl =
       "https://dev-api.okhi.io/v5/auth/anonymous-signin";
   static const String sandboxSignInUrl =
