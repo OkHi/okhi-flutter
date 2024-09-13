@@ -16,7 +16,7 @@ class CreateAddress extends StatelessWidget {
           children: [
             Expanded(
               child: OkHiLocationManager(
-                user: OkHiUser(phone: "+254700110590"),
+                user: OkHiUser(phone: "+254700110590", email: "kiano@okhi.co"),
                 onSucess: (response) {
                   _handleLocationManagerResponse(context, response);
                 },

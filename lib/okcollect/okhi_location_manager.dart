@@ -170,6 +170,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     if (widget.user.lastName != null) {
       user["lastName"] = widget.user.lastName!;
     }
+    if (widget.user.email != null) {
+      user["email"] = widget.user.email!;
+    }
     Map<String, Map<String, Object?>> context = {
       "container": {"name": _appIdentifier, "version": _appVersion},
       "developer": {"name": "external"},

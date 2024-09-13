@@ -5,9 +5,16 @@ class OkHiUser {
   String? firstName;
   String? lastName;
   String? id;
+  String? email;
   String phone;
 
-  OkHiUser({required this.phone, this.firstName, this.lastName, this.id});
+  OkHiUser({
+    required this.phone,
+    this.firstName,
+    this.lastName,
+    this.id,
+    this.email,
+  });
 
   OkHiUser.fromMap({required this.phone, required Map<String, dynamic> data}) {
     id = data.containsKey("id") ? data["id"] : null;
@@ -21,6 +28,7 @@ class OkHiUser {
         : data.containsKey("last_name")
             ? data["last_name"]
             : null;
+    email = data.containsKey("email") ? data["email"] : null;
   }
 
   @override
@@ -30,6 +38,7 @@ class OkHiUser {
       "lastName": lastName,
       "id": id,
       "phone": phone,
+      "email": email,
     });
   }
 }
