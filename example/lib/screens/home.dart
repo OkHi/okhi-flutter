@@ -174,6 +174,7 @@ class _HomeState extends State<Home> {
         user = result.user;
         location = result.location;
       });
+      print(">>>>>>>>>>>>>>\n${location?.verificationTypes}\n>>>>>>>>>>>>>>");
     }
   }
 

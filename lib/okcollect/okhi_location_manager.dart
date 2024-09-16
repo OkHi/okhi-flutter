@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -195,6 +196,12 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         },
       };
     }
+
+    var verificationTypeList = [];
+    (widget.locationManagerConfiguration.verificationTypes).forEach((type){
+      verificationTypeList.add(type.name);
+    });
+
     var data = {
       "url": _locationManagerUrl,
       "message": widget.locationManagerConfiguration.withCreateMode
@@ -223,8 +230,8 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             "home": widget.locationManagerConfiguration.withHomeAddressType,
             "work": widget.locationManagerConfiguration.withWorkAddressType
           },
-          "permissionsOnboarding":
-              widget.locationManagerConfiguration.withPermissionsOnboarding,
+          "permissionsOnboarding": widget.locationManagerConfiguration.withPermissionsOnboarding,
+          "verificationTypes": verificationTypeList
         }
       }
     };

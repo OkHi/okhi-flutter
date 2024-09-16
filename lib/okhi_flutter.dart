@@ -159,6 +159,7 @@ class OkHi {
       "locationId": location.id,
       "lat": location.lat,
       "lon": location.lon,
+      "verificationTypes": location.verificationTypes,
       "withForegroundService": config.withForegroundService,
     });
   }

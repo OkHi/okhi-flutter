@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:okhi_flutter/models/okhi_verification_types.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 import 'package:okhi_flutter_example/widgets/full_button.dart';
 
@@ -16,7 +17,10 @@ class CreateAddress extends StatelessWidget {
           children: [
             Expanded(
               child: OkHiLocationManager(
-                user: OkHiUser(phone: "+254700110590"),
+                user: OkHiUser(phone: "+254712288371"),
+                configuration: OkHiLocationManagerConfiguration(
+                  verificationTypes: [VerificationTypes.digital]
+                ),
                 onSucess: (response) {
                   _handleLocationManagerResponse(context, response);
                 },
@@ -45,8 +49,7 @@ class CreateAddress extends StatelessWidget {
     Navigator.pop(context);
   }
 
-  _handleLocationManagerResponse(
-      BuildContext context, OkHiLocationManagerResponse response) {
+  _handleLocationManagerResponse(BuildContext context, OkHiLocationManagerResponse response) {
     Navigator.pop(context, response);
   }
 }
