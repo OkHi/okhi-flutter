@@ -17,7 +17,7 @@ class CreateAddress extends StatelessWidget {
           children: [
             Expanded(
               child: OkHiLocationManager(
-                user: OkHiUser(phone: "+254712288371"),
+                user: OkHiUser(phone: "+254712000000", email: "granson@okhi.co"),
                 configuration: OkHiLocationManagerConfiguration(
                   verificationTypes: [VerificationTypes.digital]
                 ),
