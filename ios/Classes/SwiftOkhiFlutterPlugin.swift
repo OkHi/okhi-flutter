@@ -198,21 +198,31 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
     }
     
     private func handleStartVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments = call.arguments as? [String: Any] ?? [String: Any]()
+        let arguments = call.arguments as? [String: Any] ?? [:]
         let phoneNumber = arguments["phoneNumber"] as? String
         let locationId = arguments["locationId"] as? String
         let lat = arguments["lat"] as? Double
         let lon = arguments["lon"] as? Double
-        if let locationId = locationId, let lat = lat, let lon = lon, let phoneNumber = phoneNumber {
-            self.flutterResult = result
-            let user = OkHiUser(phoneNumber: phoneNumber)
-            let location = OkHiLocation(identifier: locationId, lat: lat, lon: lon)
-            okverify.delegate = self
-            okverify.startAddressVerification(user: user, location: location)
-        } else {
-            result(FlutterError(code: "bad_request", message: "invalid arguments provided for verification", details: nil))
+        let verificationTypes = arguments["verificationTypes"] as? [String] ?? []
+        let enumVerificationTypes: [OkHiVerificationType] = verificationTypes.compactMap { verificationType in
+            switch verificationType {
+            case OkHiVerificationType.physical.rawValue:
+                return .physical
+            default:
+                return .digital
+            }
         }
+        guard let phoneNumber = phoneNumber, let locationId = locationId, let lat = lat, let lon = lon else {
+            result(FlutterError(code: "bad_request", message: "Invalid arguments provided for verification", details: nil))
+            return
+        }
+        self.flutterResult = result
+        let user = OkHiUser(phoneNumber: phoneNumber)
+        let location = OkHiLocation(identifier: locationId, lat: lat, lon: lon)
+        okverify.delegate = self
+        okverify.startAddressVerification(phoneNumber: phoneNumber, locationId: locationId, lat: lat, lon: lon, verificationTypes: enumVerificationTypes)
     }
+    
     
     private func handleStopVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let arguments = call.arguments as? [String: Any] ?? [String: Any]()
