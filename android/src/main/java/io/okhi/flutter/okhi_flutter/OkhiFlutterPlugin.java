@@ -327,7 +327,6 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     }
     OkHiUser user = new OkHiUser.Builder(phone).build();
     OkHiLocation location = new OkHiLocation.Builder(locationId, lat, lon).build();
-    // okVerify.start(user, location, withForegroundService == null || withForegroundService, new OkVerifyCallback<String>() {
     okVerify.start(user, location, verificationTypes, new OkVerifyCallback<String>() {
       @Override
       public void onSuccess(String verificationResult) {
