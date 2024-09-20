@@ -12,7 +12,7 @@ class OkHiLocationManagerConfiguration {
   late bool withWorkAddressType;
   late bool withCreateMode;
   late bool withPermissionsOnboarding;
-  List<VerificationTypes> verificationTypes = [];
+  List<VerificationTypes> verificationTypes = [VerificationTypes.digital];
 
   OkHiLocationManagerConfiguration({
     String? color,
@@ -33,6 +33,6 @@ class OkHiLocationManagerConfiguration {
     this.withHomeAddressType = withHomeAddressType ?? true;
     this.withWorkAddressType = withWorkAddressType ?? true;
     this.withPermissionsOnboarding = withPermissionsOnboarding ?? true;
-    this.verificationTypes = verificationTypes ?? [];
+    this.verificationTypes = verificationTypes ?? [VerificationTypes.digital];
   }
 }
