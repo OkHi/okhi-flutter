@@ -1,1 +1,1 @@
-enum VerificationTypes { physical, digital, none}
+enum VerificationTypes { physical, digital }
