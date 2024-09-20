@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -63,8 +63,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         child: CircularProgressIndicator.adaptive(),
       );
     }
-    return WillPopScope(
-      onWillPop: _handleWillPopScope,
+    return PopScope(
+      onPopInvokedWithResult:(isPopped, result){
+        _handleWillPopScope();
+      },
       child: WebViewWidget(controller: _controller!),
     );
   }
@@ -201,9 +203,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     }
 
     var verificationTypeList = [];
-    (widget.locationManagerConfiguration.verificationTypes).forEach((type){
+    for (var type in (widget.locationManagerConfiguration.verificationTypes)) {
       verificationTypeList.add(type.name);
-    });
+    }
 
     var data = {
       "url": _locationManagerUrl,
@@ -305,7 +307,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           "window.receiveCurrentLocation({lat: ${coords!['lat']},lng: ${coords['lng']},accuracy: ${coords['accuracy']}})";
       _controller?.runJavaScript(jsString);
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -325,7 +329,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           "(function(){navigator.geolocation.watchPosition=function(s,e,o){if(window.FlutterOkHi&&FlutterOkHi.postMessage){FlutterOkHi.postMessage(JSON.stringify({message:'fetch_current_location',payload:{}}));}window.receiveCurrentLocation=function(l){s({coords:{latitude:l.lat,longitude:l.lng,accuracy:l.accuracy,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()});};};navigator.geolocation.getCurrentPosition=function(s,e,o){if(window.FlutterOkHi&&FlutterOkHi.postMessage){FlutterOkHi.postMessage(JSON.stringify({message:'fetch_current_location',payload:{}}));}window.receiveCurrentLocation=function(l){s({coords:{latitude:l.lat,longitude:l.lng,accuracy:l.accuracy,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:Date.now()});};};})();";
       await controller.runJavaScript(jsString);
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       return;
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
@@ -29,9 +30,13 @@ class _MyAppState extends State<MyApp> {
       ),
     );
     OkHi.initialize(config).then((result) {
-      print(result);
+      if (kDebugMode) {
+        print(result);
+      }
     }).onError((error, stackTrace) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
     });
   }
 
@@ -43,13 +48,15 @@ class _MyAppState extends State<MyApp> {
           title: const Text("Create an address"),
         ),
         body: OkHiLocationManager(
-          user: OkHiUser(phone: "+254712345678"),
+          user: OkHiUser(phone: "+254712000000"),
           onSucess: (response) {
             response.startVerification(null);
           },
           onError: (error) {
-            print(error.code);
-            print(error.message);
+            if (kDebugMode) {
+              print(error.code);
+              print(error.message);
+            }
           },
         ),
       ),

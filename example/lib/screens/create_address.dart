@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:okhi_flutter/models/okhi_verification_types.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
@@ -25,8 +26,10 @@ class CreateAddress extends StatelessWidget {
                   _handleLocationManagerResponse(context, response);
                 },
                 onError: (error) {
-                  print(error.code);
-                  print(error.message);
+                  if (kDebugMode) {
+                    print(error.code);
+                    print(error.message);
+                  }
                 },
               ),
             ),
