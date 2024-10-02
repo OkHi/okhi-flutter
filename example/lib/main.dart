@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:okhi_flutter/models/okhi_verification_types.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
 void main() {
@@ -49,6 +50,9 @@ class _MyAppState extends State<MyApp> {
         ),
         body: OkHiLocationManager(
           user: OkHiUser(phone: "+254712000000"),
+          configuration: OkHiLocationManagerConfiguration(
+              verificationTypes: [VerificationTypes.digital]
+          ),
           onSucess: (response) {
             response.startVerification(null);
           },

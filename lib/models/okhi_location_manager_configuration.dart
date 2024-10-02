@@ -1,6 +1,5 @@
-import 'package:okhi_flutter/models/okhi_verification_types.dart';
-
 import './okhi_constant.dart';
+import 'okhi_verification_types.dart';
 
 /// The OkHiLocationManagerConfiguration exposes configurations that you can use to customise it's functionality and appearance.
 class OkHiLocationManagerConfiguration {
