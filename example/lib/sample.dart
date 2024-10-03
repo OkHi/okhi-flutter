@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 import 'package:okhi_flutter_example/screens/home.dart';
@@ -17,10 +18,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    final config = OkHiAppConfiguration.withRawValue(
-      branchId: "",
-      clientKey: "",
-      environmentRawValue: "dev",
+    final config = OkHiAppConfiguration(
+      branchId: "<my_branch_id>",
+      clientKey: "<my_client_key_id>",
+      env: OkHiEnv.sandbox,
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
         text: "Verifying your address",
@@ -30,9 +31,13 @@ class _MyAppState extends State<MyApp> {
       ),
     );
     OkHi.initialize(config).then((result) {
-      print(">>>>>>: $result");
+      if (kDebugMode) {
+        print(">>>>>>: $result");
+      }
     }).onError((error, stackTrace) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
     });
   }
 
