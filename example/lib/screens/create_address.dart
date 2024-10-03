@@ -18,9 +18,12 @@ class CreateAddress extends StatelessWidget {
           children: [
             Expanded(
               child: OkHiLocationManager(
-                user: OkHiUser(phone: "+254712000000", email: "granson@okhi.co"),
+                user: OkHiUser(
+                  phone: "+254712000000",
+                  email: "granson@okhi.co",
+                ),
                 configuration: OkHiLocationManagerConfiguration(
-                  verificationTypes: [VerificationTypes.physical]
+                  verificationTypes: [VerificationTypes.digital],
                 ),
                 onSucess: (response) {
                   _handleLocationManagerResponse(context, response);
@@ -52,7 +55,8 @@ class CreateAddress extends StatelessWidget {
     Navigator.pop(context);
   }
 
-  _handleLocationManagerResponse(BuildContext context, OkHiLocationManagerResponse response) {
+  _handleLocationManagerResponse(
+      BuildContext context, OkHiLocationManagerResponse response) {
     Navigator.pop(context, response);
   }
 }
