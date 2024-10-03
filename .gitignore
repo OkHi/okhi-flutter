@@ -239,6 +239,4 @@ iOSInjectionProject/
 android/.idea
 okhi_flutter.iml
 example/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-.gitignore
-.gitignore
 pubspec.lock
