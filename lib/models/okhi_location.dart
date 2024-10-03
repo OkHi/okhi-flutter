@@ -25,6 +25,7 @@ class OkHiLocation {
   String? userId;
   String? neighborhood;
   String? countryCode;
+  List<String>? verificationTypes = [];
 
   OkHiLocation({
     this.id,
@@ -50,6 +51,7 @@ class OkHiLocation {
     this.userId,
     this.neighborhood,
     this.countryCode,
+    this.verificationTypes,
   });
 
   OkHiLocation.fromMap(Map<String, dynamic> data) {
@@ -85,6 +87,8 @@ class OkHiLocation {
         data.containsKey("neighborhood") ? data["neighborhood"] : null;
     countryCode =
         data.containsKey("country_code") ? data["country_code"] : null;
+
+    verificationTypes = (data.containsKey("verification_types") ? data["verification_types"] as List : []).cast<String>();
   }
 
   @override
@@ -112,7 +116,8 @@ class OkHiLocation {
       "url": url,
       "userId": userId,
       "neighborhood": neighborhood,
-      "countryCode": countryCode
+      "countryCode": countryCode,
+      "verificationTypes": verificationTypes
     });
   }
 }
