@@ -1,3 +1,8 @@
+## 1.1.13
+
+* Feature: OkLite. Verify addresses physically, digitally or both.
+* Upgrade: android:okverify:1.9.49, android:core:1.7.24, iOS OkHi 1.9.40
+
 ## 1.1.12
 
 * Feature: added email to OkHiUser class
