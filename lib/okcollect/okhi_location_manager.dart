@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -64,7 +65,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       );
     }
     return PopScope(
-      onPopInvokedWithResult:(isPopped, result){
+      onPopInvoked: (didPop) {
         _handleWillPopScope();
       },
       child: WebViewWidget(controller: _controller!),
@@ -235,7 +236,8 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             "home": widget.locationManagerConfiguration.withHomeAddressType,
             "work": widget.locationManagerConfiguration.withWorkAddressType
           },
-          "permissionsOnboarding": widget.locationManagerConfiguration.withPermissionsOnboarding,
+          "permissionsOnboarding":
+              widget.locationManagerConfiguration.withPermissionsOnboarding,
           "verificationTypes": verificationTypeList
         }
       }
