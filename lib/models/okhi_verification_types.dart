@@ -1,1 +1,0 @@
-enum VerificationTypes { physical, digital }

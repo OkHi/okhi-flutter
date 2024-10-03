@@ -11,13 +11,8 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONObject;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import java.util.HashMap;
 import java.util.Map;
-import android.util.Log;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -320,19 +315,13 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     Double lat = call.argument("lat");
     Double lon = call.argument("lon");
     Boolean withForegroundService = call.argument("withForegroundService");
-
-    ArrayList<String> verificationTypes = call.argument("verificationTypes");
-    String[] verificationTypesList = verificationTypes.toArray(new String[0]);
-
     if (phone == null || locationId == null || lat == null || lon == null) {
       result.error("bad_request", "invalid values provided for address verification", null);
       return;
     }
-
     OkHiUser user = new OkHiUser.Builder(phone).build();
-    OkHiLocation location = new OkHiLocation.Builder(locationId, lat, lon).setVerificationTypes(verificationTypesList).build();
-
-    okVerify.start(user, location, withForegroundService, new OkVerifyCallback<String>() {
+    OkHiLocation location = new OkHiLocation.Builder(locationId, lat, lon).build();
+    okVerify.start(user, location, withForegroundService == null || withForegroundService, new OkVerifyCallback<String>() {
       @Override
       public void onSuccess(String verificationResult) {
         new OkHiMainThreadResult(result).success(verificationResult);

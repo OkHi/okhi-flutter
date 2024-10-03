@@ -23,7 +23,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -36,6 +36,6 @@ android {
 }
 
 dependencies {
-    implementation 'io.okhi.android:core:1.7.24'
-    implementation 'io.okhi.android:okverify:1.9.49'
+    implementation 'io.okhi.android:core:1.7.18'
+    implementation 'io.okhi.android:okverify:1.9.45'
 }
