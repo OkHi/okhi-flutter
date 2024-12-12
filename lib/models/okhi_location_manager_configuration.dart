@@ -1,5 +1,6 @@
+import 'package:okhi_flutter/models/okhi_usage_type.dart';
+
 import './okhi_constant.dart';
-import 'okhi_verification_types.dart';
 
 /// The OkHiLocationManagerConfiguration exposes configurations that you can use to customise it's functionality and appearance.
 class OkHiLocationManagerConfiguration {
@@ -11,7 +12,7 @@ class OkHiLocationManagerConfiguration {
   late bool withWorkAddressType;
   late bool withCreateMode;
   late bool withPermissionsOnboarding;
-  List<VerificationTypes> verificationTypes = [VerificationTypes.digital];
+  List<UsageType> usageTypes = [UsageType.digitalVerification];
 
   OkHiLocationManagerConfiguration({
     String? color,
@@ -22,7 +23,7 @@ class OkHiLocationManagerConfiguration {
     bool? withWorkAddressType,
     bool? withCreateMode,
     bool? withPermissionsOnboarding,
-    List<VerificationTypes>? verificationTypes,
+    List<UsageType>? usageTypes,
   }) {
     this.color = color ?? "#005d67";
     this.withCreateMode = withCreateMode ?? false;
@@ -32,6 +33,6 @@ class OkHiLocationManagerConfiguration {
     this.withHomeAddressType = withHomeAddressType ?? true;
     this.withWorkAddressType = withWorkAddressType ?? true;
     this.withPermissionsOnboarding = withPermissionsOnboarding ?? true;
-    this.verificationTypes = verificationTypes ?? [VerificationTypes.digital];
+    this.usageTypes = usageTypes ?? [UsageType.digitalVerification];
   }
 }
