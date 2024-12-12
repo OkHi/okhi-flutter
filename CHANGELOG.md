@@ -1,3 +1,11 @@
+## 1.1.15-beta
+
+* Feature: Enable usage type verification.
+* Feature: appUserId as property of OkHiUser.
+* Feature: OkHiLocationManager now accepts locationIds for previously created addresses for either digital and/or physical verification.
+* Update android:core to 1.7.31
+* Update android:okverify to 1.9.66
+
 ## 1.1.14
 
 * Feature: OkLite. Verify addresses physically, digitally or both.
