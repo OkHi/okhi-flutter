@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:okhi_flutter/models/okhi_verification_types.dart';
+import 'package:okhi_flutter/models/okhi_usage_type.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 import 'package:okhi_flutter_example/widgets/full_button.dart';
 
@@ -23,7 +23,7 @@ class CreateAddress extends StatelessWidget {
                   email: "granson@okhi.co",
                 ),
                 configuration: OkHiLocationManagerConfiguration(
-                  verificationTypes: [VerificationTypes.digital],
+                  usageTypes: [UsageType.addressBook],
                 ),
                 onSucess: (response) {
                   _handleLocationManagerResponse(context, response);
