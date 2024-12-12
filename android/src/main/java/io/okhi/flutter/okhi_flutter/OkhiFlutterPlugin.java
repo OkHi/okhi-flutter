@@ -29,6 +29,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
 import io.okhi.android_core.OkHi;
 import io.okhi.android_core.interfaces.OkHiRequestHandler;
+import io.okhi.android_core.models.OkCollectSuccessResponse;
 import io.okhi.android_core.models.OkHiAppContext;
 import io.okhi.android_core.models.OkHiAuth;
 import io.okhi.android_core.models.OkHiException;
@@ -316,23 +317,25 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       return;
     }
     String phone = call.argument("phoneNumber");
+    String userId = call.argument("userId");
+    String token = call.argument("token");
     String locationId = call.argument("locationId");
     Double lat = call.argument("lat");
     Double lon = call.argument("lon");
     Boolean withForegroundService = call.argument("withForegroundService");
-
-    ArrayList<String> verificationTypes = call.argument("verificationTypes");
-    String[] verificationTypesList = verificationTypes.toArray(new String[0]);
+    ArrayList<String> usageTypes = call.argument("usageTypes");
+    String[] usageTypesList = usageTypes.toArray(new String[0]);
 
     if (phone == null || locationId == null || lat == null || lon == null) {
       result.error("bad_request", "invalid values provided for address verification", null);
       return;
     }
 
-    OkHiUser user = new OkHiUser.Builder(phone).build();
-    OkHiLocation location = new OkHiLocation.Builder(locationId, lat, lon).setVerificationTypes(verificationTypesList).build();
+    OkHiLocation location = new OkHiLocation.Builder(locationId, lat, lon).setUsageTypes(usageTypesList).build();
+    OkHiUser user = new OkHiUser.Builder(phone).withOkHiUserId(userId).withToken(token).build();
+    OkCollectSuccessResponse response = new OkCollectSuccessResponse(user, location);
 
-    okVerify.start(user, location, withForegroundService, new OkVerifyCallback<String>() {
+    okVerify.start(response, new OkVerifyCallback<String>() {
       @Override
       public void onSuccess(String verificationResult) {
         new OkHiMainThreadResult(result).success(verificationResult);
