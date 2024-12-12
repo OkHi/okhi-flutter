@@ -11,6 +11,7 @@ class OkHiLocationManagerConfiguration {
   late bool withHomeAddressType;
   late bool withWorkAddressType;
   late bool withCreateMode;
+  late String? locationId;
   List<UsageType> usageTypes = [UsageType.digitalVerification];
 
   OkHiLocationManagerConfiguration({
@@ -23,6 +24,7 @@ class OkHiLocationManagerConfiguration {
     bool? withCreateMode,
     bool? withPermissionsOnboarding,
     List<UsageType>? usageTypes,
+    this.locationId,
   }) {
     this.color = color ?? "#005d67";
     this.withCreateMode = withCreateMode ?? false;
