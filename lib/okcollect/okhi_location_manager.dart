@@ -115,16 +115,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       if (Platform.isAndroid) {
         _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
       }
-      if (!widget.locationManagerConfiguration.withPermissionsOnboarding &&
-          _locationPermissionLevel != "always") {
-        if (widget.onError != null) {
-          widget.onError!(OkHiException(
-              code: OkHiException.permissionDeniedCode,
-              message:
-                  "Always location permission required to launch okcollect"));
-        }
-        return;
-      }
       setState(() {
         _controller = WebViewController()
           ..loadRequest(Uri.parse(_locationManagerUrl))
@@ -222,8 +212,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             "home": widget.locationManagerConfiguration.withHomeAddressType,
             "work": widget.locationManagerConfiguration.withWorkAddressType
           },
-          "permissionsOnboarding":
-              widget.locationManagerConfiguration.withPermissionsOnboarding,
+          "permissionsOnboarding": true,
           "usageTypes": usageTypeList
         }
       }

@@ -11,7 +11,6 @@ class OkHiLocationManagerConfiguration {
   late bool withHomeAddressType;
   late bool withWorkAddressType;
   late bool withCreateMode;
-  late bool withPermissionsOnboarding;
   List<UsageType> usageTypes = [UsageType.digitalVerification];
 
   OkHiLocationManagerConfiguration({
@@ -32,7 +31,6 @@ class OkHiLocationManagerConfiguration {
     this.withStreetView = withStreetView ?? true;
     this.withHomeAddressType = withHomeAddressType ?? true;
     this.withWorkAddressType = withWorkAddressType ?? true;
-    this.withPermissionsOnboarding = withPermissionsOnboarding ?? true;
     this.usageTypes = usageTypes ?? [UsageType.digitalVerification];
   }
 }
