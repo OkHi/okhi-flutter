@@ -214,7 +214,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           },
           "permissionsOnboarding": true,
           "usageTypes": usageTypeList
-        }
+        },
+        "location": widget.locationManagerConfiguration.locationId != null
+            ? {"id": widget.locationManagerConfiguration.locationId}
+            : null
       }
     };
     final payload = jsonEncode(data);
