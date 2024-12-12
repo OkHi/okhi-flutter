@@ -23,7 +23,7 @@ class CreateAddress extends StatelessWidget {
                   email: "granson@okhi.co",
                 ),
                 configuration: OkHiLocationManagerConfiguration(
-                  usageTypes: [UsageType.addressBook],
+                  usageTypes: [UsageType.digitalVerification],
                 ),
                 onSucess: (response) {
                   _handleLocationManagerResponse(context, response);
