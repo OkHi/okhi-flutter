@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:http/http.dart' as http;
 import '../okhi_flutter.dart';
 import '../models/okhi_constant.dart';
 import '../models/okhi_native_methods.dart';
@@ -37,11 +36,8 @@ class OkHiLocationManager extends StatefulWidget {
 
 class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   WebViewController? _controller;
-  String? _accessToken;
-  String? _authorizationToken;
   String? _appIdentifier;
   String? _appVersion;
-  String _signInUrl = OkHiConstant.sandboxSignInUrl;
   String _locationManagerUrl = OkHiConstant.sandboxLocationManagerUrl;
   Map<String, Object>? _coords;
   Map<String, Object>? _deviceInfo;
@@ -79,16 +75,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     return !canGoBack;
   }
 
-  _fetchSignInUrl(String env) {
-    if (env == "dev") {
-      return OkHiConstant.devSignInUrl;
-    } else if (env == "prod") {
-      return OkHiConstant.prodSignInUrl;
-    } else {
-      return OkHiConstant.sandboxSignInUrl;
-    }
-  }
-
   Future<String> _fetchLocationManagerUrl(String env) async {
     final platformVersion = await OkHi.platformVersion;
     if (Platform.isIOS ||
@@ -115,13 +101,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     // if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
     final configuration = OkHi.getConfiguration();
     if (configuration != null) {
-      _signInUrl = _fetchSignInUrl(configuration.environmentRawValue);
       _locationManagerUrl =
           await _fetchLocationManagerUrl(configuration.environmentRawValue);
       final bytes =
           utf8.encode("${configuration.branchId}:${configuration.clientKey}");
-      _accessToken = 'Token ${base64.encode(bytes)}';
-      await _signInUser();
       await _getAppInformation();
       _locationPermissionLevel = await OkHi.fetchLocationPermissionStatus();
       _deviceInfo = await OkHi.retrieveDeviceInfo();
@@ -132,29 +115,17 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       if (Platform.isAndroid) {
         _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
       }
-      if (!widget.locationManagerConfiguration.withPermissionsOnboarding &&
-          _locationPermissionLevel != "always") {
-        if (widget.onError != null) {
-          widget.onError!(OkHiException(
-              code: OkHiException.permissionDeniedCode,
-              message:
-                  "Always location permission required to launch okcollect"));
-        }
-        return;
-      }
-      if (_authorizationToken != null) {
-        setState(() {
-          _controller = WebViewController()
-            ..loadRequest(Uri.parse(_locationManagerUrl))
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..addJavaScriptChannel("FlutterOkHi",
-                onMessageReceived: _handleMessageReceived)
-            ..setBackgroundColor(Colors.white)
-            ..setNavigationDelegate(
-              NavigationDelegate(onPageFinished: _handlePageLoaded),
-            );
-        });
-      }
+      setState(() {
+        _controller = WebViewController()
+          ..loadRequest(Uri.parse(_locationManagerUrl))
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..addJavaScriptChannel("FlutterOkHi",
+              onMessageReceived: _handleMessageReceived)
+          ..setBackgroundColor(Colors.white)
+          ..setNavigationDelegate(
+            NavigationDelegate(onPageFinished: _handlePageLoaded),
+          );
+      });
     } else if (widget.onError != null) {
       widget.onError!(
         OkHiException(
@@ -175,6 +146,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     }
     if (widget.user.email != null) {
       user["email"] = widget.user.email!;
+    }
+    if (widget.user.appUserId != null) {
+      user["appUserId"] = widget.user.appUserId!;
     }
     Map<String, Map<String, Object?>> context = {
       "container": {"name": _appIdentifier, "version": _appVersion},
@@ -202,11 +176,11 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       };
     }
 
-    var verificationTypeList = [];
-    for (var type in (widget.locationManagerConfiguration.verificationTypes)) {
-      verificationTypeList.add(type.name);
+    var usageTypeList = [];
+    for (var type in (widget.locationManagerConfiguration.usageTypes)) {
+      usageTypeList.add(type.toString());
     }
-
+    final configuration = OkHi.getConfiguration();
     var data = {
       "url": _locationManagerUrl,
       "message": widget.locationManagerConfiguration.withCreateMode
@@ -222,7 +196,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
           }
         },
         "user": user,
-        "auth": {"authToken": _authorizationToken},
+        "auth": {
+          "branchId": configuration?.branchId,
+          "clientKey": configuration?.clientKey
+        },
         "context": context,
         "config": {
           "streetView": widget.locationManagerConfiguration.withStreetView,
@@ -235,10 +212,12 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             "home": widget.locationManagerConfiguration.withHomeAddressType,
             "work": widget.locationManagerConfiguration.withWorkAddressType
           },
-          "permissionsOnboarding":
-              widget.locationManagerConfiguration.withPermissionsOnboarding,
-          "verificationTypes": verificationTypeList
-        }
+          "permissionsOnboarding": true,
+          "usageTypes": usageTypeList
+        },
+        "location": widget.locationManagerConfiguration.locationId != null
+            ? {"id": widget.locationManagerConfiguration.locationId}
+            : null
       }
     };
     final payload = jsonEncode(data);
@@ -419,67 +398,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     _appIdentifier =
         await _channel.invokeMethod(OkHiNativeMethod.getAppIdentifier);
     _appVersion = await _channel.invokeMethod(OkHiNativeMethod.getAppVersion);
-  }
-
-  _signInUser() async {
-    final Map<String, String> headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': _accessToken ?? ''
-    };
-    final body = jsonEncode({
-      "phone": widget.user.phone,
-      "scopes": ["address"]
-    });
-    final parsedUrl = Uri.parse(_signInUrl);
-    try {
-      final response = await http
-          .post(
-            parsedUrl,
-            headers: headers,
-            body: body,
-          )
-          .timeout(const Duration(seconds: 10));
-      if (response.statusCode == 201) {
-        final body = jsonDecode(response.body);
-        _authorizationToken = body["authorization_token"];
-      } else if (widget.onError != null) {
-        switch (response.statusCode) {
-          case 400:
-            widget.onError!(
-              OkHiException(
-                code: OkHiException.invalidPhoneCode,
-                message: OkHiException.invalidPhoneMessage,
-              ),
-            );
-            break;
-          case 401:
-            widget.onError!(
-              OkHiException(
-                code: OkHiException.unauthorizedCode,
-                message: OkHiException.unauthorizedMessage,
-              ),
-            );
-            break;
-          default:
-            widget.onError!(
-              OkHiException(
-                code: OkHiException.unknownErrorCode,
-                message: OkHiException.uknownErrorMessage,
-              ),
-            );
-        }
-      }
-    } catch (e) {
-      if (widget.onError != null) {
-        widget.onError!(
-          OkHiException(
-            code: OkHiException.networkError,
-            message: OkHiException.networkErrorMessage,
-          ),
-        );
-      }
-    }
   }
 
   Future<Map<String, Object>?> _fetchCoords() async {

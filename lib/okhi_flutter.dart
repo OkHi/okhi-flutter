@@ -156,10 +156,12 @@ class OkHi {
     final config = configuration ?? OkHiVerificationConfiguration();
     return await _channel.invokeMethod(OkHiNativeMethod.startVerification, {
       "phoneNumber": user.phone,
+      "userId": user.id,
+      "token": user.token,
       "locationId": location.id,
       "lat": location.lat,
       "lon": location.lon,
-      "verificationTypes": location.verificationTypes,
+      "usageTypes": location.usageTypes,
       "withForegroundService": config.withForegroundService,
     });
   }

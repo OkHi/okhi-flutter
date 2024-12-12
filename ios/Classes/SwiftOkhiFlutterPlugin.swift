@@ -199,28 +199,37 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
     
     private func handleStartVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let arguments = call.arguments as? [String: Any] ?? [:]
+        
         let phoneNumber = arguments["phoneNumber"] as? String
+        let userId = arguments["userId"] as? String
+        let token = arguments["token"] as? String
         let locationId = arguments["locationId"] as? String
         let lat = arguments["lat"] as? Double
         let lon = arguments["lon"] as? Double
-        let verificationTypes = arguments["verificationTypes"] as? [String] ?? []
-        let enumVerificationTypes: [OkHiVerificationType] = verificationTypes.compactMap { verificationType in
-            switch verificationType {
-            case OkHiVerificationType.physical.rawValue:
-                return .physical
+        let usageTypes = arguments["usageTypes"] as? [String] ?? []
+        
+        let enumUsageTypes: [OkHiUsageType] = usageTypes.compactMap { usageType in
+            switch usageType {
+            case OkHiUsageType.physicalVerification.rawValue:
+                return .physicalVerification
+            case OkHiUsageType.addressBook.rawValue:
+                return .addressBook
             default:
-                return .digital
+                return .digitalVerification
             }
         }
-        guard let phoneNumber = phoneNumber, let locationId = locationId, let lat = lat, let lon = lon else {
+        
+        guard let phoneNumber = phoneNumber, let userId = userId, let token = token, let locationId = locationId, let lat = lat, let lon = lon else {
             result(FlutterError(code: "bad_request", message: "Invalid arguments provided for verification", details: nil))
             return
         }
-        self.flutterResult = result
-        let user = OkHiUser(phoneNumber: phoneNumber)
-        let location = OkHiLocation(identifier: locationId, lat: lat, lon: lon)
         okverify.delegate = self
-        okverify.startAddressVerification(phoneNumber: phoneNumber, locationId: locationId, lat: lat, lon: lon, verificationTypes: enumVerificationTypes)
+        self.flutterResult = result
+        
+        let user = OkHiUser(phoneNumber: phoneNumber).with(token: token).with(okHiId: userId)
+        let location = OkHiLocation(identifier: locationId, lat: lat, lon: lon, usageTypes: enumUsageTypes)
+        let response = OkCollectSuccessResponse(user: user, location: location)
+        okverify.startAddressVerification(response: response)
     }
     
     
