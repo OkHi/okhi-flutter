@@ -10,9 +10,7 @@ import OkHi
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        if launchOptions?[UIApplication.LaunchOptionsKey.location] != nil {
-            okverify.startMonitoring()
-        }
+        OkVerify.startMonitoring()
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
