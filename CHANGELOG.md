@@ -1,3 +1,7 @@
+## 1.1.17
+
+* Release: Update example code
+
 ## 1.1.16
 
 * Release: Moved to stable release.
