@@ -1,3 +1,7 @@
+## 1.1.6
+
+* Release: Moved to stable release.
+
 ## 1.1.15-beta
 
 * Feature: Enable usage type verification.
