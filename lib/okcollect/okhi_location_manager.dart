@@ -103,8 +103,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     if (configuration != null) {
       _locationManagerUrl =
           await _fetchLocationManagerUrl(configuration.environmentRawValue);
-      final bytes =
-          utf8.encode("${configuration.branchId}:${configuration.clientKey}");
       await _getAppInformation();
       _locationPermissionLevel = await OkHi.fetchLocationPermissionStatus();
       _deviceInfo = await OkHi.retrieveDeviceInfo();
