@@ -1,3 +1,11 @@
+## 1.1.18
+
+* added extralocation properties to OkHiLocation class
+`ward, formattedAddress, postCode, lga, lgaCode, unit, gpsAccuracy, businessName, type, district, addressLine`
+* upgrade: bump up android:core to v1.7.32
+* upgrade: bump up android:okverify to v1.9.67
+* upgrade: bump up ios:OkHi to v1.9.48
+
 ## 1.1.17
 
 * Release: Update example code

@@ -26,6 +26,17 @@ class OkHiLocation {
   String? neighborhood;
   String? countryCode;
   List<String>? usageTypes = [];
+  String? ward;
+  String? formattedAddress;
+  String? postCode;
+  String? lga;
+  String? lgaCode;
+  String? unit;
+  double? gpsAccuracy;
+  String? businessName;
+  String? type;
+  String? district;
+  String? addressLine;
 
   OkHiLocation({
     this.id,
@@ -52,6 +63,17 @@ class OkHiLocation {
     this.neighborhood,
     this.countryCode,
     this.usageTypes,
+    this.ward,
+    this.formattedAddress,
+    this.postCode,
+    this.lga,
+    this.lgaCode,
+    this.unit,
+    this.gpsAccuracy,
+    this.businessName,
+    this.type,
+    this.district,
+    this.addressLine,
   });
 
   OkHiLocation.fromMap(Map<String, dynamic> data) {
@@ -87,10 +109,25 @@ class OkHiLocation {
         data.containsKey("neighborhood") ? data["neighborhood"] : null;
     countryCode =
         data.containsKey("country_code") ? data["country_code"] : null;
-
     usageTypes =
         (data.containsKey("usage_types") ? data["usage_types"] as List : [])
             .cast<String>();
+    ward = data.containsKey("ward") ? data["ward"] : null;
+    formattedAddress = data.containsKey("formatted_address")
+        ? data["formatted_address"]
+        : null;
+    postCode = data.containsKey("post_code") ? data["post_code"] : null;
+    lga = data.containsKey("lga") ? data["lga"] : null;
+    lgaCode = data.containsKey("lga_code") ? data["lga_code"] : null;
+    unit = data.containsKey("unit") ? data["unit"] : null;
+    gpsAccuracy =
+        data.containsKey("gps_accuracy") ? data["gps_accuracy"] : null;
+    businessName =
+        data.containsKey("business_name") ? data["business_name"] : null;
+    type = data.containsKey("type") ? data["type"] : null;
+    district = data.containsKey("district") ? data["district"] : null;
+    addressLine =
+        data.containsKey("address_line_1") ? data["address_line_1"] : null;
   }
 
   @override
@@ -119,7 +156,18 @@ class OkHiLocation {
       "userId": userId,
       "neighborhood": neighborhood,
       "countryCode": countryCode,
-      "usageTypes": usageTypes
+      "usageTypes": usageTypes,
+      "ward": ward,
+      "formattedAddress": formattedAddress,
+      "postCode": postCode,
+      "lga": lga,
+      "lgaCode": lgaCode,
+      "unit": unit,
+      "gpsAccuracy": gpsAccuracy,
+      "businessName": businessName,
+      "type": type,
+      "district": district,
+      "addressLine": addressLine,
     });
   }
 }
