@@ -36,6 +36,6 @@ android {
 }
 
 dependencies {
-    implementation 'io.okhi.android:core:1.7.31'
-    implementation 'io.okhi.android:okverify:1.9.66'
+    implementation 'io.okhi.android:core:1.7.32'
+    implementation 'io.okhi.android:okverify:1.9.67'
 }
