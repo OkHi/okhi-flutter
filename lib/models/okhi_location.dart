@@ -32,7 +32,7 @@ class OkHiLocation {
   String? lga;
   String? lgaCode;
   String? unit;
-  double? gpsAccuracy;
+  String? gpsAccuracy;
   String? businessName;
   String? type;
   String? district;
@@ -120,8 +120,9 @@ class OkHiLocation {
     lga = data.containsKey("lga") ? data["lga"] : null;
     lgaCode = data.containsKey("lga_code") ? data["lga_code"] : null;
     unit = data.containsKey("unit") ? data["unit"] : null;
-    gpsAccuracy =
-        data.containsKey("gps_accuracy") ? data["gps_accuracy"] : null;
+    gpsAccuracy = data.containsKey("gps_accuracy")
+        ? data["gps_accuracy"].toString()
+        : null;
     businessName =
         data.containsKey("business_name") ? data["business_name"] : null;
     type = data.containsKey("type") ? data["type"] : null;
