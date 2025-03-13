@@ -1,3 +1,7 @@
+## 1.1.19
+
+* Updated extra location properties to OkHiLocation class `gpsAccuracy` from typeOf double to string
+
 ## 1.1.18
 
 * added extralocation properties to OkHiLocation class
