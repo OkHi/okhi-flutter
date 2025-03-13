@@ -1,3 +1,7 @@
+## 1.1.20
+
+* upgrade: bump up native ios library to v1.9.50
+
 ## 1.1.19
 
 * Updated extra location properties to OkHiLocation class `gpsAccuracy` from typeOf double to string
