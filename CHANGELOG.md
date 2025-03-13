@@ -1,4 +1,4 @@
-## 1.1.19
+## 1.1.20
 
 * upgrade: bump up native ios library to v1.9.50
 
