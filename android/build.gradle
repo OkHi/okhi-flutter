@@ -23,6 +23,9 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
+
+    namespace = "io.okhi.flutter.okhi_flutter"
+    
     compileSdkVersion 34
 
     compileOptions {
