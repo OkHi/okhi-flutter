@@ -1,3 +1,7 @@
+## 1.1.21
+
+* fix: added namespace to build.gradle fixing `Namespace not specified. Specify a namespace in the module's build file..` Enables targetting Android SDK 35
+
 ## 1.1.20
 
 * upgrade: bump up native ios library to v1.9.50
