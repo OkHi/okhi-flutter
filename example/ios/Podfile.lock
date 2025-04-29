@@ -1,16 +1,17 @@
 PODS:
   - Flutter (1.0.0)
-  - OkHi (1.9.46)
+  - OkHi (1.9.52)
   - okhi_flutter (0.0.1):
     - Flutter
-    - OkHi (= 1.9.46)
+    - OkHi (= 1.9.52)
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - okhi_flutter (from `.symlinks/plugins/okhi_flutter/ios`)
-  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -22,14 +23,14 @@ EXTERNAL SOURCES:
   okhi_flutter:
     :path: ".symlinks/plugins/okhi_flutter/ios"
   webview_flutter_wkwebview:
-    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  OkHi: 7e8071c1b9bff29fe2a262759186a545ba4c7e49
-  okhi_flutter: 9893264fe5e09dcb8490b18bc75487e45a421efb
-  webview_flutter_wkwebview: 2a23822e9039b7b1bc52e5add778e5d89ad488d1
+  OkHi: 1bc3a35d7d686a3744c1fc2b6cfe2baf284aff6c
+  okhi_flutter: 98a73a28136f771bce607727865b3b4d71bcd454
+  webview_flutter_wkwebview: a4af96a051138e28e29f60101d094683b9f82188
 
 PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
