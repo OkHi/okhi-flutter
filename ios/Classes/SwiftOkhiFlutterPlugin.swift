@@ -78,10 +78,18 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
             break
         case "openAppSettings":
             handleOpenAppSettings(call, result)
+        case "getLocationAccuracyLevel":
+            handleGetLocationAccuracyLevel(call, result)
+            break
         default:
             result(FlutterMethodNotImplemented)
             break
         }
+    }
+    
+    private func handleGetLocationAccuracyLevel(_ call: FlutterMethodCall, _ result: FlutterResult) {
+        let level = OkVerify.getLocationAccuracyLevel()
+        result(level)
     }
     
     private func handleOpenAppSettings(_ call: FlutterMethodCall, _ result: FlutterResult) {

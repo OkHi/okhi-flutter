@@ -43,8 +43,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   Map<String, Object>? _deviceInfo;
   List<dynamic>? _geofences;
   String _locationPermissionLevel = "denied";
+  String _locationAccuracyLevel = "no_permission";
   final MethodChannel _channel = const MethodChannel('okhi_flutter');
   bool _canOpenProtectedApps = false;
+  bool _androidAlwaysRequested = false;
 
   @override
   void initState() {
@@ -107,6 +109,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       _locationPermissionLevel = await OkHi.fetchLocationPermissionStatus();
       _deviceInfo = await OkHi.retrieveDeviceInfo();
       _geofences = await OkHi.fetchRegisteredGeofences();
+      _locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
       if (_locationPermissionLevel != "denied") {
         _coords = await _fetchCoords();
       }
@@ -148,7 +151,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     if (widget.user.appUserId != null) {
       user["appUserId"] = widget.user.appUserId!;
     }
-    Map<String, Map<String, Object?>> context = {
+    Map<String, dynamic> context = {
       "container": {"name": _appIdentifier, "version": _appVersion},
       "developer": {"name": "external"},
       "library": {
@@ -162,7 +165,8 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         "model": _deviceInfo!["model"],
         "platform": _deviceInfo!["platform"],
         "osVersion": _deviceInfo!["osVersion"],
-      }
+      },
+      "locationAccuracyLevel": _locationAccuracyLevel,
     };
     if (_coords != null) {
       context["coordinates"] = {
@@ -291,9 +295,26 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     }
   }
 
-  _runWebViewCallback(String result) {
-    String jsString =
-        "(function (){ if (typeof runOkHiLocationManagerCallback === \"function\") { runOkHiLocationManagerCallback(\"$result\") } })()";
+  _runWebViewCallback(String result) async {
+    String level = await OkHi.getLocationAccuracyLevel();
+    if (result == "blocked" || result == "denied") {
+      if (level == "approximate") {
+        result = "whenInUse";
+      }
+    }
+    Map<String, dynamic> update = {
+      'locationAccuracyLevel': level,
+    };
+    String jsonUpdate = jsonEncode(update)
+        .replaceAll(r'\', r'\\')
+        .replaceAll('"', r'\"'); // Escape for JS string
+    String jsString = """
+    (function (){
+      if (typeof runOkHiLocationManagerCallback === "function") {
+        runOkHiLocationManagerCallback("$result", "$jsonUpdate")
+      }
+    })()
+  """;
     _controller?.runJavaScript(jsString);
   }
 
@@ -315,37 +336,49 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handleAndroidRequestLocationPermission(String level) async {
-    bool isServiceAvailable = await OkHi.isLocationServicesEnabled();
-    if (!isServiceAvailable) {
-      bool result = await OkHi.requestEnableLocationServices();
-      if (!result) {
-        _runWebViewCallback('blocked');
-        return;
-      }
-    }
-    if (level == 'whenInUse') {
+    bool isLocationPermissionGranted = await OkHi.isLocationPermissionGranted();
+    bool isBackgroundLocationPermissionGranted =
+        await OkHi.isBackgroundLocationPermissionGranted();
+    String locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
+    if (isBackgroundLocationPermissionGranted &&
+        locationAccuracyLevel == "precise") {
+      _runWebViewCallback("always");
+    } else if (isLocationPermissionGranted &&
+        locationAccuracyLevel == "precise") {
+      _runWebViewCallback("whenInUse");
+    } else if (level == "whenInUse" &&
+        locationAccuracyLevel == "no_permission") {
       bool result = await OkHi.requestLocationPermission();
-      _runWebViewCallback(result ? 'whenInUse' : 'blocked');
-    } else if (level == 'always') {
+      _runWebViewCallback(result ? "whenInUse" : "denied");
+    } else if (level == "always" && !_androidAlwaysRequested) {
       bool result = await OkHi.requestBackgroundLocationPermission();
-      _runWebViewCallback(result ? 'always' : 'blocked');
+      _runWebViewCallback(result ? "always" : "denied");
+      _androidAlwaysRequested = true;
+    } else if (level == "whenInUse" && locationAccuracyLevel == "approximate") {
+      bool result = await OkHi.requestLocationPermission();
+      _runWebViewCallback(result ? "whenInUse" : "denied");
+    } else {
+      await OkHi.openAppSettings();
     }
   }
 
   _handleIOSRequestLocationPermission(String level) async {
-    bool isServiceAvailable = await OkHi.isLocationServicesEnabled();
-    if (!isServiceAvailable) {
-      await OkHi.openAppSettings();
-    } else if (level == 'whenInUse') {
+    bool isLocationPermissionGranted = await OkHi.isLocationPermissionGranted();
+    bool isBackgroundLocationPermissionGranted =
+        await OkHi.isBackgroundLocationPermissionGranted();
+    String locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
+
+    if (isBackgroundLocationPermissionGranted &&
+        locationAccuracyLevel == "precise") {
+      _runWebViewCallback("always");
+    } else if (isLocationPermissionGranted &&
+        locationAccuracyLevel == "precise") {
+      _runWebViewCallback("whenInUse");
+    } else if (level == "whenInUse" && !isLocationPermissionGranted) {
       bool result = await OkHi.requestLocationPermission();
-      _runWebViewCallback(result ? level : 'denied');
-    } else if (level == 'always') {
-      bool granted = await OkHi.isBackgroundLocationPermissionGranted();
-      if (granted) {
-        _runWebViewCallback(level);
-      } else {
-        await OkHi.openAppSettings();
-      }
+      _runWebViewCallback(result ? "whenInUse" : "denied");
+    } else {
+      await OkHi.openAppSettings();
     }
   }
 
