@@ -31,4 +31,5 @@ class OkHiNativeMethod {
   static const String fetchRegisteredGeofences = "fetchRegisteredGeofences";
   static const String openAppSettings = "openAppSettings";
   static const String getCurrentLocation = "getCurrentLocation";
+  static const String getLocationAccuracyLevel = "getLocationAccuracyLevel";
 }

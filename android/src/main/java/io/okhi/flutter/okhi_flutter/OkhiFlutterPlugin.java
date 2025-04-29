@@ -159,6 +159,9 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       case "openAppSettings":
         handleOpenAppSettings(call, result);
         break;
+      case "getLocationAccuracyLevel":
+        handleGetLocationAccuracyLevel(call, result);
+        break;
       default:
         result.notImplemented();
     }
@@ -194,6 +197,11 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
   @Override
   public void onDetachedFromActivity() {
 
+  }
+
+  private void handleGetLocationAccuracyLevel(MethodCall call, Result result) {
+    String level = OkHiLocationService.getLocationAccuracyLevel(activity);
+    result.success(level);
   }
 
   private void handleGetPlatformVersion(MethodCall call, Result result) {
