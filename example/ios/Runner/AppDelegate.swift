@@ -2,7 +2,7 @@ import UIKit
 import Flutter
 import OkHi
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
     private let okverify = OkVerify()
     
