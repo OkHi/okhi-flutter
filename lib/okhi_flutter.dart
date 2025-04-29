@@ -270,4 +270,9 @@ class OkHi {
         await _channel.invokeMapMethod(OkHiNativeMethod.getCurrentLocation);
     return coords;
   }
+
+  static Future<String> getLocationAccuracyLevel() async {
+    return await _channel
+        .invokeMethod(OkHiNativeMethod.getLocationAccuracyLevel);
+  }
 }

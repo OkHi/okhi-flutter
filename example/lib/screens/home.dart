@@ -62,8 +62,8 @@ class _HomeState extends State<Home> {
                 onPressed: _handleRequestEnableLocationService,
               ),
               FullButton(
-                title: "Request enable Google Play Service",
-                onPressed: _handleEnableGooglePlayService,
+                title: "Get Location accuracy level",
+                onPressed: _handleGetLocationAccuracyLevel,
               ),
               FullButton(
                 title: "Create an address",
@@ -159,8 +159,8 @@ class _HomeState extends State<Home> {
     });
   }
 
-  _handleEnableGooglePlayService() async {
-    final result = await OkHi.requestEnableGooglePlayServices();
+  _handleGetLocationAccuracyLevel() async {
+    final result = await OkHi.getLocationAccuracyLevel();
     setState(() {
       message = result.toString();
     });
