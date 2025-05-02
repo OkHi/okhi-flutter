@@ -344,7 +344,8 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         locationAccuracyLevel == "precise") {
       _runWebViewCallback("always");
     } else if (isLocationPermissionGranted &&
-        locationAccuracyLevel == "precise") {
+        locationAccuracyLevel == "precise" &&
+        level != "always") {
       _runWebViewCallback("whenInUse");
     } else if (level == "whenInUse" &&
         locationAccuracyLevel == "no_permission") {
