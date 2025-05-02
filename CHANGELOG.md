@@ -1,3 +1,7 @@
+## 1.1.23
+
+- fix: android callback when requesting for when in use with precise granted
+
 ## 1.1.22
 
 - feature: enabled checking precise location before address verification starts
