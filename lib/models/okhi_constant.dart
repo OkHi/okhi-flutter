@@ -1,5 +1,5 @@
 class OkHiConstant {
-  static const String libraryVersion = "1.1.23";
+  static const String libraryVersion = "1.1.24";
   static const String okhiLogoUrl =
       "https://storage.googleapis.com/okhi-cdn/images/logos/okhi-logo-white.png";
   static const String devLocationManagerUrl = "https://dev-manager-v5.okhi.io";
