@@ -1,3 +1,7 @@
+## 1.1.24
+
+- fix: ios callback when requesting for always permission with precise granted
+
 ## 1.1.23
 
 - fix: android callback when requesting for when in use with precise granted
