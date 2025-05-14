@@ -295,14 +295,12 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       String branchId = call.argument("branchId");
       String clientKey = call.argument("clientKey");
       String mode = call.argument("environment");
-      String developer = call.argument("developer");
       if (branchId == null || clientKey == null || mode == null) {
         result.error("unauthorized", "invalid initialization credentials provided", null);
       } else if (activity == null) {
         result.error("unknown_error", "unable to obtain activity", null);
       } else {
-        OkHiAppContext appContext = new OkHiAppContext(context, mode, "flutter", developer == null ? "external" : developer);
-        auth = new OkHiAuth(context, branchId, clientKey, appContext);
+        auth = new OkHiAuth(context, branchId, clientKey, mode);
         okVerify = new OkVerify.Builder(activity, auth).build();
         Map<String, Object> notification = call.<HashMap<String, Object>>argument("notification");
         int importance = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? NotificationManager.IMPORTANCE_DEFAULT : 3;
