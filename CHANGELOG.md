@@ -1,3 +1,7 @@
+## 1.1.25
+
+- upgrade: bump up native android libraries
+
 ## 1.1.24
 
 - fix: ios callback when requesting for always permission with precise granted
