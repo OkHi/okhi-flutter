@@ -1,3 +1,7 @@
+## 1.1.26
+
+- upgrade: removed deprecated api usage
+
 ## 1.1.25
 
 - upgrade: bump up native android libraries
