@@ -224,6 +224,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     };
     final payload = jsonEncode(data);
     _saveLaunchPayload(payload);
+    if (_locationAccuracyLevel == "precise" ||
+        _locationAccuracyLevel == "approximate" && _controller != null) {
+      await _overrideGeolocation(_controller!);
+    }
     await _controller?.runJavaScript("""
     function receiveMessage (data) {
       if (FlutterOkHi && FlutterOkHi.postMessage) {
@@ -233,9 +237,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
     var bridge = { receiveMessage: receiveMessage };
     window.startOkHiLocationManager(bridge, $payload);
     """);
-    if (_controller != null) {
-      await _overrideGeolocation(_controller!);
-    }
   }
 
   _handleMessageReceived(JavaScriptMessage jsMessage) {
@@ -301,6 +302,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       if (level == "approximate") {
         result = "whenInUse";
       }
+    }
+    if (result == "whenInUse") {
+      await _overrideGeolocation(_controller!);
     }
     Map<String, dynamic> update = {
       'locationAccuracyLevel': level,
