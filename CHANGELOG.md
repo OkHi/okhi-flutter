@@ -1,3 +1,7 @@
+## 1.1.27
+
+- fix: overriding geolocation web api on android + ios
+
 ## 1.1.26
 
 - upgrade: removed deprecated api usage
