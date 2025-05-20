@@ -1,3 +1,7 @@
+## 1.1.28
+
+- fix: Reply already submitted error on native android when fetching location
+
 ## 1.1.27
 
 - fix: overriding geolocation web api on android + ios
