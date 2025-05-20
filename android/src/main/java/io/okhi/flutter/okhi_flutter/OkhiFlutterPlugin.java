@@ -55,6 +55,8 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
   private OkVerify okVerify;
   private OkHiAuth auth;
   private Activity activity;
+  private Location cachedLocation;
+  private boolean isFetchingLocation = false;
 
   private final PluginRegistry.ActivityResultListener activityResultListener = new PluginRegistry.ActivityResultListener() {
     @Override
@@ -390,11 +392,29 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
   }
 
   private void handleGetCurrentLocation(MethodCall call, Result result) {
+
+    if (cachedLocation != null) {
+      // Return the cached location immediately
+      HashMap<String, Double> coords = new HashMap<>();
+      coords.put("lat", cachedLocation.getLatitude());
+      coords.put("lng", cachedLocation.getLongitude());
+      coords.put("accuracy", (double) cachedLocation.getAccuracy());
+      result.success(coords);
+      return;
+    }
+
+    // If a location is already being fetched, queue the current result
+    if (isFetchingLocation) {
+      return;
+    }
+
     if (OkHi.isLocationPermissionGranted(context)) {
       OkHiLocationService.getCurrentLocation(context, new OkHiRequestHandler<Location>() {
         @Override
         public void onResult(Location location) {
+          isFetchingLocation = false;
           if (location != null) {
+            cachedLocation = location;
             HashMap<String, Double> coords = new HashMap<String, Double>();
             coords.put("lat", location.getLatitude());
             coords.put("lng", location.getLongitude());
@@ -407,6 +427,7 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
 
         @Override
         public void onError(OkHiException exception) {
+          isFetchingLocation = false;
           result.error(exception.getCode(), exception.getMessage(), null);
         }
       });
