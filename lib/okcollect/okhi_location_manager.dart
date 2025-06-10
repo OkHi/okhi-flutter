@@ -282,10 +282,11 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
 
   _handleFetchCurrentLocation() async {
     try {
-      Map<String, Object>? coords = await OkHi.getCurrentLocation();
-      String jsString =
-          "window.receiveCurrentLocation({lat: ${coords!['lat']},lng: ${coords['lng']},accuracy: ${coords['accuracy']}})";
-      _controller?.runJavaScript(jsString);
+      if (_coords != null) {
+        String jsString =
+            "window.receiveCurrentLocation({lat: ${_coords!['lat']},lng: ${_coords!['lng']},accuracy: ${_coords!['accuracy']}})";
+        await _controller?.runJavaScript(jsString);
+      }
     } catch (e) {
       if (kDebugMode) {
         print(e);
@@ -313,7 +314,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       }
     })()
   """;
-    _controller?.runJavaScript(jsString);
+    await _controller?.runJavaScript(jsString);
+    if (level == "precise" || level == "approximate") {
+      _coords = await _fetchCoords();
+    }
   }
 
   /// This is due to an issue with the webview
