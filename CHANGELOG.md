@@ -1,3 +1,11 @@
+## 1.1.30
+
+- fix: override geolocation fix for physical devices
+
+## 1.1.29
+
+- fix: bump up android libs - Wakelock null fix android
+
 ## 1.1.28
 
 - fix: Reply already submitted error on native android when fetching location
