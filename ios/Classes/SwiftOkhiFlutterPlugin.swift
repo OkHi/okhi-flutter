@@ -253,11 +253,20 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
     }
     
     private func handleGetCurrentLocation(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        self.flutterResult = result
-        if (okverify.isLocationPermissionGranted()) {
-            coreLocationManager.requestLocation()
+        if let location = coreLocationManager.location, abs(location.timestamp.timeIntervalSinceNow) < 60, location.horizontalAccuracy <= 50 {
+            let coords = [
+                "lat": location.coordinate.latitude,
+                "lng": location.coordinate.longitude,
+                "accuracy": location.horizontalAccuracy
+            ]
+            result(coords)
         } else {
-            result(FlutterError(code: "permission_denied", message: "location permission is not granted", details: nil))
+            self.flutterResult = result
+            if (okverify.isLocationPermissionGranted()) {
+                coreLocationManager.requestLocation()
+            } else {
+                result(FlutterError(code: "permission_denied", message: "location permission is not granted", details: nil))
+            }
         }
     }
     
