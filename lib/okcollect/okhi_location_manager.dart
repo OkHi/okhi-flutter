@@ -110,9 +110,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       _deviceInfo = await OkHi.retrieveDeviceInfo();
       _geofences = await OkHi.fetchRegisteredGeofences();
       _locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
-      if (_locationPermissionLevel != "denied") {
-        _coords = await _fetchCoords();
-      }
       if (Platform.isAndroid) {
         _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
       }
@@ -127,6 +124,9 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
             NavigationDelegate(onPageFinished: _handlePageLoaded),
           );
       });
+      if (_locationPermissionLevel != "denied") {
+        _coords = await _fetchCoords();
+      }
     } else if (widget.onError != null) {
       widget.onError!(
         OkHiException(
@@ -282,10 +282,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
 
   _handleFetchCurrentLocation() async {
     try {
-      Map<String, Object>? coords = await OkHi.getCurrentLocation();
+      _coords ??= await _fetchCoords();
       String jsString =
-          "window.receiveCurrentLocation({lat: ${coords!['lat']},lng: ${coords['lng']},accuracy: ${coords['accuracy']}})";
-      _controller?.runJavaScript(jsString);
+          "window.receiveCurrentLocation({lat: ${_coords!['lat']},lng: ${_coords!['lng']},accuracy: ${_coords!['accuracy']}})";
+      await _controller?.runJavaScript(jsString);
     } catch (e) {
       if (kDebugMode) {
         print(e);
@@ -313,7 +313,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       }
     })()
   """;
-    _controller?.runJavaScript(jsString);
+    await _controller?.runJavaScript(jsString);
   }
 
   /// This is due to an issue with the webview
