@@ -1,4 +1,4 @@
-## 1.1.30
+## 1.1.31
 
 - fix: ios address book precise flow
 
