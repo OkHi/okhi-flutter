@@ -1,5 +1,9 @@
 ## 1.1.30
 
+- fix: ios address book precise flow
+
+## 1.1.30
+
 - fix: override geolocation fix for physical devices
 
 ## 1.1.29
