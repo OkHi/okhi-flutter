@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:okhi_flutter/models/okhi_usage_type.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../okhi_flutter.dart';
 import '../models/okhi_constant.dart';
@@ -47,6 +48,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   final MethodChannel _channel = const MethodChannel('okhi_flutter');
   bool _canOpenProtectedApps = false;
   bool _androidAlwaysRequested = false;
+  bool _iOSWhenInUseRequested = false;
 
   @override
   void initState() {
@@ -239,6 +241,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   _handleMessageReceived(JavaScriptMessage jsMessage) {
     final Map<String, dynamic> data = jsonDecode(jsMessage.message);
     final String message = data["message"];
+    debugPrint(message);
     switch (message) {
       case "location_created":
       case "location_updated":
@@ -268,15 +271,27 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handleOpenAppSettings() async {
-    try {
-      bool isPermGranted = await OkHi.isBackgroundLocationPermissionGranted();
-      if (isPermGranted) {
-        await _controller?.goBack();
+    final isLocationPermissionGranted =
+        await OkHi.isLocationPermissionGranted();
+    final isBackgroundLocationPermissionGranted =
+        await OkHi.isBackgroundLocationPermissionGranted();
+    final locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
+    final isPrecise = locationAccuracyLevel == "precise";
+    final isDigitalVerification = widget.locationManagerConfiguration.usageTypes
+        .contains(UsageType.digitalVerification);
+
+    if (isDigitalVerification) {
+      if (isBackgroundLocationPermissionGranted && isPrecise) {
+        _runWebViewCallback("always");
       } else {
         await OkHi.openAppSettings();
       }
-    } catch (e) {
-      return;
+    } else {
+      if (isLocationPermissionGranted && isPrecise) {
+        _runWebViewCallback("whenInUse");
+      } else {
+        await OkHi.openAppSettings();
+      }
     }
   }
 
@@ -362,22 +377,45 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   }
 
   _handleIOSRequestLocationPermission(String level) async {
-    bool isLocationPermissionGranted = await OkHi.isLocationPermissionGranted();
-    bool isBackgroundLocationPermissionGranted =
+    final isLocationPermissionGranted =
+        await OkHi.isLocationPermissionGranted();
+    final isBackgroundLocationPermissionGranted =
         await OkHi.isBackgroundLocationPermissionGranted();
-    String locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
+    final locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
+    final isPrecise = locationAccuracyLevel == "precise";
+    final isDigitalVerification = widget.locationManagerConfiguration.usageTypes
+        .contains(UsageType.digitalVerification);
 
-    if (isBackgroundLocationPermissionGranted &&
-        locationAccuracyLevel == "precise") {
-      _runWebViewCallback("always");
-    } else if (level == "whenInUse" &&
-        isLocationPermissionGranted &&
-        locationAccuracyLevel == "precise") {
+    if (isDigitalVerification) {
+      if (isBackgroundLocationPermissionGranted && isPrecise) {
+        _runWebViewCallback("always");
+        return;
+      }
+
+      if (!isLocationPermissionGranted && !_iOSWhenInUseRequested) {
+        final result = await OkHi.requestLocationPermission();
+        _iOSWhenInUseRequested = true;
+        _runWebViewCallback(result ? "whenInUse" : "denied");
+        return;
+      }
+
+      await OkHi.openAppSettings();
+      return;
+    }
+
+    if (isLocationPermissionGranted && isPrecise) {
       _runWebViewCallback("whenInUse");
-    } else if (level == "whenInUse" && !isLocationPermissionGranted) {
-      bool result = await OkHi.requestLocationPermission();
+      return;
+    }
+
+    if (!isLocationPermissionGranted && !_iOSWhenInUseRequested) {
+      final result = await OkHi.requestLocationPermission();
+      _iOSWhenInUseRequested = true;
       _runWebViewCallback(result ? "whenInUse" : "denied");
-    } else {
+      return;
+    }
+
+    if (!isPrecise) {
       await OkHi.openAppSettings();
     }
   }
