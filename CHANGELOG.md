@@ -1,3 +1,7 @@
+## 1.1.32
+
+- fix: Remove wakelock
+
 ## 1.1.31
 
 - fix: ios address book precise flow

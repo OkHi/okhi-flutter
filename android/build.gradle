@@ -8,7 +8,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        // todo: Updated the AGP version for latest Android packaging configs
+        classpath 'com.android.tools.build:gradle:8.10.0'
     }
 }
 
@@ -40,5 +41,5 @@ android {
 
 dependencies {
     implementation 'io.okhi.android:core:1.7.39'
-    implementation 'io.okhi.android:okverify:1.9.74'
+    implementation 'io.okhi.android:okverify:1.9.75'
 }
