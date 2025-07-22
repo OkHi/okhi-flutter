@@ -46,7 +46,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   String _locationPermissionLevel = "denied";
   String _locationAccuracyLevel = "no_permission";
   final MethodChannel _channel = const MethodChannel('okhi_flutter');
-  bool _canOpenProtectedApps = false;
   bool _androidAlwaysRequested = false;
   bool _iOSWhenInUseRequested = false;
 
@@ -112,9 +111,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       _deviceInfo = await OkHi.retrieveDeviceInfo();
       _geofences = await OkHi.fetchRegisteredGeofences();
       _locationAccuracyLevel = await OkHi.getLocationAccuracyLevel();
-      if (Platform.isAndroid) {
-        _canOpenProtectedApps = await OkHi.canOpenProtectedApps();
-      }
+
       setState(() {
         _controller = WebViewController()
           ..loadRequest(Uri.parse(_locationManagerUrl))
