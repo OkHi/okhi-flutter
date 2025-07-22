@@ -207,7 +207,7 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
         "context": context,
         "config": {
           "streetView": widget.locationManagerConfiguration.withStreetView,
-          "protectedApps": _canOpenProtectedApps,
+          "protectedApps": false,
           "appBar": {
             "color": widget.locationManagerConfiguration.color,
             "visible": widget.locationManagerConfiguration.withAppBar
