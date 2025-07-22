@@ -1,3 +1,7 @@
+## 1.1.32
+
+- fix: disables protected apps route for some devices
+
 ## 1.1.31
 
 - fix: ios address book precise flow
