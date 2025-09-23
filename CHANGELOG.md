@@ -1,3 +1,7 @@
+## 1.1.33
+
+- fix: location permission when launching okcollect when app isn't in foreground
+
 ## 1.1.32
 
 - fix: disables protected apps route for some devices
