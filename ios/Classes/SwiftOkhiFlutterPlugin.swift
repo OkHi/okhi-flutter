@@ -113,7 +113,7 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
     
     private func handleFetchLocationPermissionStatus(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         var status = fetchLocationPermissionStatus(status: getLocationAuthorizationStatus(manager: CLLocationManager()))
-        status = status == "notDetermined" ? "notDetermined" : status == "authorizedWhenInUse" ? "whenInuse" : status == "authorizedAlways" ? "always" : "denied"
+        status = status == "notDetermined" ? "notDetermined" : status == "authorizedWhenInUse" ? "whenInUse" : status == "authorizedAlways" ? "always" : "denied"
         result(status)
     }
     
