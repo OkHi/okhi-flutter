@@ -1,3 +1,7 @@
+## 1.1.34
+
+- fix: Reply already submitted exception on android when fetching user's location
+
 ## 1.1.33
 
 - fix: location permission when launching okcollect when app isn't in foreground
