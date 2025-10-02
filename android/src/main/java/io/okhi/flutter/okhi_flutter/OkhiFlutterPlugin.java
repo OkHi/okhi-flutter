@@ -409,6 +409,7 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     }
 
     if (OkHi.isLocationPermissionGranted(context)) {
+      isFetchingLocation = true;
       OkHiLocationService.getCurrentLocation(context, new OkHiRequestHandler<Location>() {
         @Override
         public void onResult(Location location) {
