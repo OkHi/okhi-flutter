@@ -1,3 +1,8 @@
+## 1.1.35
+
+- fix: Android 16KB page size compatibility
+- fix: In progress verification addresses syncing
+
 ## 1.1.34
 
 - fix: Reply already submitted exception on android when fetching user's location
