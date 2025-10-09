@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath 'com.android.tools.build:gradle:8.8.1'
     }
 }
 
@@ -34,11 +34,11 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
     }
 }
 
 dependencies {
-    implementation 'io.okhi.android:core:1.7.39'
-    implementation 'io.okhi.android:okverify:1.9.74'
+    implementation 'io.okhi.android:core:1.7.40'
+    implementation 'io.okhi.android:okverify:1.9.80'
 }

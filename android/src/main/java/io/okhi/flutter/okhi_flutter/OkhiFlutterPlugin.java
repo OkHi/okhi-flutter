@@ -134,6 +134,9 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       case "startForegroundService":
         handleStartForegroundService(call, result);
         break;
+      case "syncVerificationAddresses":
+        handleSyncVerificationAddresses(call, result);
+        break;
       case "stopForegroundService":
         handleStopForegroundService(call, result);
         break;
@@ -383,6 +386,27 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
       result.success(true);
     } catch (OkHiException e) {
       result.error(e.getCode(), e.getMessage(), null);
+    }
+  }
+
+  private void handleSyncVerificationAddresses(MethodCall call, Result result) {
+    try {
+      if (okVerify == null) {
+        result.error("unauthorized", "OkVerify not initialized", null);
+        return;
+      }
+      String phone = call.argument("phoneNumber");
+      String userId = call.argument("userId");
+      String userEmail = call.argument("email");
+      String userFirstName = call.argument("firstName");
+      String userLastName = call.argument("lastName");
+      String token = call.argument("token");
+      OkHiUser user = new OkHiUser.Builder(phone).withOkHiUserId(userId).withToken(token).withEmail(userEmail).withFirstName(userFirstName).withLastName(userLastName).build();
+      okVerify.syncOngoingAddressVerification(context, auth, user);
+      result.success(true);
+
+    } catch (Exception e) {
+      result.error("unknown_error", "Could not fetch user addresses " + e.getMessage() , null);
     }
   }
 

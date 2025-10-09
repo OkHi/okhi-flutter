@@ -84,6 +84,10 @@ class _HomeState extends State<Home> {
                 disabled: _handleVerificationButtonDisabled(),
               ),
               FullButton(
+                title: "Sync addresses",
+                onPressed: _handleAddressSyncing,
+              ),
+              FullButton(
                 title: "Start foreground service",
                 onPressed: _handleStartForegroundService,
               ),
@@ -172,6 +176,7 @@ class _HomeState extends State<Home> {
     if (result != null) {
       setState(() {
         user = result.user;
+        print(user);
         location = result.location;
       });
     }
@@ -191,6 +196,20 @@ class _HomeState extends State<Home> {
         message = "Started verification for $result";
       });
     }
+  }
+
+  _handleAddressSyncing() async {
+    var okHiUser = OkHiUser(
+      phone: "+254712...",
+      firstName: "Granson",
+      lastName: "Oyombe",
+      email: "granson@okhi.co",
+    );
+
+    final result = await OkHi.synchronizeVerificationAddresses(okHiUser);
+    setState(() {
+      message = "Synchronized verifications: $result";
+    });
   }
 
   _handleStopVerification() async {
