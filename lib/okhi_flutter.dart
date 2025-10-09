@@ -185,7 +185,7 @@ class OkHi {
   /// * [user] An instance of OkHiUser
   /// * [location] An instance of OkHiLocation
   static Future<String> synchronizeVerificationAddresses(OkHiUser user) async {
-    if (user.phone == null || user.email == null) {
+    if (user.email == null) {
       throw OkHiException(
         code: OkHiException.badRequestCode,
         message:

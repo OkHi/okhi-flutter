@@ -63,8 +63,10 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
       );
     }
     return PopScope(
-      onPopInvoked: (didPop) {
-        _handleWillPopScope();
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          _handleWillPopScope();
+        }
       },
       child: WebViewWidget(controller: _controller!),
     );
