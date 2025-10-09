@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:okhi_flutter/models/okhi_usage_type.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
-void mainSample() {
+void main() {
   runApp(MyApp());
 }
 
