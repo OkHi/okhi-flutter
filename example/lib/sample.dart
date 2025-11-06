@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
     final config = OkHiAppConfiguration(
       branchId: "<my_branch_id>",
       clientKey: "<my_client_key_id>",
-      env: OkHiEnv.prod,
+      env: OkHiEnv.sandbox,
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
         text: "Verifying your address",
@@ -33,8 +33,8 @@ class _MyAppState extends State<MyApp> {
 
     final okHiUser = OkHiUser(
       phone: "+2547...",
-      firstName: "Granson",
-      lastName: "Oyombe",
+      firstName: "John",
+      lastName: "Doe",
       appUserId: "abcd1234",
       email: "abcd@okhi.co",
     );

@@ -139,7 +139,7 @@ class OkHi {
       "environment": configuration.environmentRawValue,
       "notification": configuration.notification.toMap(),
 
-      // Optional arguments for addresses auto-sync
+      // Optional arguments for addresses auto-syncing
       "phoneNumber": okHiUser?.phone,
       "userId": okHiUser?.id,
       "token": okHiUser?.token,

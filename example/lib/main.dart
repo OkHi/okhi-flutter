@@ -73,10 +73,10 @@ class _MyAppState extends State<MyApp> {
   OkHiUser _createOkHiUser() {
     return OkHiUser(
       phone: "+25471...",
-      firstName: "granson",
-      lastName: "oyombe",
+      firstName: "John",
+      lastName: "Doe",
       appUserId: "abcd1234",
-      email: "abcd@okhi.co",
+      email: "john@okhi.co",
     );
   }
 
