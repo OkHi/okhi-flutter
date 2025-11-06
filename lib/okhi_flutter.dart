@@ -128,18 +128,28 @@ class OkHi {
 
   ///  Initializes the library with provided API Keys and optional notification configuration.
   ///  * [configuration] An instance of OkHiAppConfiguration
-  static Future<bool> initialize(OkHiAppConfiguration configuration) async {
+  ///  * [okHiUser] An instance of OkHiUser, nullable
+  static Future<bool> initialize(
+      OkHiAppConfiguration configuration, OkHiUser? okHiUser) async {
     _configuration = configuration;
+
     final credentials = {
       "branchId": configuration.branchId,
       "clientKey": configuration.clientKey,
       "environment": configuration.environmentRawValue,
       "notification": configuration.notification.toMap(),
+
+      // Optional arguments for addresses auto-sync
+      "phoneNumber": okHiUser?.phone,
+      "userId": okHiUser?.id,
+      "token": okHiUser?.token,
+      "email": okHiUser?.email,
+      "firstname": okHiUser?.firstName,
+      "lastname": okHiUser?.lastName
     };
-    final initState = await _channel.invokeMethod(
-      OkHiNativeMethod.initialize,
-      credentials,
-    );
+
+    final initState =
+        await _channel.invokeMethod(OkHiNativeMethod.initialize, credentials);
     if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
         Platform.isIOS) {
       await _channel.invokeMethod(OkHiNativeMethod.onStart);
@@ -179,29 +189,6 @@ class OkHi {
       "usageTypes": location.usageTypes,
       "withForegroundService": config.withForegroundService,
     });
-  }
-
-  /// Stops verification for a particular address.
-  /// * [user] An instance of OkHiUser
-  /// * [location] An instance of OkHiLocation
-  static Future<String> synchronizeVerificationAddresses(OkHiUser user) async {
-    if (user.email == null) {
-      throw OkHiException(
-        code: OkHiException.badRequestCode,
-        message:
-            "Invalid OkHiUser arguments provided for syncing addresses, email and phone are required",
-      );
-    } else {
-      return await _channel
-          .invokeMethod(OkHiNativeMethod.syncVerificationAddresses, {
-        "phoneNumber": user.phone,
-        "userId": user.id,
-        "token": user.token,
-        "email": user.email,
-        "firstname": user.firstName,
-        "lastname": user.lastName,
-      });
-    }
   }
 
   /// Stops verification for a particular address.

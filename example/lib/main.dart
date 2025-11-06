@@ -29,7 +29,9 @@ class _MyAppState extends State<MyApp> {
         channelDescription: "Verification alerts",
       ),
     );
-    OkHi.initialize(config).then((value) => print("init done"));
+
+    final user = _createOkHiUser();
+    OkHi.initialize(config, user).then((value) => print("init done"));
   }
 
   @override
@@ -70,11 +72,11 @@ class _MyAppState extends State<MyApp> {
 
   OkHiUser _createOkHiUser() {
     return OkHiUser(
-      phone: "+2547..",
-      firstName: "John",
-      lastName: "Doe",
+      phone: "+25471...",
+      firstName: "granson",
+      lastName: "oyombe",
       appUserId: "abcd1234",
-      email: "john@okhi.co",
+      email: "abcd@okhi.co",
     );
   }
 

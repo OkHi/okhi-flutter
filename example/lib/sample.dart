@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
     final config = OkHiAppConfiguration(
       branchId: "<my_branch_id>",
       clientKey: "<my_client_key_id>",
-      env: OkHiEnv.sandbox,
+      env: OkHiEnv.prod,
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
         text: "Verifying your address",
@@ -30,7 +30,16 @@ class _MyAppState extends State<MyApp> {
         channelDescription: "Verification alerts",
       ),
     );
-    OkHi.initialize(config).then((result) {
+
+    final okHiUser = OkHiUser(
+      phone: "+2547...",
+      firstName: "Granson",
+      lastName: "Oyombe",
+      appUserId: "abcd1234",
+      email: "abcd@okhi.co",
+    );
+
+    OkHi.initialize(config, okHiUser).then((result) {
       if (kDebugMode) {
         print(">>>>>>: $result");
       }
