@@ -30,7 +30,6 @@ import io.flutter.plugin.common.PluginRegistry;
 import io.okhi.android_core.OkHi;
 import io.okhi.android_core.interfaces.OkHiRequestHandler;
 import io.okhi.android_core.models.OkCollectSuccessResponse;
-import io.okhi.android_core.models.OkHiAppContext;
 import io.okhi.android_core.models.OkHiAuth;
 import io.okhi.android_core.models.OkHiException;
 import io.okhi.android_core.models.OkHiLocation;
@@ -41,6 +40,7 @@ import io.okhi.android_core.models.OkPreference;
 import io.okhi.android_okverify.OkVerify;
 import io.okhi.android_okverify.interfaces.OkVerifyCallback;
 import io.okhi.android_okverify.models.OkHiNotification;
+import io.okhi.android_okverify.models.OkVerifyInitConfig;
 
 /** OkhiFlutterPlugin */
 public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -311,7 +311,21 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
         String channelId = notification != null && notification.containsKey("channelId") ? (String) notification.get("channelId") : "okhi";
         String channelName = notification != null && notification.containsKey("channelName") ? (String) notification.get("channelName") : "OkHi";
         String channelDescription = notification != null && notification.containsKey("channelDescription") ? (String) notification.get("channelDescription") : "Address verification alerts";
-        OkVerify.init(context, new OkHiNotification(title, text, channelId, channelName, channelDescription, importance));
+
+        if(call.argument("email") != null){
+          String phone = call.argument("phoneNumber");
+          String userId = call.argument("userId");
+          String userEmail = call.argument("email");
+          String userFirstName = call.argument("firstName");
+          String userLastName = call.argument("lastName");
+          String token = call.argument("token");
+          String appUserId = call.argument("appUserId");
+          OkHiUser user = new OkHiUser.Builder(phone).withOkHiUserId(userId).withToken(token).withEmail(userEmail).withFirstName(userFirstName).withLastName(userLastName).withAppUserId(appUserId).build();
+          OkVerifyInitConfig config = new OkVerifyInitConfig(auth, user);
+          OkVerify.init(activity, new OkHiNotification(title, text, channelId, channelName, channelDescription, importance), config);
+        } else {
+          OkVerify.init(activity, new OkHiNotification(title, text, channelId, channelName, channelDescription, importance));
+        }
         result.success(true);
       }
     } catch (Exception e) {

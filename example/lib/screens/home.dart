@@ -172,6 +172,7 @@ class _HomeState extends State<Home> {
     if (result != null) {
       setState(() {
         user = result.user;
+        print(user);
         location = result.location;
       });
     }
