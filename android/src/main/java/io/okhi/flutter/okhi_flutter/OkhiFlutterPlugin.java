@@ -319,7 +319,8 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
           String userFirstName = call.argument("firstName");
           String userLastName = call.argument("lastName");
           String token = call.argument("token");
-          OkHiUser user = new OkHiUser.Builder(phone).withOkHiUserId(userId).withToken(token).withEmail(userEmail).withFirstName(userFirstName).withLastName(userLastName).build();
+          String appUserId = call.argument("appUserId");
+          OkHiUser user = new OkHiUser.Builder(phone).withOkHiUserId(userId).withToken(token).withEmail(userEmail).withFirstName(userFirstName).withLastName(userLastName).withAppUserId(appUserId).build();
           OkVerifyInitConfig config = new OkVerifyInitConfig(auth, user);
           OkVerify.init(activity, new OkHiNotification(title, text, channelId, channelName, channelDescription, importance), config);
         } else {
