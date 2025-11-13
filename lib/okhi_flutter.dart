@@ -145,7 +145,8 @@ class OkHi {
       "token": okHiUser?.token,
       "email": okHiUser?.email,
       "firstname": okHiUser?.firstName,
-      "lastname": okHiUser?.lastName
+      "lastname": okHiUser?.lastName,
+      "appUserId": okHiUser?.appUserId
     };
 
     final initState =
