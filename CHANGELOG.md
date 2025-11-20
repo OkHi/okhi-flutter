@@ -1,4 +1,4 @@
-## 1.1.35
+## 1.1.36
 
 - fix: Android 16KB page size compatibility
 - fix: In progress verification addresses syncing

@@ -115,8 +115,8 @@ class _HomeState extends State<Home> {
 
   _handleLogin() async {
     final config = OkHiAppConfiguration(
-      branchId: "bWpVwm65jy",
-      clientKey: "3db1617f-b25b-4a80-8165-8077b4d1ea44",
+      branchId: "",
+      clientKey: "",
       env: OkHiEnv.sandbox,
       notification: OkHiAndroidNotification(
         title: "Verification in progress",
