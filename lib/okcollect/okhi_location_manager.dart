@@ -240,7 +240,6 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
   _handleMessageReceived(JavaScriptMessage jsMessage) {
     final Map<String, dynamic> data = jsonDecode(jsMessage.message);
     final String message = data["message"];
-    debugPrint(message);
     switch (message) {
       case "location_created":
       case "location_updated":
