@@ -133,6 +133,10 @@ class OkHi {
       OkHiAppConfiguration configuration, OkHiUser? okHiUser) async {
     _configuration = configuration;
 
+    if (okHiUser == null) {
+      debugPrint(
+          '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com');
+    }
     final credentials = {
       "branchId": configuration.branchId,
       "clientKey": configuration.clientKey,
