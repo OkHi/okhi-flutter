@@ -312,7 +312,7 @@ public class OkhiFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
         String channelName = notification != null && notification.containsKey("channelName") ? (String) notification.get("channelName") : "OkHi";
         String channelDescription = notification != null && notification.containsKey("channelDescription") ? (String) notification.get("channelDescription") : "Address verification alerts";
 
-        if(call.argument("email") != null){
+        if(call.argument("phoneNumber") != null){
           String phone = call.argument("phoneNumber");
           String userId = call.argument("userId");
           String userEmail = call.argument("email");
