@@ -30,7 +30,16 @@ class _MyAppState extends State<MyApp> {
         channelDescription: "Verification alerts",
       ),
     );
-    OkHi.initialize(config).then((result) {
+
+    final okHiUser = OkHiUser(
+      phone: "+2547...",
+      firstName: "John",
+      lastName: "Doe",
+      appUserId: "abcd1234",
+      email: "abcd@okhi.co",
+    );
+
+    OkHi.initialize(config, okHiUser).then((result) {
       if (kDebugMode) {
         print(">>>>>>: $result");
       }

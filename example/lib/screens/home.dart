@@ -13,7 +13,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String message = "";
-  OkHiUser? user;
+  OkHiUser okHiUser = OkHiUser(
+    phone: "+2547..",
+    firstName: "Jane",
+    lastName: "Doe",
+    appUserId: "abcd1234",
+    email: "abcd@okhi.co",
+  );
   OkHiLocation? location;
 
   @override
@@ -29,6 +35,10 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              FullButton(
+                title: "Login",
+                onPressed: _handleLogin,
+              ),
               FullButton(
                 title: "Platform version",
                 onPressed: _handlePlatformVersion,
@@ -103,6 +113,27 @@ class _HomeState extends State<Home> {
     );
   }
 
+  _handleLogin() async {
+    final config = OkHiAppConfiguration(
+      branchId: "",
+      clientKey: "",
+      env: OkHiEnv.sandbox,
+      notification: OkHiAndroidNotification(
+        title: "Verification in progress",
+        text: "Verifying your address",
+        channelId: "okhi",
+        channelName: "OkHi",
+        channelDescription: "Verification alerts",
+      ),
+    );
+
+    OkHi.initialize(config, okHiUser).then((result) {
+      print(">>>>>>: $result");
+    }).onError((error, stackTrace) {
+      print(error);
+    });
+  }
+
   _handlePlatformVersion() async {
     final result = await OkHi.platformVersion;
     setState(() {
@@ -167,26 +198,34 @@ class _HomeState extends State<Home> {
   }
 
   _handleCreateAnAddress(BuildContext context) async {
-    final result = await Navigator.push<OkHiLocationManagerResponse>(context,
-        MaterialPageRoute(builder: (context) => const CreateAddress()));
+    final result = await Navigator.push<OkHiLocationManagerResponse>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateAddress(
+          user: okHiUser,
+        ),
+      ),
+    );
     if (result != null) {
       setState(() {
-        user = result.user;
+        okHiUser = result.user;
         location = result.location;
+        print(result.user);
+        print(result.location);
       });
     }
   }
 
   _handleVerificationButtonDisabled() {
-    if (user == null || location == null) {
+    if (location == null) {
       return true;
     }
     return false;
   }
 
   _handleVerifyAddress() async {
-    if (user != null && location != null) {
-      final result = await OkHi.startVerification(user!, location!, null);
+    if (location != null) {
+      final result = await OkHi.startVerification(okHiUser, location!, null);
       setState(() {
         message = "Started verification for $result";
       });
@@ -194,8 +233,8 @@ class _HomeState extends State<Home> {
   }
 
   _handleStopVerification() async {
-    if (user != null && location != null) {
-      final result = await OkHi.stopVerification(user!, location!);
+    if (location != null) {
+      final result = await OkHi.stopVerification(okHiUser!, location!);
       setState(() {
         message = "Stopped verification for $result";
       });

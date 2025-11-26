@@ -29,49 +29,56 @@ class OkHi {
 
   ///  Returns the system version of the current platform
   static Future<String> get platformVersion async {
-    final String version =
-        await _channel.invokeMethod(OkHiNativeMethod.getPlatformVersion);
+    final String version = await _channel.invokeMethod(
+      OkHiNativeMethod.getPlatformVersion,
+    );
     return version;
   }
 
   /// Checks whether location services are enabled.
   static Future<bool> isLocationServicesEnabled() async {
-    final bool result =
-        await _channel.invokeMethod(OkHiNativeMethod.isLocationServicesEnabled);
+    final bool result = await _channel.invokeMethod(
+      OkHiNativeMethod.isLocationServicesEnabled,
+    );
     return result;
   }
 
   /// Checks whether when in use location permission is granted
   static Future<bool> isLocationPermissionGranted() async {
-    final bool result = await _channel
-        .invokeMethod(OkHiNativeMethod.isLocationPermissionGranted);
+    final bool result = await _channel.invokeMethod(
+      OkHiNativeMethod.isLocationPermissionGranted,
+    );
     return result;
   }
 
   /// Checks whether background location permission is granted.
   static Future<bool> isBackgroundLocationPermissionGranted() async {
-    final bool result = await _channel
-        .invokeMethod(OkHiNativeMethod.isBackgroundLocationPermissionGranted);
+    final bool result = await _channel.invokeMethod(
+      OkHiNativeMethod.isBackgroundLocationPermissionGranted,
+    );
     return result;
   }
 
   /// Android Only - Checks if Google Play Services is available.
   static Future<bool> isGooglePlayServicesAvailable() async {
     if (Platform.isAndroid) {
-      final bool result = await _channel
-          .invokeMethod(OkHiNativeMethod.isGooglePlayServicesAvailable);
+      final bool result = await _channel.invokeMethod(
+        OkHiNativeMethod.isGooglePlayServicesAvailable,
+      );
       return result;
     } else {
       throw OkHiException(
-          code: OkHiException.unsupportedPlatformCode,
-          message: OkHiException.unsupportedPlatformMessage);
+        code: OkHiException.unsupportedPlatformCode,
+        message: OkHiException.unsupportedPlatformMessage,
+      );
     }
   }
 
   /// Requests for when in use location permission.
   static Future<bool> requestLocationPermission() async {
-    final bool result =
-        await _channel.invokeMethod(OkHiNativeMethod.requestLocationPermission);
+    final bool result = await _channel.invokeMethod(
+      OkHiNativeMethod.requestLocationPermission,
+    );
     return result;
   }
 
@@ -83,16 +90,18 @@ class OkHi {
         return false;
       }
     }
-    final bool result = await _channel
-        .invokeMethod(OkHiNativeMethod.requestBackgroundLocationPermission);
+    final bool result = await _channel.invokeMethod(
+      OkHiNativeMethod.requestBackgroundLocationPermission,
+    );
     return result;
   }
 
   /// Requests the user to enable location services by showing an in app modal on android and opening location settings on iOS.
   static Future<bool> requestEnableLocationServices() async {
     if (Platform.isAndroid) {
-      final bool result = await _channel
-          .invokeMethod(OkHiNativeMethod.requestEnableLocationServices);
+      final bool result = await _channel.invokeMethod(
+        OkHiNativeMethod.requestEnableLocationServices,
+      );
       return result;
     } else {
       throw OkHiException(
@@ -105,8 +114,9 @@ class OkHi {
   /// Android Only - Requests user to enable Google Play Services.
   static Future<bool> requestEnableGooglePlayServices() async {
     if (Platform.isAndroid) {
-      final bool result = await _channel
-          .invokeMethod(OkHiNativeMethod.requestEnableGooglePlayServices);
+      final bool result = await _channel.invokeMethod(
+        OkHiNativeMethod.requestEnableGooglePlayServices,
+      );
       return result;
     } else {
       throw OkHiException(
@@ -118,14 +128,31 @@ class OkHi {
 
   ///  Initializes the library with provided API Keys and optional notification configuration.
   ///  * [configuration] An instance of OkHiAppConfiguration
-  static Future<bool> initialize(OkHiAppConfiguration configuration) async {
+  ///  * [okHiUser] An instance of OkHiUser, nullable
+  static Future<bool> initialize(
+      OkHiAppConfiguration configuration, OkHiUser? okHiUser) async {
     _configuration = configuration;
+
+    if (okHiUser == null) {
+      debugPrint(
+          '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com');
+    }
     final credentials = {
       "branchId": configuration.branchId,
       "clientKey": configuration.clientKey,
       "environment": configuration.environmentRawValue,
-      "notification": configuration.notification.toMap()
+      "notification": configuration.notification.toMap(),
+
+      // Optional arguments for addresses auto-syncing
+      "phoneNumber": okHiUser?.phone,
+      "userId": okHiUser?.id,
+      "token": okHiUser?.token,
+      "email": okHiUser?.email,
+      "firstName": okHiUser?.firstName,
+      "lastName": okHiUser?.lastName,
+      "appUserId": okHiUser?.appUserId
     };
+
     final initState =
         await _channel.invokeMethod(OkHiNativeMethod.initialize, credentials);
     if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
@@ -144,8 +171,11 @@ class OkHi {
   /// * [user] An instance of OkHiUser
   /// * [location] An instance of OkHiLocation
   /// * [configuration] Optional Configures how verification will start on different platforms
-  static Future<String> startVerification(OkHiUser user, OkHiLocation location,
-      OkHiVerificationConfiguration? configuration) async {
+  static Future<String> startVerification(
+    OkHiUser user,
+    OkHiLocation location,
+    OkHiVerificationConfiguration? configuration,
+  ) async {
     if (location.id == null || location.lat == null || location.lon == null) {
       throw OkHiException(
         code: OkHiException.badRequestCode,
@@ -170,7 +200,9 @@ class OkHi {
   /// * [user] An instance of OkHiUser
   /// * [location] An instance of OkHiLocation
   static Future<String> stopVerification(
-      OkHiUser user, OkHiLocation location) async {
+    OkHiUser user,
+    OkHiLocation location,
+  ) async {
     if (location.id == null) {
       throw OkHiException(
         code: OkHiException.badRequestCode,
@@ -186,8 +218,9 @@ class OkHi {
 
   /// Android Only - Checks if the foreground service is running.
   static Future<bool> isForegroundServiceRunning() async {
-    return await _channel
-        .invokeMethod(OkHiNativeMethod.isForegroundServiceRunning);
+    return await _channel.invokeMethod(
+      OkHiNativeMethod.isForegroundServiceRunning,
+    );
   }
 
   /// Android Only - Starts a foreground service that speeds up rate of verification.
@@ -248,13 +281,15 @@ class OkHi {
   }
 
   static Future<String> fetchLocationPermissionStatus() async {
-    return await _channel
-        .invokeMethod(OkHiNativeMethod.fetchLocationPermissionStatus);
+    return await _channel.invokeMethod(
+      OkHiNativeMethod.fetchLocationPermissionStatus,
+    );
   }
 
   static Future<List<dynamic>> fetchRegisteredGeofences() async {
-    final geofences =
-        await _channel.invokeMethod(OkHiNativeMethod.fetchRegisteredGeofences);
+    final geofences = await _channel.invokeMethod(
+      OkHiNativeMethod.fetchRegisteredGeofences,
+    );
     if (geofences != null) {
       return jsonDecode(geofences);
     }
@@ -266,13 +301,15 @@ class OkHi {
   }
 
   static Future<Map<String, Object>?> getCurrentLocation() async {
-    final Map<String, Object>? coords =
-        await _channel.invokeMapMethod(OkHiNativeMethod.getCurrentLocation);
+    final Map<String, Object>? coords = await _channel.invokeMapMethod(
+      OkHiNativeMethod.getCurrentLocation,
+    );
     return coords;
   }
 
   static Future<String> getLocationAccuracyLevel() async {
-    return await _channel
-        .invokeMethod(OkHiNativeMethod.getLocationAccuracyLevel);
+    return await _channel.invokeMethod(
+      OkHiNativeMethod.getLocationAccuracyLevel,
+    );
   }
 }

@@ -5,7 +5,9 @@ import 'package:okhi_flutter/okhi_flutter.dart';
 import 'package:okhi_flutter_example/widgets/full_button.dart';
 
 class CreateAddress extends StatelessWidget {
-  const CreateAddress({Key? key}) : super(key: key);
+  final OkHiUser user;
+
+  const CreateAddress({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +20,7 @@ class CreateAddress extends StatelessWidget {
           children: [
             Expanded(
               child: OkHiLocationManager(
-                user: OkHiUser(
-                  phone: "+254712000000",
-                  email: "granson@okhi.co",
-                ),
+                user: user,
                 configuration: OkHiLocationManagerConfiguration(
                   usageTypes: [UsageType.digitalVerification],
                 ),
