@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
-import 'package:okhi_flutter_example/screens/create_address.dart';
 import '../widgets/full_button.dart';
 import '../widgets/message_box.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   _HomeState createState() => _HomeState();
@@ -13,21 +12,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String message = "";
-  OkHiUser okHiUser = OkHiUser(
-    phone: "+2547..",
-    firstName: "Jane",
-    lastName: "Doe",
-    appUserId: "abcd1234",
-    email: "abcd@okhi.co",
-  );
+  OkHiUser? user;
   OkHiLocation? location;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("OkHi"),
-      ),
+      appBar: AppBar(title: const Text("OkHi")),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -35,10 +26,6 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              FullButton(
-                title: "Login",
-                onPressed: _handleLogin,
-              ),
               FullButton(
                 title: "Platform version",
                 onPressed: _handlePlatformVersion,
@@ -76,62 +63,35 @@ class _HomeState extends State<Home> {
                 onPressed: _handleGetLocationAccuracyLevel,
               ),
               FullButton(
+                title: "Create a digital address",
+                onPressed: () async {
+                  OkHi.startDigitalAddressVerification();
+                },
+              ),
+              FullButton(
+                title: "Create a physical address",
+                onPressed: () async {
+                  OkHi.startPhysicalAddressVerification();
+                },
+              ),
+              FullButton(
+                title: "Create a digital & physical address",
+                onPressed: () async {
+                  OkHi.startDigitalAndPhysicalAddressVerification();
+                },
+              ),
+              FullButton(
                 title: "Create an address",
-                onPressed: () {
-                  _handleCreateAnAddress(context);
+                onPressed: () async {
+                  OkHi.createAddress();
                 },
               ),
-              FullButton(
-                title: "Verify address",
-                onPressed: () {
-                  _handleVerifyAddress();
-                },
-                disabled: _handleVerificationButtonDisabled(),
-              ),
-              FullButton(
-                title: "Stop address verification",
-                onPressed: _handleStopVerification,
-                disabled: _handleVerificationButtonDisabled(),
-              ),
-              FullButton(
-                title: "Start foreground service",
-                onPressed: _handleStartForegroundService,
-              ),
-              FullButton(
-                title: "Stop foreground service",
-                onPressed: _handleStopForegroundService,
-              ),
-              FullButton(
-                title: "Is service running",
-                onPressed: _handleCheckForegroundService,
-              ),
-              MessageBox(message: message)
+              MessageBox(message: message),
             ],
           ),
         ),
       ),
     );
-  }
-
-  _handleLogin() async {
-    final config = OkHiAppConfiguration(
-      branchId: "",
-      clientKey: "",
-      env: OkHiEnv.sandbox,
-      notification: OkHiAndroidNotification(
-        title: "Verification in progress",
-        text: "Verifying your address",
-        channelId: "okhi",
-        channelName: "OkHi",
-        channelDescription: "Verification alerts",
-      ),
-    );
-
-    OkHi.initialize(config, okHiUser).then((result) {
-      print(">>>>>>: $result");
-    }).onError((error, stackTrace) {
-      print(error);
-    });
   }
 
   _handlePlatformVersion() async {
@@ -194,71 +154,6 @@ class _HomeState extends State<Home> {
     final result = await OkHi.getLocationAccuracyLevel();
     setState(() {
       message = result.toString();
-    });
-  }
-
-  _handleCreateAnAddress(BuildContext context) async {
-    final result = await Navigator.push<OkHiLocationManagerResponse>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateAddress(
-          user: okHiUser,
-        ),
-      ),
-    );
-    if (result != null) {
-      setState(() {
-        okHiUser = result.user;
-        location = result.location;
-        print(result.user);
-        print(result.location);
-      });
-    }
-  }
-
-  _handleVerificationButtonDisabled() {
-    if (location == null) {
-      return true;
-    }
-    return false;
-  }
-
-  _handleVerifyAddress() async {
-    if (location != null) {
-      final result = await OkHi.startVerification(okHiUser, location!, null);
-      setState(() {
-        message = "Started verification for $result";
-      });
-    }
-  }
-
-  _handleStopVerification() async {
-    if (location != null) {
-      final result = await OkHi.stopVerification(okHiUser!, location!);
-      setState(() {
-        message = "Stopped verification for $result";
-      });
-    }
-  }
-
-  _handleStartForegroundService() async {
-    final result = await OkHi.startForegroundService();
-    setState(() {
-      message = "Foreground service start: $result";
-    });
-  }
-
-  _handleStopForegroundService() async {
-    final result = await OkHi.stopForegroundService();
-    setState(() {
-      message = "Foreground service stop: $result";
-    });
-  }
-
-  _handleCheckForegroundService() async {
-    final result = await OkHi.isForegroundServiceRunning();
-    setState(() {
-      message = "Foreground service is running: $result";
     });
   }
 }

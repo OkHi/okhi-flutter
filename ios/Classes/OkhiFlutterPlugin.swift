@@ -3,29 +3,50 @@ import UIKit
 import OkHi
 import CoreLocation
 
-public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
+public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
     private enum LocationPermissionRequestType: String {
         case whenInUse = "whenInUse"
         case always = "always"
     }
-    private var flutterResult: FlutterResult?
     private var locationPermissionRequestType: LocationPermissionRequestType = .always
     private let okverify: OkVerify
     private let coreLocationManager: CLLocationManager
+
+    private var verificationSuccessResult: ((Any) -> Void)?
+    private var verificationErrorResult: ((FlutterError) -> Void)?
+
+    private func topViewController() -> UIViewController? {
+        let keyWindow = UIApplication.shared.windows.first { $0.isKeyWindow }
+        var topController = keyWindow?.rootViewController
+        while let presentedViewController = topController?.presentedViewController {
+            topController = presentedViewController
+        }
+        if let navigationController = topController as? UINavigationController {
+            return navigationController.visibleViewController
+        }
+        if let tabController = topController as? UITabBarController {
+            return tabController.selectedViewController
+        }
+        return topController
+    }
+
     public override init() {
-        okverify = OkVerify()
         coreLocationManager = CLLocationManager()
         coreLocationManager.desiredAccuracy = kCLLocationAccuracyBest
+        if #available(iOS 9.0, *) {
+            coreLocationManager.allowsBackgroundLocationUpdates = true
+        }
+        okverify = OkVerify()
         super.init()
         coreLocationManager.delegate = self
     }
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "okhi_flutter", binaryMessenger: registrar.messenger())
-        let instance = SwiftOkhiFlutterPlugin()
+        let instance = OkhiFlutterPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch (call.method) {
         case "getPlatformVersion":
@@ -55,8 +76,17 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
         case "initialize":
             handleInitialize(call, result)
             break
-        case "startVerification":
-            handleStartVerification(call, result)
+        case "startDigitalAddressVerification":
+            handleStartDigitalVerification(call, result)
+            break
+        case "startPhysicalAddressVerification":
+            handleStartPhysicalVerification(call, result)
+            break
+        case "startDigitalAndPhysicalAddressVerification":
+            handleStartDigitalAndPhysicalVerification(call, result)
+            break
+        case "createAddress":
+            handleCreateAddress(call, result)
             break
         case "stopVerification":
             handleStopVerification(call, result)
@@ -86,17 +116,17 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
             break
         }
     }
-    
+
     private func handleGetLocationAccuracyLevel(_ call: FlutterMethodCall, _ result: FlutterResult) {
         let level = OkVerify.getLocationAccuracyLevel()
         result(level)
     }
-    
+
     private func handleOpenAppSettings(_ call: FlutterMethodCall, _ result: FlutterResult) {
         OkVerify.openAppSettings()
         result(true)
     }
-    
+
     private func handleFetchRegisteredGeofences(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         do {
             let geofences: [[String: Any]] = OkVerify.fetchRegisteredGeofences()
@@ -110,13 +140,13 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
             result(NSNull())
         }
     }
-    
+
     private func handleFetchLocationPermissionStatus(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         var status = fetchLocationPermissionStatus(status: getLocationAuthorizationStatus(manager: CLLocationManager()))
         status = status == "notDetermined" ? "notDetermined" : status == "authorizedWhenInUse" ? "whenInUse" : status == "authorizedAlways" ? "always" : "denied"
         result(status)
     }
-    
+
     private func handleRetrieveDeviceInfo(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let deviceInfoDict: NSDictionary = [
             "manufacturer": "Apple",
@@ -126,132 +156,211 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
         ]
         result(deviceInfoDict)
     }
-    
+
     private func handleOnStart(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         OkVerify.onStart { initState in
             result(initState)
         }
     }
-    
+
     private func handlePlatformVersion(_ call: FlutterMethodCall, _ result: FlutterResult) {
         result("iOS " + UIDevice.current.systemVersion)
     }
-    
+
     private func handleIsLocationServicesEnabled(_ call: FlutterMethodCall, _ result: FlutterResult) {
         result(okverify.isLocationServicesEnabled())
     }
-    
+
     private func handleIsLocationPermissionGranted(_ call: FlutterMethodCall, _ result: FlutterResult) {
         result(okverify.isLocationPermissionGranted())
     }
-    
+
     private func handleIsBackgroundLocationPermissionGranted(_ call: FlutterMethodCall, _ result: FlutterResult) {
         result(isBackgroundLocationPermissionGranted())
     }
-    
+
     private func handleRequestLocationPermission(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        okverify.delegate = self
         if okverify.isLocationPermissionGranted() {
             result(true)
             return
         }
-        self.flutterResult = result
-        okverify.delegate = self
-        okverify.requestLocationPermission()
+        self.verificationSuccessResult = { granted in
+            result(granted)
+        }
+        self.verificationErrorResult = { error in
+            result(error)
+        }
         locationPermissionRequestType = .whenInUse
+        okverify.requestLocationPermission()
     }
-    
+
     private func handleRequestBackgroundLocationPermission(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         if isBackgroundLocationPermissionGranted() {
             result(true)
             return
         }
         okverify.delegate = self
-        self.flutterResult = result
+        self.verificationSuccessResult = { granted in
+            result(granted)
+        }
+        self.verificationErrorResult = { error in
+            result(error)
+        }
         locationPermissionRequestType = .always
         okverify.requestBackgroundLocationPermission()
     }
-    
+
     private func handleGetAppIdentifier(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let bundleID = Bundle.main.bundleIdentifier
         result(bundleID ?? "")
     }
-    
+
     private func handleGetAppVersion(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
         result(appVersion ?? "")
     }
-    
+
     private func isBackgroundLocationPermissionGranted() -> Bool {
+        okverify.delegate = self
         if okverify.isLocationServicesEnabled() {
             return CLLocationManager.authorizationStatus() == .authorizedAlways
         } else {
             return false
         }
     }
-    
+
     private func handleInitialize(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+
+        print("OkHi Initialized got here")
+
         let arguments = call.arguments as? [String: Any] ?? [String: Any]()
         let branchId = arguments["branchId"] as? String
         let clientKey = arguments["clientKey"] as? String
         let envRaw = arguments["environment"] as? String ?? "sandbox"
-        self.flutterResult = result
-        if let branchId = branchId, let clientKey = clientKey {
-            okverify.delegate = self
-            okverify.initialize(branchId: branchId, clientKey: clientKey, environment: envRaw)
-        } else {
-            result(FlutterError(code: "unauthorized", message: "invalid initialization credentials provided", details: nil))
-            print("init failed")
-        }
-    }
-    
-    private func handleStartVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments = call.arguments as? [String: Any] ?? [:]
-        
+
         let phoneNumber = arguments["phoneNumber"] as? String
+        let firstName = arguments["firstname"] as? String
+        let lastName = arguments["lastname"] as? String
+        let email = arguments["email"] as? String
         let userId = arguments["userId"] as? String
         let token = arguments["token"] as? String
-        let locationId = arguments["locationId"] as? String
-        let lat = arguments["lat"] as? Double
-        let lon = arguments["lon"] as? Double
-        let usageTypes = arguments["usageTypes"] as? [String] ?? []
-        
-        let enumUsageTypes: [OkHiUsageType] = usageTypes.compactMap { usageType in
-            switch usageType {
-            case OkHiUsageType.physicalVerification.rawValue:
-                return .physicalVerification
-            case OkHiUsageType.addressBook.rawValue:
-                return .addressBook
-            default:
-                return .digitalVerification
+
+        if let branchId = branchId, let clientKey = clientKey {
+            guard let phoneNumber = phoneNumber, let userId = userId, let firstName = firstName else {
+                result(FlutterError(code: "bad_request", message: "Invalid arguments provided for verification", details: nil))
+                return
             }
+
+            let auth = OkHiAuth(
+                branchId: branchId,
+                clientKey: clientKey,
+                environment: envRaw,
+                appContext: OkHiAppContext().withAppMeta(name: "OkHi Global", version: "1.0.0", build: "1") // Verify when this is used
+            )
+
+            let user = OkHiUser(phoneNumber: phoneNumber)
+                .with(firstName: firstName)
+                .with(lastName: lastName ?? "")
+                .with(email: email ?? "")
+                .with(appUserId: userId) // Verify if this is a required field
+                .with(token: token ?? "")
+                .with(okHiId: userId)
+
+            OK.shared.login(auth: auth, user: user)
+            print("OkHi Initialized successfully on iOS platform")
+            result("OkHi Initialized successfully")
+        } else {
+            result(FlutterError(code: "unauthorized", message: "invalid initialization credentials provided", details: nil))
         }
-        
-        guard let phoneNumber = phoneNumber, let userId = userId, let token = token, let locationId = locationId, let lat = lat, let lon = lon else {
-            result(FlutterError(code: "bad_request", message: "Invalid arguments provided for verification", details: nil))
+    }
+
+    private func handleStartDigitalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let viewController = topViewController() else {
+            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
             return
         }
-        okverify.delegate = self
-        self.flutterResult = result
-        
-        let user = OkHiUser(phoneNumber: phoneNumber).with(token: token).with(okHiId: userId)
-        let location = OkHiLocation(identifier: locationId, lat: lat, lon: lon, usageTypes: enumUsageTypes)
-        let response = OkCollectSuccessResponse(user: user, location: location)
-        okverify.startAddressVerification(response: response)
+        OK.shared.startAddressVerification(vc: viewController) { response, error in
+            if let error = error {
+                result(FlutterError(code: "verification_error", message: error.message, details: nil))
+                return
+            }
+            guard let locationId = response?.location.id else {
+                result(FlutterError(code: "verification_failed", message: "Verification failed to return a location ID", details: nil))
+                return
+            }
+            print("Successfully started verification for \(locationId)")
+            result(locationId)
+        }
     }
-    
-    
+
+    private func handleStartPhysicalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let viewController = topViewController() else {
+            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
+            return
+        }
+        OK.shared.startPhysicalAddressVerification(vc: viewController) { response, error in
+            guard let locationId = response?.location.id else { return }
+            print("Successfully started verification for \(locationId)")
+            result(locationId)
+        }
+    }
+
+    private func handleStartDigitalAndPhysicalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let viewController = topViewController() else {
+            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
+            return
+        }
+        OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController) { response, error in
+            guard let locationId = response?.location.id else { return }
+            print("Successfully started verification for \(locationId)")
+            result(locationId)
+        }
+    }
+
+    private func handleCreateAddress(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let viewController = topViewController() else {
+            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
+            return
+        }
+        OK.shared.createAddress(vc: viewController) { response, error in
+            guard let locationId = response?.location.id else { return }
+            print("Successfully created address for \(locationId)")
+            result(locationId)
+        }
+    }
+
+    private func handleVerifySavedAddress(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        // let arguments = call.arguments as? [String: Any] ?? [:]
+        // let locationId = arguments["locationId"] as? String
+        // let okhiLocation: OkHiLocation = OkHiLocation(
+        //   id: locationId
+        // )
+        result("locationId")
+        // OK.shared.startAddressVerification(vc: rootViewController, location: okhiLocation) { response, error in
+        //   guard let locationId = response?.location.id else { return }
+        //   print("Successfully created address for \(locationId)")
+        //   result(locationId)
+        // }
+    }
+
     private func handleStopVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let arguments = call.arguments as? [String: Any] ?? [String: Any]()
         let locationId = arguments["locationId"] as? String
         if let locationId = locationId {
-            self.flutterResult = result
             okverify.delegate = self
+            self.verificationSuccessResult = { granted in
+                result(granted)
+            }
+            self.verificationErrorResult = { error in
+                result(error)
+            }
             okverify.stopAddressVerification(locationId: locationId)
         } else {
             result(FlutterError(code: "bad_request", message: "invalid arguments provided for stopping verification", details: nil))
         }
     }
-    
+
     private func handleGetCurrentLocation(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         if let location = coreLocationManager.location, abs(location.timestamp.timeIntervalSinceNow) < 60, location.horizontalAccuracy <= 50 {
             let coords = [
@@ -261,7 +370,13 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
             ]
             result(coords)
         } else {
-            self.flutterResult = result
+            self.verificationSuccessResult = { granted in
+                result(granted)
+            }
+            self.verificationErrorResult = { error in
+                result(error)
+            }
+
             if (okverify.isLocationPermissionGranted()) {
                 coreLocationManager.requestLocation()
             } else {
@@ -269,7 +384,7 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
             }
         }
     }
-    
+
     private func getLocationAuthorizationStatus(manager: CLLocationManager) -> CLAuthorizationStatus {
         if #available(iOS 14.0, *) {
             return manager.authorizationStatus
@@ -277,96 +392,93 @@ public class SwiftOkhiFlutterPlugin: NSObject, FlutterPlugin {
             return CLLocationManager.authorizationStatus()
         }
     }
-    
+
     private func fetchLocationPermissionStatus(status: CLAuthorizationStatus) -> String {
-            var str: String = ""
-            switch status {
-            case .notDetermined:
-                str = "notDetermined"
-            case .restricted:
-                str = "restricted"
-            case .denied:
-                str = "denied"
-            case .authorizedAlways:
-                str = "authorizedAlways"
-            case .authorizedWhenInUse:
-                str = "authorizedWhenInUse"
-            case .authorized:
-                str = "authorized"
-            @unknown default:
-                str = "unknown"
-            }
-            return str
+        var str: String = ""
+        switch status {
+        case .notDetermined:
+            str = "notDetermined"
+        case .restricted:
+            str = "restricted"
+        case .denied:
+            str = "denied"
+        case .authorizedAlways:
+            str = "authorizedAlways"
+        case .authorizedWhenInUse:
+            str = "authorizedWhenInUse"
+        case .authorized:
+            str = "authorized"
+        @unknown default:
+            str = "unknown"
         }
-    
+        return str
+    }
 }
 
-extension SwiftOkhiFlutterPlugin: OkVerifyDelegate {
+extension OkhiFlutterPlugin: OkVerifyDelegate {
     public func verify(_ okverify: OkVerify, didChangeLocationPermissionStatus requestType: OkVerifyLocationPermissionRequestType, status: Bool) {
-        if let flutterResult = flutterResult {
-            if locationPermissionRequestType == .whenInUse && requestType == .whenInUse {
-                flutterResult(status)
-            } else if locationPermissionRequestType == .always && requestType == .always {
-                flutterResult(status)
-            } else {
-                flutterResult(false)
-            }
+        if locationPermissionRequestType == .whenInUse && requestType == .whenInUse {
+            verificationSuccessResult?(status)
+        } else if locationPermissionRequestType == .always && requestType == .always {
+            verificationSuccessResult?(status)
+        } else {
+            verificationSuccessResult?(false)
         }
+        verificationSuccessResult = nil
+        verificationErrorResult = nil
     }
-    
+
     public func verify(_ okverify: OkVerify, didInitialize result: Bool) {
-        if let flutterResult = flutterResult {
-            flutterResult(result)
-        }
+        verificationSuccessResult?(result)
+        verificationSuccessResult = nil
+        verificationErrorResult = nil
     }
-    
+
     public func verify(_ okverify: OkVerify, didEncounterError error: OkVerifyError) {
-        if let flutterResult = flutterResult {
-            flutterResult(FlutterError(code: error.code, message: error.message, details: nil))
-        }
+        verificationErrorResult?(FlutterError(code: error.code, message: error.message, details: nil))
+        verificationErrorResult = nil
+        verificationSuccessResult = nil
     }
-    
+
     public func verify(_ okverify: OkVerify, didStartAddressVerificationFor locationId: String) {
-        if let flutterResult = flutterResult {
-            flutterResult(locationId)
-        }
+        verificationSuccessResult?(locationId)
+        verificationSuccessResult = nil
+        verificationErrorResult = nil
     }
-    
+
     public func verify(_ okverify: OkVerify, didStopVerificationFor locationId: String) {
-        if let flutterResult = flutterResult {
-            flutterResult(locationId)
-        }
+        verificationSuccessResult?(locationId)
+        verificationSuccessResult = nil
+        verificationErrorResult = nil
     }
-    
+
     public func verify(_ okverify: OkVerify, didUpdateLocationPermissionStatus status: CLAuthorizationStatus) {
         // TODO: handle event transmission
     }
-    
+
     public func verify(_ okverify: OkVerify, didUpdateNotificationPermissionStatus status: Bool) {
-        
+
     }
 }
 
-extension SwiftOkhiFlutterPlugin: CLLocationManagerDelegate {
+extension OkhiFlutterPlugin: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
-            if let result = self.flutterResult {
-                let coords = [
-                    "lat": location.coordinate.latitude,
-                    "lng": location.coordinate.longitude,
-                    "accuracy": location.horizontalAccuracy
-                ]
-                result(coords)
-                self.flutterResult = nil
-            }
+            let coords = [
+                "lat": location.coordinate.latitude,
+                "lng": location.coordinate.longitude,
+                "accuracy": location.horizontalAccuracy
+            ]
+            verificationSuccessResult?(coords)
+            verificationSuccessResult = nil
+            verificationErrorResult = nil
         }
     }
-    
+
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        if let result = self.flutterResult {
-            result(FlutterError(code: "unknown_error", message: "unable to obtain location", details: nil))
-            self.flutterResult = nil
-        }
+        verificationErrorResult?(FlutterError(code: "unknown_error", message: "unable to obtain location", details: nil))
+        verificationErrorResult = nil
+        verificationSuccessResult = nil
     }
 }
 

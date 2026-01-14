@@ -1,7 +1,7 @@
 /// Defines the structure of the foreground notification that will be used during verification.
 class OkHiAndroidNotification {
-  String title = "Kiano Verification in progress";
-  String text = "Kiano Your address is being verified";
+  String title = "Verification in progress";
+  String text = "Your address is being verified";
   String channelId = "okhi";
   String channelName = "OkHi";
   String channelDescription = "Address verification alerts";

@@ -19,6 +19,6 @@ class OkHiLocationManagerResponse {
 
   Future<String> startVerification(
       OkHiVerificationConfiguration? configuration) {
-    return OkHi.startVerification(user, location, configuration);
+    return OkHi.startDigitalAddressVerification();
   }
 }

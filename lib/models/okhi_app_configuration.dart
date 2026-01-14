@@ -19,6 +19,9 @@ class OkHiAppConfiguration {
     if (env == OkHiEnv.prod) {
       environmentRawValue = "prod";
     }
+    if (env == OkHiEnv.dev) {
+      environmentRawValue = "dev";
+    }
     this.notification = notification ?? OkHiAndroidNotification.withDefaults();
   }
 
