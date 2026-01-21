@@ -1,15 +1,17 @@
+import 'dart:math';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:okhi_flutter/models/okhi_app_configuration.dart';
-import 'package:okhi_flutter/models/okhi_env.dart';
-import 'package:okhi_flutter/models/okhi_location.dart';
-import 'package:okhi_flutter/models/okhi_user.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 import 'package:okhi_flutter/utils/utilities.dart';
 import 'package:okhi_flutter_example/widgets/full_button.dart';
 
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -23,20 +25,21 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   OkHiLocation? location;
   bool isUserSet = false;
-  String email = "granson@okhi.co",
-      phone = "+254712288371",
-      firstName = "Granson",
-      lastName = "Oyombe";
+  String email = "", phone = "", firstName = "", lastName = "";
 
-  String textToCopy = "";
+  String savedAddressID = "";
 
-  void copyToClipboard() {
-    Clipboard.setData(ClipboardData(text: textToCopy)).then((_) {
-      if (textToCopy != "user_closed") {
+  void copyToClipboard(String type, String addressId) {
+    Clipboard.setData(
+      ClipboardData(text: 'Verification Type:$type\n Address ID: $addressId'),
+    ).then((_) {
+      if (addressId != "user_closed") {
         scaffoldMessengerKey.currentState?.showSnackBar(
           SnackBar(
             backgroundColor: Colors.green[300],
-            content: Text('The address $textToCopy copied to the clipboard!'),
+            content: Text(
+              'Verification Type:$type\n Address ID: $addressId \n Copied to clipboard',
+            ),
           ),
         );
         return;
@@ -258,18 +261,6 @@ class _MyAppState extends State<MyApp> {
       child: Column(
         children: [
           FullButton(
-            title: "Request location permission",
-            onPressed: _handleRequestLocationPermission,
-          ),
-          FullButton(
-            title: "Request background location permission",
-            onPressed: _handleRequestBackgroundLocationPermission,
-          ),
-          FullButton(
-            title: "Enable location service",
-            onPressed: _handleRequestEnableLocationService,
-          ),
-          FullButton(
             title: "Initialize OkHi",
             onPressed: () {
               if (email.isNotEmpty &&
@@ -306,14 +297,46 @@ class _MyAppState extends State<MyApp> {
         ),
         SizedBox(height: 25),
         FullButton(
+          title: "Create address (Address book)",
+          onPressed: () async {
+            var result = await OkHi.createAddress();
+            appDebugPrint("Create address result: $result");
+            setState(() {
+              savedAddressID = result.toString();
+            });
+            copyToClipboard("Create Address", result.toString());
+          },
+        ),
+        FullButton(
+          title: "Verify address (Address book)",
+          onPressed: () async {
+            if (savedAddressID.isNotEmpty) {
+              var result = await OkHi.startSavedAddressVerification(
+                savedAddressID,
+              );
+              setState(() {
+                savedAddressID = "";
+              });
+              copyToClipboard("Verifying Address Book", result.toString());
+            } else {
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.red[300],
+                  content: const Text(
+                    'Please create an address first to proceed',
+                  ),
+                ),
+              );
+              return;
+            }
+          },
+        ),
+        FullButton(
           title: "Create a digital address",
           onPressed: () async {
             var result = await OkHi.startDigitalAddressVerification();
             appDebugPrint("Digital address result: $result");
-            setState(() {
-              textToCopy = result.toString();
-            });
-            copyToClipboard();
+            copyToClipboard("Digital", result.toString());
           },
         ),
         FullButton(
@@ -321,10 +344,7 @@ class _MyAppState extends State<MyApp> {
           onPressed: () async {
             var result = await OkHi.startPhysicalAddressVerification();
             appDebugPrint("Physical address result: $result");
-            setState(() {
-              textToCopy = result.toString();
-            });
-            copyToClipboard();
+            copyToClipboard("Physical", result.toString());
           },
         ),
         FullButton(
@@ -333,20 +353,7 @@ class _MyAppState extends State<MyApp> {
             var result =
                 await OkHi.startDigitalAndPhysicalAddressVerification();
             appDebugPrint("Digital & Physical address result: $result");
-            setState(() {
-              textToCopy = result.toString();
-            });
-          },
-        ),
-        FullButton(
-          title: "Create an address",
-          onPressed: () async {
-            var result = await OkHi.createAddress();
-            appDebugPrint("Create address result: $result");
-            setState(() {
-              textToCopy = result.toString();
-            });
-            copyToClipboard();
+            copyToClipboard("Physical & Digital", result.toString());
           },
         ),
       ],
@@ -355,18 +362,18 @@ class _MyAppState extends State<MyApp> {
 
   _handleInitializeOkHi() async {
     final config = OkHiAppConfiguration(
-      branchId: "UD3tyqVt50",
-      clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
-      env: OkHiEnv.dev,
+      branchId: "",
+      clientKey: "",
+      env: OkHiEnv.prod,
     );
 
     final okHiUser = OkHiUser(
       phone: phone,
       firstName: firstName,
       lastName: lastName,
-      appUserId: "okhiUserId_12345",
+      appUserId: "okhiId_${Random().nextInt(100000)}",
       email: email,
-      id: "23456543567",
+      id: Random().nextInt(100000000).toString(),
     );
 
     OkHi.initialize(config, okHiUser)

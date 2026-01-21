@@ -24,6 +24,8 @@ class OkHiNativeMethod {
   static const String startDigitalAndPhysicalAddressVerification =
       "startDigitalAndPhysicalAddressVerification";
   static const String createAddress = "createAddress";
+  static const String startSavedAddressVerification =
+      "startSavedAddressVerification";
 
   static const String isNotificationsEnabled = "isNotificationsEnabled";
   static const String requestEnableNotifications = "requestEnableNotifications";

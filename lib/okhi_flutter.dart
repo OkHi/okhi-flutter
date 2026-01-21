@@ -152,7 +152,8 @@ class OkHi {
 
     if (okHiUser == null) {
       debugPrint(
-          '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com');
+        '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com',
+      );
     }
 
     final credentials = {
@@ -176,11 +177,6 @@ class OkHi {
         OkHiNativeMethod.initialize,
         credentials,
       );
-
-      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
-          Platform.isIOS) {
-        await _channel.invokeMethod(OkHiNativeMethod.onStart);
-      }
     } catch (e) {
       appDebugPrint("OkHi Initialization error: $e");
       // ignore
@@ -218,6 +214,14 @@ class OkHi {
   /// Create a Digital address for a particular location.
   static Future<String> createAddress() async {
     return await _channel.invokeMethod(OkHiNativeMethod.createAddress);
+  }
+
+  /// Start verification on a saved Address.
+  static Future<String> startSavedAddressVerification(String locationId) async {
+    return await _channel.invokeMethod(
+      OkHiNativeMethod.startSavedAddressVerification,
+      {"locationId": locationId},
+    );
   }
 
   /// Android Only - Checks whether current device can open "Protected Apps Settings" available in Transsion Group android devices such as Infinix and Tecno

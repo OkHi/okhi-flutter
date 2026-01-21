@@ -23,6 +23,7 @@ import io.okhi.android.OkHi
 import io.okhi.android.collect.OkCollect
 import io.okhi.android.collect.OkCollectConfig
 import io.okhi.android.collect.OkCollectStyle
+import io.okhi.android.core.model.OkHiLocation
 import io.okhi.android.collect.models.OkHiSuccessResponse
 import io.okhi.android.core.enums.LocationAccuracyLevel
 import io.okhi.android.core.interfaces.OkHiAddressVerificationCallback
@@ -100,6 +101,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             "startPhysicalAddressVerification" -> handleStartPhysicalVerification(call, result)
             "startDigitalAndPhysicalAddressVerification" -> handleStartDigitalAndPhysicalVerification(call, result)
             "createAddress" -> handleCreateAddress(call, result)
+            "startSavedAddressVerification" -> handleStartSavedVerification(call, result)
             "canOpenProtectedApps" -> handleCanOpenProtectedApps(call, result)
             "openProtectedApps" -> handleOpenProtectedApps(call, result)
             "retrieveDeviceInfo" -> handleRetrieveDeviceInfo(call, result)
@@ -118,6 +120,44 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         OkHi.createAddress(
             activity,
             collect,
+            object : OkHiAddressVerificationCallback() {
+                override fun onSuccess(response: OkHiSuccessResponse) {
+                    Log.e("Yay!" ,"createAddress onSuccess $isReplied")
+
+                    if (isReplied) return
+                    isReplied = true
+                    result.success(response.location.id.toString())
+                }
+
+                override fun onClose() {
+                    Log.e("Yay!" ,"createAddress onClose $isReplied")
+                    if (isReplied) return
+                    isReplied = true
+                    result.success("user_closed")
+                }
+
+                override fun onError(e: OkHiException) {
+                    Log.e("Yay!" ,"createAddress onError $isReplied")
+                    if (isReplied) return
+                    isReplied = true
+                    result.error(e.code, e.message, null)
+                }
+            })
+    }
+
+    private fun handleStartSavedVerification(
+        call: MethodCall,
+        result: Result
+    ) {
+        var isReplied = false
+        val locationId: String? = call.argument("locationId")
+        val collectInstance = OkCollect(
+            location = OkHiLocation(locationId)
+        )
+
+        OkHi.startAddressVerification(
+            activity,
+            collectInstance,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
                     if (isReplied) return
