@@ -8,6 +8,7 @@ import 'package:okhi_flutter/utils/utilities.dart';
 import './models/okhi_app_configuration.dart';
 import './models/okhi_native_methods.dart';
 import './models/okhi_exception.dart';
+import 'models/OkHiEvent.dart';
 
 // models export
 export './models/okhi_app_configuration.dart';
@@ -22,8 +23,23 @@ export './models/okhi_exception.dart';
 
 /// The primary class for integrating OkHi with your app.
 class OkHi {
+  static late final StreamSubscription streamSubscription;
+  static Function(String locationId)? onVerificationSuccess;
+  static Function(OkHiException exception)? onVerificationError;
+
   static const MethodChannel _channel = MethodChannel('okhi_flutter');
+  static const EventChannel _okhiVerificationEvents = EventChannel(
+    'okhi_flutter_events',
+  );
+
   static OkHiAppConfiguration? _configuration;
+
+  static Stream<OkHiEvent> get okhiVerificationStream {
+    return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
+      final map = Map<String, dynamic>.from(event);
+      return OkHiEvent.fromMap(map);
+    });
+  }
 
   ///  Returns the system version of the current platform
   static Future<String> get platformVersion async {
@@ -171,6 +187,23 @@ class OkHi {
       "appUserId": okHiUser?.appUserId,
     };
 
+    streamSubscription = okhiVerificationStream.listen((OkHiEvent event) {
+      if (event.resultType == "success") {
+        if (event.locationId != null) {
+          onVerificationSuccess?.call(event.locationId!);
+        }
+      } else if (event.resultType == "error") {
+        onVerificationError?.call(
+          OkHiException(
+            code: event.code.toString(),
+            message: event.message.toString(),
+          ),
+        );
+      }
+      onVerificationSuccess = null;
+      onVerificationError = null;
+    });
+
     bool initState = false;
     try {
       initState = await _channel.invokeMethod(
@@ -191,33 +224,59 @@ class OkHi {
   }
 
   /// Starts Digital verification for a particular address.
-  static Future<String> startDigitalAddressVerification() async {
+  static Future<String> startDigitalAddressVerification({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
     return await _channel.invokeMethod(
       OkHiNativeMethod.startDigitalAddressVerification,
     );
   }
 
   /// Starts Physical verification for a particular address.
-  static Future<String> startPhysicalAddressVerification() async {
+  static Future<String> startPhysicalAddressVerification({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
     return await _channel.invokeMethod(
       OkHiNativeMethod.startPhysicalAddressVerification,
     );
   }
 
   /// Starts Digital And Physical verification for a particular address.
-  static Future<String> startDigitalAndPhysicalAddressVerification() async {
+  static Future<String> startDigitalAndPhysicalAddressVerification({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
     return await _channel.invokeMethod(
       OkHiNativeMethod.startDigitalAndPhysicalAddressVerification,
     );
   }
 
   /// Create a Digital address for a particular location.
-  static Future<String> createAddress() async {
+  static Future<String> createAddress({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
     return await _channel.invokeMethod(OkHiNativeMethod.createAddress);
   }
 
   /// Start verification on a saved Address.
-  static Future<String> startSavedAddressVerification(String locationId) async {
+  static Future<String> startSavedAddressVerification({
+    required String locationId,
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
     return await _channel.invokeMethod(
       OkHiNativeMethod.startSavedAddressVerification,
       {"locationId": locationId},

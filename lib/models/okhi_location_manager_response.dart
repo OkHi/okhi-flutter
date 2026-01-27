@@ -17,8 +17,10 @@ class OkHiLocationManagerResponse {
     return '{"user": ${user.toString()}, "location": ${location.toString()}}';
   }
 
-  Future<String> startVerification(
-      OkHiVerificationConfiguration? configuration) {
-    return OkHi.startDigitalAddressVerification();
-  }
+  // todo: Check if this is used anywhere else before uncommenting
+  // Future<String> startVerification(
+  //   OkHiVerificationConfiguration? configuration,
+  // ) {
+  //   return OkHi.startDigitalAddressVerification(onSuccess: (id){}, onError: (message){});
+  // }
 }

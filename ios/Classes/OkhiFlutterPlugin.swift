@@ -14,6 +14,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
 
     private var verificationSuccessResult: ((Any) -> Void)?
     private var verificationErrorResult: ((FlutterError) -> Void)?
+    private let eventHandler = OkHiEventHandler()
 
     private func topViewController() -> UIViewController? {
         let keyWindow = UIApplication.shared.windows.first { $0.isKeyWindow }
@@ -45,6 +46,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
         let channel = FlutterMethodChannel(name: "okhi_flutter", binaryMessenger: registrar.messenger())
         let instance = OkhiFlutterPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
+
+        let eventChannel = FlutterEventChannel(name: "address_verification_events", binaryMessenger: registrar.messenger())
+        eventChannel.setStreamHandler(eventHandler)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -232,8 +236,6 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
 
     private func handleInitialize(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 
-        print("OkHi Initialized got here")
-
         let arguments = call.arguments as? [String: Any] ?? [String: Any]()
         let branchId = arguments["branchId"] as? String
         let clientKey = arguments["clientKey"] as? String
@@ -331,17 +333,22 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
     }
 
     private func handleVerifySavedAddress(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        // let arguments = call.arguments as? [String: Any] ?? [:]
-        // let locationId = arguments["locationId"] as? String
-        // let okhiLocation: OkHiLocation = OkHiLocation(
-        //   id: locationId
-        // )
-        result("locationId")
-        // OK.shared.startAddressVerification(vc: rootViewController, location: okhiLocation) { response, error in
-        //   guard let locationId = response?.location.id else { return }
-        //   print("Successfully created address for \(locationId)")
-        //   result(locationId)
-        // }
+        let arguments = call.arguments as? [String: Any] ?? [:]
+        let locationId = arguments["locationId"] as? String
+        let okhiLocation: OkHiLocation = OkHiLocation(
+          id: locationId
+        )
+
+        guard let rootViewController = topViewController() else {
+            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
+            return
+        }
+
+        OK.shared.startAddressVerification(vc: rootViewController, location: okhiLocation) { response, error in
+          guard let locationId = response?.location.id else { return }
+          print("Successfully created address for \(locationId)")
+          result(locationId)
+        }
     }
 
     private func handleStopVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -412,6 +419,26 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
             str = "unknown"
         }
         return str
+    }
+
+    class EventsHandler: NSObject, FlutterStreamHandler {
+        // Handle events on the main thread.
+        private var eventSink: FlutterEventSink?
+
+        func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
+            self.eventSink = eventSink
+
+            self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { _ in
+                eventSink(time)
+            })
+
+            return nil
+        }
+
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            eventSink = nil
+            return nil
+        }
     }
 }
 
@@ -492,5 +519,39 @@ extension UIDevice {
             return identifier + String(UnicodeScalar(UInt8(value)))
         }
         return identifier
+    }
+}
+
+class OkHiEventHandler: NSObject, FlutterStreamHandler {
+
+    private var eventSink: FlutterEventSink?
+
+    func onListen(
+        withArguments arguments: Any?,
+        eventSink events: @escaping FlutterEventSink
+    ) -> FlutterError? {
+        self.eventSink = events
+        return nil
+    }
+
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.eventSink = nil
+        return nil
+    }
+}
+
+extension OkHiEventHandler {
+
+    func emit(_ data: [String: Any]) {
+        DispatchQueue.main.async {
+            self.eventSink?(data)
+        }
+    }
+
+    func close() {
+        DispatchQueue.main.async {
+            self.eventSink?(FlutterEndOfEventStream)
+            self.eventSink = nil
+        }
     }
 }

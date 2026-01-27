@@ -10,6 +10,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -18,6 +20,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.EventChannel.EventSink
 
 import io.okhi.android.OkHi
 import io.okhi.android.collect.OkCollect
@@ -42,16 +46,46 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var collect: OkCollect
     private lateinit var okHiUser: OkHiUser
     private lateinit var cachedLocation: Location
+    private var eventSink: EventChannel.EventSink? = null
     private var isFetchingLocation = false
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         context = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "okhi_flutter")
         channel.setMethodCallHandler(this)
+        setUpEventChannel(flutterPluginBinding)
+    }
+
+    fun setUpEventChannel(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        EventChannel(flutterPluginBinding.binaryMessenger, "okhi_flutter_events").setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    eventSink = events
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    eventSink = null
+                }
+            }
+        )
+    }
+
+    private fun sendEvent(data: Map<String, Any?>) {
+        Handler(Looper.getMainLooper()).post {
+            eventSink?.success(data)
+        }
+    }
+
+    private fun closeStream() {
+        Handler(Looper.getMainLooper()).post {
+            eventSink?.endOfStream()
+            eventSink = null
+        }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        closeStream()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -97,11 +131,15 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             "getAppIdentifier" -> handleGetAppIdentifier(call, result)
             "getAppVersion" -> handleGetAppVersion(call, result)
             "initialize" -> handleInitialize(call, result)
-            "startDigitalAddressVerification" -> handleStartDigitalVerification(call, result)
+
+            "startDigitalAddressVerification" -> { handleStartDigitalVerification(call, result)
+                result.success(null)
+            }
             "startPhysicalAddressVerification" -> handleStartPhysicalVerification(call, result)
             "startDigitalAndPhysicalAddressVerification" -> handleStartDigitalAndPhysicalVerification(call, result)
             "createAddress" -> handleCreateAddress(call, result)
             "startSavedAddressVerification" -> handleStartSavedVerification(call, result)
+
             "canOpenProtectedApps" -> handleCanOpenProtectedApps(call, result)
             "openProtectedApps" -> handleOpenProtectedApps(call, result)
             "retrieveDeviceInfo" -> handleRetrieveDeviceInfo(call, result)
@@ -122,25 +160,33 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    Log.e("Yay!" ,"createAddress onSuccess $isReplied")
-
-                    if (isReplied) return
-                    isReplied = true
-                    result.success(response.location.id.toString())
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "createAddress",
+                            "type" to "success",
+                            "locationId" to response.location.id
+                        )
+                    )
                 }
 
                 override fun onClose() {
-                    Log.e("Yay!" ,"createAddress onClose $isReplied")
-                    if (isReplied) return
-                    isReplied = true
-                    result.success("user_closed")
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "createAddress",
+                            "type" to "closed"
+                        )
+                    )
                 }
 
                 override fun onError(e: OkHiException) {
-                    Log.e("Yay!" ,"createAddress onError $isReplied")
-                    if (isReplied) return
-                    isReplied = true
-                    result.error(e.code, e.message, null)
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "createAddress",
+                            "type" to "error",
+                            "code" to e.code,
+                            "message" to e.message
+                        )
+                    )
                 }
             })
     }
@@ -149,7 +195,6 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         call: MethodCall,
         result: Result
     ) {
-        var isReplied = false
         val locationId: String? = call.argument("locationId")
         val collectInstance = OkCollect(
             location = OkHiLocation(locationId)
@@ -160,21 +205,33 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             collectInstance,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success(response.location.id.toString())
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startSavedAddressVerification",
+                            "type" to "success",
+                            "locationId" to response.location.id
+                        )
+                    )
                 }
 
                 override fun onClose() {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success("user_closed")
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startSavedAddressVerification",
+                            "type" to "closed"
+                        )
+                    )
                 }
 
                 override fun onError(e: OkHiException) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.error(e.code, e.message, null)
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startSavedAddressVerification",
+                            "type" to "error",
+                            "code" to e.code,
+                            "message" to e.message
+                        )
+                    )
                 }
             })
     }
@@ -183,27 +240,38 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         call: MethodCall,
         result: Result
     ) {
-        var isReplied = false
         OkHi.startDigitalAndPhysicalAddressVerification(
             activity,
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success(response.location.id.toString())
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startDigitalAndPhysicalAddressVerification",
+                            "type" to "success",
+                            "locationId" to response.location.id
+                        )
+                    )
                 }
 
                 override fun onClose() {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success("user_closed")
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startDigitalAndPhysicalAddressVerification",
+                            "type" to "closed"
+                        )
+                    )
                 }
 
                 override fun onError(e: OkHiException) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.error(e.code, e.message, null)
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startDigitalAndPhysicalAddressVerification",
+                            "type" to "error",
+                            "code" to e.code,
+                            "message" to e.message
+                        )
+                    )
                 }
             })
     }
@@ -212,27 +280,38 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         call: MethodCall,
         result: Result
     ) {
-        var isReplied = false
         OkHi.startPhysicalAddressVerification(
             activity,
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success(response.location.id.toString())
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startPhysicalAddressVerification",
+                            "type" to "success",
+                            "locationId" to response.location.id
+                        )
+                    )
                 }
 
                 override fun onClose() {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success("user_closed")
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startPhysicalAddressVerification",
+                            "type" to "closed"
+                        )
+                    )
                 }
 
                 override fun onError(e: OkHiException) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.error(e.code, e.message, null)
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startPhysicalAddressVerification",
+                            "type" to "error",
+                            "code" to e.code,
+                            "message" to e.message
+                        )
+                    )
                 }
             })
     }
@@ -241,112 +320,123 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         call: MethodCall,
         result: Result
     ) {
-        var isReplied = false
         OkHi.startDigitalAddressVerification(
             activity,
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success(response.location.id.toString())
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startDigitalAddressVerification",
+                            "type" to "success",
+                            "locationId" to response.location.id
+                        )
+                    )
                 }
 
                 override fun onClose() {
-                    if (isReplied) return
-                    isReplied = true
-                    result.success("user_closed")
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startDigitalAddressVerification",
+                            "type" to "closed"
+                        )
+                    )
                 }
 
                 override fun onError(e: OkHiException) {
-                    if (isReplied) return
-                    isReplied = true
-                    result.error(e.code, e.message, null)
+                    sendEvent(
+                        mapOf(
+                            "methodCall" to "startDigitalAddressVerification",
+                            "type" to "error",
+                            "code" to e.code,
+                            "message" to e.message
+                        )
+                    )
                 }
             })
     }
 
     private fun handleGetLocationAccuracyLevel(call: MethodCall, result: Result) {
         val level: LocationAccuracyLevel = OkHi.getLocationAccuracyLevel(context)
-        result.success(level.toString())
+        OkHiMainThreadResult(result).success(level.toString())
     }
 
     private fun handleGetPlatformVersion(call: MethodCall, result: Result) {
-        result.success("${android.os.Build.VERSION.SDK_INT}")
+        OkHiMainThreadResult(result).success("${android.os.Build.VERSION.SDK_INT}")
     }
 
     private fun handleIsNotificationsEnabled(call: MethodCall, result: Result) {
-        result.success(OkHi.isPostNotificationPermissionGranted(context))
+        OkHiMainThreadResult(result).success(OkHi.isPostNotificationPermissionGranted(context))
     }
 
     private fun handleIsLocationServicesEnabled(call: MethodCall, result: Result) {
-        result.success(OkHi.isLocationServicesEnabled(context))
+        OkHiMainThreadResult(result).success(OkHi.isLocationServicesEnabled(context))
     }
 
     private fun handleIsLocationPermissionGranted(call: MethodCall, result: Result) {
-        result.success(OkHi.isFineLocationPermissionGranted(context))
+        OkHiMainThreadResult(result).success(OkHi.isFineLocationPermissionGranted(context))
     }
 
     private fun handleIsBackgroundLocationPermissionGranted(call: MethodCall, result: Result) {
-        result.success(OkHi.isBackgroundLocationPermissionGranted(context))
+        OkHiMainThreadResult(result).success(OkHi.isBackgroundLocationPermissionGranted(context))
     }
 
     private fun handleIsGooglePlayServicesAvailable(call: MethodCall, result: Result) {
-        result.success(OkHi.isPlayServicesAvailable(context))
+        OkHiMainThreadResult(result).success(OkHi.isPlayServicesAvailable(context))
     }
 
     private fun handleGetAppIdentifier(call: MethodCall, result: Result) {
-        result.success(context.getPackageName())
+        OkHiMainThreadResult(result).success(context.getPackageName())
     }
 
     private fun handleGetAppVersion(call: MethodCall, result: Result) {
         try {
             val versionName: String? =
                 context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName
-            result.success(versionName)
+            OkHiMainThreadResult(result).success(versionName)
         } catch (e: Exception) {
-            result.success("-1")
+            OkHiMainThreadResult(result).success("-1")
         }
     }
 
     private fun handleRequestLocationPermission(call: MethodCall, result: Result) {
         try {
             OkHi.requestLocationPermission(context){
-                result.success(it)
+                OkHiMainThreadResult(result).success(it)
             }
 
         } catch (e: Exception) {
-            result.success(false)
+            OkHiMainThreadResult(result).success(false)
         }
     }
 
     private fun handleRequestBackgroundLocationPermission(call: MethodCall, result: Result) {
         try {
             OkHi.requestBackgroundLocationPermission(context){
-                result.success(it)
+                OkHiMainThreadResult(result).success(it)
             }
         } catch (e: Exception) {
-            result.success(false)
+            OkHiMainThreadResult(result).success(false)
         }
     }
 
     private fun handleRequestEnableLocationServices(call: MethodCall, result: Result) {
         try {
             OkHi.requestEnableLocationServices(context){
-                result.success(it)
+                OkHiMainThreadResult(result).success(it)
             }
         } catch (e: Exception) {
-            result.success(false)
+            OkHiMainThreadResult(result).success(false)
         }
     }
 
     private fun handleRequestNotificationPermission(call: MethodCall, result: Result) {
         try {
             OkHi.requestPostNotificationPermissions(context){
-                result.success(it)
+                OkHiMainThreadResult(result).success(it)
             }
         } catch (e: Exception) {
-            result.success(false)
+            OkHiMainThreadResult(result).success(false)
         }
     }
 
@@ -383,26 +473,26 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     token = token
                 )
                 OkHi.login(context, auth, okHiUser) { locationIds ->
-                    // TODO: handle login
+                    // todo: handle login
                 }
 
-                result.success(true)
+                OkHiMainThreadResult(result).success(true)
             }
         } catch (e: Exception) {
-            result.error("unknown_error", "initialization failed", e)
+            OkHiMainThreadResult(result).error("unknown_error", "initialization failed", e)
         }
     }
 
     private fun handleCanOpenProtectedApps(call: MethodCall, result: Result) {
-        result.success(OkHi.canOpenProtectedApps(context));
+        OkHiMainThreadResult(result).success(OkHi.canOpenProtectedApps(context));
     }
 
     private fun handleOpenProtectedApps(call: MethodCall, result: Result) {
         try {
             OkHi.openProtectedApps(context)
-            result.success(true)
+            OkHiMainThreadResult(result).success(true)
         } catch (e: OkHiException) {
-            result.error(e.code, e.message, e)
+            OkHiMainThreadResult(result).error(e.code, e.message, e)
         }
     }
 
@@ -412,16 +502,16 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         deviceInfo.put("model", Build.MODEL)
         deviceInfo.put("osVersion", Build.VERSION.RELEASE)
         deviceInfo.put("platform", "android")
-        result.success(deviceInfo)
+        OkHiMainThreadResult(result).success(deviceInfo)
     }
 
     private fun handleFetchLocationPermissionStatus(call: MethodCall, result: Result) {
         if (OkHi.isBackgroundLocationPermissionGranted(activity)) {
-            result.success("always")
+            OkHiMainThreadResult(result).success("always")
         } else if (OkHi.isFineLocationPermissionGranted(activity)) {
-            result.success("whenInUse")
+            OkHiMainThreadResult(result).success("whenInUse")
         } else {
-            result.success("denied")
+            OkHiMainThreadResult(result).success("denied")
         }
     }
 
@@ -431,6 +521,6 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         intent.setData(uri)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         activity.startActivity(intent)
-        result.success(true)
+        OkHiMainThreadResult(result).success(true)
     }
 }

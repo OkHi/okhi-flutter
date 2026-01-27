@@ -65,25 +65,37 @@ class _HomeState extends State<Home> {
               FullButton(
                 title: "Create a digital address",
                 onPressed: () async {
-                  OkHi.startDigitalAddressVerification();
+                  OkHi.startDigitalAddressVerification(
+                    onError: (message) {},
+                    onSuccess: (locationId) {},
+                  );
                 },
               ),
               FullButton(
                 title: "Create a physical address",
                 onPressed: () async {
-                  OkHi.startPhysicalAddressVerification();
+                  OkHi.startPhysicalAddressVerification(
+                    onError: (message) {},
+                    onSuccess: (locationId) {},
+                  );
                 },
               ),
               FullButton(
                 title: "Create a digital & physical address",
                 onPressed: () async {
-                  OkHi.startDigitalAndPhysicalAddressVerification();
+                  OkHi.startDigitalAndPhysicalAddressVerification(
+                    onError: (message) {},
+                    onSuccess: (locationId) {},
+                  );
                 },
               ),
               FullButton(
                 title: "Create an address",
                 onPressed: () async {
-                  OkHi.createAddress();
+                  OkHi.createAddress(
+                    onError: (message) {},
+                    onSuccess: (locationId) {},
+                  );
                 },
               ),
               MessageBox(message: message),
