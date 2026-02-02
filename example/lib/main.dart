@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 import 'package:okhi_flutter_example/widgets/full_button.dart';
 
@@ -554,10 +555,23 @@ class _MyAppState extends State<MyApp> {
   }
 
   _handleInitializeOkHi() async {
-    final config = getConfig();
+    final appConfig = getConfig();
     setState(() {
       isLoading = true;
     });
+
+    final locationManagerConfiguration = OkHiLocationManagerConfiguration(
+      color: "#029e52",
+      appName: "OkHi Flutter Demo",
+      logoUrl:
+          "https://storage.googleapis.com/okhi-cdn/images/logos/okhi-logo-white.png",
+      withAppBar: true,
+      withCreateMode: true,
+      withHomeAddressType: true,
+      withWorkAddressType: true,
+      withStreetView: true,
+    );
+
     final okHiUser = OkHiUser(
       phone: phone,
       firstName: firstName,
@@ -567,7 +581,7 @@ class _MyAppState extends State<MyApp> {
       id: userId,
     );
 
-    OkHi.initialize(config, okHiUser)
+    OkHi.initialize(appConfig, okHiUser, locationManagerConfiguration)
         .then((result) {
           setState(() {
             isUserSet = true;

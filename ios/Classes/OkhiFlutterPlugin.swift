@@ -265,10 +265,13 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
     private func handleInitialize(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 
+        // todo: Verify where theme is passed to in IOS
         let arguments = call.arguments as? [String: Any] ?? [String: Any]()
         let branchId = arguments["branchId"] as? String
         let clientKey = arguments["clientKey"] as? String
         let envRaw = arguments["environment"] as? String ?? "sandbox"
+
+        let locationManagerConfiguration = arguments("locationManagerConfiguration") as? [String: Any] ?? [String: Any]()
 
         let phoneNumber = arguments["phoneNumber"] as? String
         let firstName = arguments["firstname"] as? String

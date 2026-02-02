@@ -9,15 +9,12 @@ import './models/okhi_app_configuration.dart';
 import './models/okhi_native_methods.dart';
 import './models/okhi_exception.dart';
 import 'models/OkHiEvent.dart';
+import 'models/okhi_location_manager_configuration.dart';
 
 // models export
 export './models/okhi_app_configuration.dart';
 export './models/okhi_env.dart';
 export './models/okhi_user.dart';
-export './models/okhi_location_manager_response.dart';
-export './models/okhi_location_manager_configuration.dart';
-export './models/okhi_notification.dart';
-export './models/okhi_verification_configuration.dart';
 export './models/okhi_location.dart';
 export './models/okhi_exception.dart';
 
@@ -164,6 +161,7 @@ class OkHi {
   static Future<bool> initialize(
     OkHiAppConfiguration configuration,
     OkHiUser? okHiUser,
+    OkHiLocationManagerConfiguration? locationManagerConfiguration,
   ) async {
     _configuration = configuration;
 
@@ -186,6 +184,19 @@ class OkHi {
       "firstname": okHiUser?.firstName,
       "lastname": okHiUser?.lastName,
       "appUserId": okHiUser?.appUserId,
+      "locationManagerConfiguration": locationManagerConfiguration != null
+          ? {
+              "color": locationManagerConfiguration.color,
+              "logoUrl": locationManagerConfiguration.logoUrl,
+              "withAppBar": locationManagerConfiguration.withAppBar,
+              "withCreateMode": locationManagerConfiguration.withCreateMode,
+              "withHomeAddressType":
+                  locationManagerConfiguration.withHomeAddressType,
+              "withWorkAddressType":
+                  locationManagerConfiguration.withWorkAddressType,
+              "withStreetView": locationManagerConfiguration.withStreetView,
+            }
+          : null,
     };
 
     streamSubscription = okhiVerificationStream.listen((OkHiEvent event) {

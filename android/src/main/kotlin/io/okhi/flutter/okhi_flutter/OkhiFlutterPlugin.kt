@@ -196,9 +196,9 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         result: Result
     ) {
         val locationId: String? = call.argument("locationId")
-        val collectInstance = OkCollect(
-            location = OkHiLocation(locationId)
-        )
+
+        // todo: Update OkCollect to accept locationId edits
+        collect.location = OkHiLocation(locationId)
 
         OkHi.startAddressVerification(
             activity,
@@ -445,12 +445,24 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val branchId: String? = call.argument("branchId")
             val clientKey: String? = call.argument("clientKey")
             val mode: String? = call.argument("environment")
+            val locationManagerConfiguration: Map<String, String>? = call.argument("locationManagerConfiguration")
+
             if (branchId == null || clientKey == null || mode == null) {
                 result.error("unauthorized", "invalid initialization credentials provided", null)
             } else {
 
-                val style = OkCollectStyle("#263238", "OkHi", "https://cdn.okhi.co/icon.png")
-                val config = OkCollectConfig(true, true, false, true)
+                var style = OkCollectStyle("#263238", "OkHi", "https://cdn.okhi.co/icon.png")
+                var config = OkCollectConfig(true, true, false, true)
+
+                if(locationManagerConfiguration != null) {
+
+                    style = OkCollectStyle(locationManagerConfiguration["color"].toString(), locationManagerConfiguration["appName"].toString(), locationManagerConfiguration["logoUrl"].toString())
+                    config = OkCollectConfig(
+                        locationManagerConfiguration["withStreetView"] == "true",
+                        locationManagerConfiguration["withHomeAddressType"] == "true",
+                        locationManagerConfiguration["withWorkAddressType"] == "true",
+                        locationManagerConfiguration["withAppBar"] == "true")
+                }
 
                 collect = OkCollect(style, config)
                 auth = OkHiAuth(branchId, clientKey, mode)
