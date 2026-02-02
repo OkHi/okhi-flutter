@@ -198,11 +198,11 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val locationId: String? = call.argument("locationId")
 
         // todo: Update OkCollect to accept locationId edits
-        collect.location = OkHiLocation(locationId)
+        // collect.location = OkHiLocation(locationId) Not working for now, requires Android update
 
         OkHi.startAddressVerification(
             activity,
-            collectInstance,
+            collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
                     sendEvent(
