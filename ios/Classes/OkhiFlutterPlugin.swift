@@ -10,6 +10,8 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     }
     private var locationPermissionRequestType: LocationPermissionRequestType = .always
     private let okverify: OkVerify
+    private var appConfig: OkHiConfig
+    private var theme: OkHiTheme
     private let coreLocationManager: CLLocationManager
     private var eventSink: FlutterEventSink?
 
@@ -38,6 +40,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             coreLocationManager.allowsBackgroundLocationUpdates = true
         }
         okverify = OkVerify()
+        appConfig = OkHiConfig()
+        theme = OkHiTheme()
+        
         super.init()
         coreLocationManager.delegate = self
     }
@@ -265,17 +270,20 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
     private func handleInitialize(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 
-        // todo: Verify where theme is passed to in IOS
         let arguments = call.arguments as? [String: Any] ?? [String: Any]()
         let branchId = arguments["branchId"] as? String
         let clientKey = arguments["clientKey"] as? String
         let envRaw = arguments["environment"] as? String ?? "sandbox"
 
-        let locationManagerConfiguration = arguments("locationManagerConfiguration") as? [String: Any] ?? [String: Any]()
 
+        let locationManagerConfiguration = arguments["locationManagerConfiguration"] as? [String: Any] ?? [String: Any]()
+        print("OkHi Initialized locationManagerConfiguration: \(locationManagerConfiguration)")
+        
+        
         let phoneNumber = arguments["phoneNumber"] as? String
         let firstName = arguments["firstname"] as? String
         let lastName = arguments["lastname"] as? String
+        
         let email = arguments["email"] as? String
         let userId = arguments["userId"] as? String
         let token = arguments["token"] as? String
@@ -301,6 +309,16 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 .with(token: token ?? "")
                 .with(okHiId: userId)
 
+            appConfig = OkHiConfig()
+                .withAddressTypes(
+                    work: locationManagerConfiguration["withWorkAddressType"] as? Int == 1,
+                    home: locationManagerConfiguration["withHomeAddressType"] as? Int == 1
+                )
+
+            theme = OkHiTheme()
+                .with(primaryColor: locationManagerConfiguration["color"] as? String ?? "")
+                .with(logoUrl: locationManagerConfiguration["logoUrl"] as? String ?? "")
+
             OK.shared.login(auth: auth, user: user)
             print("OkHi Initialized successfully on iOS platform")
             result(true)
@@ -314,7 +332,8 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
             return
         }
-        OK.shared.startAddressVerification(vc: viewController) { response, error in
+
+        OK.shared.startAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
             if let error = error {
                 result(FlutterError(code: "verification_error", message: error.message, details: nil))
                 return
@@ -339,7 +358,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
             return
         }
-        OK.shared.startPhysicalAddressVerification(vc: viewController) { response, error in
+        OK.shared.startPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
             guard let locationId = response?.location.id else { return }
             print("Successfully started verification for \(locationId)")
             self.emit(
@@ -357,7 +376,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
             return
         }
-        OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController) { response, error in
+        OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
             guard let locationId = response?.location.id else { return }
             print("Successfully started verification for \(locationId)")
             self.emit(
@@ -375,7 +394,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
             return
         }
-        OK.shared.createAddress(vc: viewController) { response, error in
+        OK.shared.createAddress(vc: viewController, theme: theme, config: appConfig) { response, error in
             guard let locationId = response?.location.id else { return }
             print("Successfully created address for \(locationId)")
             do {
@@ -404,7 +423,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
 
-        OK.shared.startAddressVerification(vc: rootViewController, location: okhiLocation) { response, error in
+        OK.shared.startAddressVerification(vc: rootViewController, theme: theme, config: appConfig, location: okhiLocation) { response, error in
           guard let locationId = response?.location.id else { return }
           print("Successfully created address for \(locationId)")
             self.emit(
