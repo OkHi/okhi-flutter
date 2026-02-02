@@ -36,6 +36,7 @@ class OkHi {
 
   static Stream<OkHiEvent> get okhiVerificationStream {
     return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
+      print("the event is: $event");
       final map = Map<String, dynamic>.from(event);
       return OkHiEvent.fromMap(map);
     });
@@ -224,60 +225,60 @@ class OkHi {
   }
 
   /// Starts Digital verification for a particular address.
-  static Future<String> startDigitalAddressVerification({
+  static startDigitalAddressVerification({
     required Function(String locationId) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
-    return await _channel.invokeMethod(
+    await _channel.invokeMethod(
       OkHiNativeMethod.startDigitalAddressVerification,
     );
   }
 
   /// Starts Physical verification for a particular address.
-  static Future<String> startPhysicalAddressVerification({
+  static startPhysicalAddressVerification({
     required Function(String locationId) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
-    return await _channel.invokeMethod(
+    await _channel.invokeMethod(
       OkHiNativeMethod.startPhysicalAddressVerification,
     );
   }
 
   /// Starts Digital And Physical verification for a particular address.
-  static Future<String> startDigitalAndPhysicalAddressVerification({
+  static startDigitalAndPhysicalAddressVerification({
     required Function(String locationId) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
-    return await _channel.invokeMethod(
+    await _channel.invokeMethod(
       OkHiNativeMethod.startDigitalAndPhysicalAddressVerification,
     );
   }
 
   /// Create a Digital address for a particular location.
-  static Future<String> createAddress({
+  static createAddress({
     required Function(String locationId) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
-    return await _channel.invokeMethod(OkHiNativeMethod.createAddress);
+    await _channel.invokeMethod(OkHiNativeMethod.createAddress);
   }
 
   /// Start verification on a saved Address.
-  static Future<String> startSavedAddressVerification({
+  static startSavedAddressVerification({
     required String locationId,
     required Function(String locationId) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
-    return await _channel.invokeMethod(
+    await _channel.invokeMethod(
       OkHiNativeMethod.startSavedAddressVerification,
       {"locationId": locationId},
     );

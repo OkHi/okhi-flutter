@@ -3,7 +3,7 @@ import UIKit
 import OkHi
 import CoreLocation
 
-public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
+public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     private enum LocationPermissionRequestType: String {
         case whenInUse = "whenInUse"
         case always = "always"
@@ -11,10 +11,10 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
     private var locationPermissionRequestType: LocationPermissionRequestType = .always
     private let okverify: OkVerify
     private let coreLocationManager: CLLocationManager
+    private var eventSink: FlutterEventSink?
 
     private var verificationSuccessResult: ((Any) -> Void)?
     private var verificationErrorResult: ((FlutterError) -> Void)?
-    private let eventHandler = OkHiEventHandler()
 
     private func topViewController() -> UIViewController? {
         let keyWindow = UIApplication.shared.windows.first { $0.isKeyWindow }
@@ -47,9 +47,35 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
         let instance = OkhiFlutterPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
 
-        let eventChannel = FlutterEventChannel(name: "address_verification_events", binaryMessenger: registrar.messenger())
-        eventChannel.setStreamHandler(eventHandler)
+        let eventChannel = FlutterEventChannel(name: "okhi_flutter_events", binaryMessenger: registrar.messenger())
+        eventChannel.setStreamHandler(instance)
     }
+
+    // Called when the first listener is set on the Flutter side
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        self.eventSink = events
+        return nil
+    }
+
+    // Called when the last listener is cancelled on the Flutter side
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        eventSink = nil
+        return nil
+    }
+
+    func emit(_ data: [String: Any?]) {
+        DispatchQueue.main.async {
+            self.eventSink?(data)
+        }
+    }
+
+    func close() {
+        DispatchQueue.main.async {
+            self.eventSink?(FlutterEndOfEventStream)
+            self.eventSink = nil
+        }
+    }
+
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch (call.method) {
@@ -91,6 +117,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
             break
         case "createAddress":
             handleCreateAddress(call, result)
+            break
+        case "startSavedAddressVerification":
+            handleVerifySavedAddress(call, result)
             break
         case "stopVerification":
             handleStopVerification(call, result)
@@ -271,7 +300,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
 
             OK.shared.login(auth: auth, user: user)
             print("OkHi Initialized successfully on iOS platform")
-            result("OkHi Initialized successfully")
+            result(true)
         } else {
             result(FlutterError(code: "unauthorized", message: "invalid initialization credentials provided", details: nil))
         }
@@ -292,7 +321,13 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             print("Successfully started verification for \(locationId)")
-            result(locationId)
+            self.emit(
+                [
+                    "type": "success",
+                    "methodCall": "startAddressVerification",
+                    "locationId": locationId
+                ]
+            )
         }
     }
 
@@ -304,7 +339,13 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
         OK.shared.startPhysicalAddressVerification(vc: viewController) { response, error in
             guard let locationId = response?.location.id else { return }
             print("Successfully started verification for \(locationId)")
-            result(locationId)
+            self.emit(
+                [
+                    "type": "success",
+                    "methodCall": "startPhysicalAddressVerification",
+                    "locationId": locationId
+                ]
+            )
         }
     }
 
@@ -316,7 +357,13 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
         OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController) { response, error in
             guard let locationId = response?.location.id else { return }
             print("Successfully started verification for \(locationId)")
-            result(locationId)
+            self.emit(
+                [
+                    "type": "success",
+                    "methodCall": "startAddressVerification",
+                    "locationId": locationId
+                ]
+            )
         }
     }
 
@@ -328,7 +375,17 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
         OK.shared.createAddress(vc: viewController) { response, error in
             guard let locationId = response?.location.id else { return }
             print("Successfully created address for \(locationId)")
-            result(locationId)
+            do {
+                self.emit(
+                    [
+                        "type": "success",
+                        "methodCall": "createAddress",
+                        "locationId": locationId
+                    ]
+                )
+            } catch {
+                print("Error on emit: \(error)")
+            }
         }
     }
 
@@ -336,7 +393,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
         let arguments = call.arguments as? [String: Any] ?? [:]
         let locationId = arguments["locationId"] as? String
         let okhiLocation: OkHiLocation = OkHiLocation(
-          id: locationId
+            identifier: locationId ?? ""
         )
 
         guard let rootViewController = topViewController() else {
@@ -347,7 +404,13 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
         OK.shared.startAddressVerification(vc: rootViewController, location: okhiLocation) { response, error in
           guard let locationId = response?.location.id else { return }
           print("Successfully created address for \(locationId)")
-          result(locationId)
+            self.emit(
+                [
+                    "type": "success",
+                    "methodCall": "startAddressVerification",
+                    "locationId": locationId
+                ]
+            )
         }
     }
 
@@ -419,26 +482,6 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin {
             str = "unknown"
         }
         return str
-    }
-
-    class EventsHandler: NSObject, FlutterStreamHandler {
-        // Handle events on the main thread.
-        private var eventSink: FlutterEventSink?
-
-        func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
-            self.eventSink = eventSink
-
-            self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { _ in
-                eventSink(time)
-            })
-
-            return nil
-        }
-
-        func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            eventSink = nil
-            return nil
-        }
     }
 }
 
@@ -519,39 +562,5 @@ extension UIDevice {
             return identifier + String(UnicodeScalar(UInt8(value)))
         }
         return identifier
-    }
-}
-
-class OkHiEventHandler: NSObject, FlutterStreamHandler {
-
-    private var eventSink: FlutterEventSink?
-
-    func onListen(
-        withArguments arguments: Any?,
-        eventSink events: @escaping FlutterEventSink
-    ) -> FlutterError? {
-        self.eventSink = events
-        return nil
-    }
-
-    func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        self.eventSink = nil
-        return nil
-    }
-}
-
-extension OkHiEventHandler {
-
-    func emit(_ data: [String: Any]) {
-        DispatchQueue.main.async {
-            self.eventSink?(data)
-        }
-    }
-
-    func close() {
-        DispatchQueue.main.async {
-            self.eventSink?(FlutterEndOfEventStream)
-            self.eventSink = nil
-        }
     }
 }

@@ -360,41 +360,31 @@ class _MyAppState extends State<MyApp> {
             borderRadius: BorderRadius.circular(15.0),
           ),
           shadowColor: Colors.grey[100],
-          child: InkWell(
-            onTap: () {
-              copyToClipboard("userId", userId);
-            },
-            child: SizedBox(
-              width: 160,
-              height: 50,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      userId,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      "click to copy",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              color: Colors.orange[300],
+            ),
+            width: MediaQuery.of(context).size.width - 20,
+            child: InkWell(
+              onTap: () async {
+                copyToClipboard("userId", userId);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  "Tap here to save your user ID:\n$userId",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        SizedBox(height: 25),
+        SizedBox(height: 15),
         FullButton(
           title: "Create address (Address book)",
           onPressed: () async {
@@ -414,6 +404,56 @@ class _MyAppState extends State<MyApp> {
             );
           },
         ),
+        savedAddressID.isNotEmpty
+            ? Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: Colors.teal,
+                ),
+                width: MediaQuery.of(context).size.width - 20,
+                child: InkWell(
+                  onTap: () async {
+                    if (savedAddressID.isNotEmpty) {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      OkHi.startSavedAddressVerification(
+                        locationId: savedAddressID,
+                        onSuccess: (locationId) {
+                          setState(() {
+                            savedAddressID = "";
+                          });
+                          copyToClipboard(
+                            "Verifying Address Book",
+                            locationId.toString(),
+                          );
+                        },
+                        onError: (error) {
+                          showSnackBarError(
+                            'Verifying Address Book error: ${error.message}',
+                          );
+                        },
+                      );
+                    } else {
+                      showSnackBarError(
+                        'Please create an address first to proceed',
+                      );
+                      return;
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      "Tap here to verify the saved address: $savedAddressID",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Container(),
         FullButton(
           title: "Create a digital address",
           onPressed: () async {
@@ -428,36 +468,6 @@ class _MyAppState extends State<MyApp> {
                 showSnackBarError('Digital Address error: ${error.message}');
               },
             );
-          },
-        ),
-        FullButton(
-          title: "Verify address (Address book)",
-          onPressed: () {
-            if (savedAddressID.isNotEmpty) {
-              setState(() {
-                isLoading = true;
-              });
-              OkHi.startSavedAddressVerification(
-                locationId: savedAddressID,
-                onSuccess: (locationId) {
-                  setState(() {
-                    savedAddressID = "";
-                  });
-                  copyToClipboard(
-                    "Verifying Address Book",
-                    locationId.toString(),
-                  );
-                },
-                onError: (error) {
-                  showSnackBarError(
-                    'Verifying Address Book error: ${error.message}',
-                  );
-                },
-              );
-            } else {
-              showSnackBarError('Please create an address first to proceed');
-              return;
-            }
           },
         ),
         FullButton(
@@ -552,7 +562,7 @@ class _MyAppState extends State<MyApp> {
       phone: phone,
       firstName: firstName,
       lastName: lastName,
-      appUserId: appUserId,
+      appUserId: "flutterAppUser1000000",
       email: email,
       id: userId,
     );
