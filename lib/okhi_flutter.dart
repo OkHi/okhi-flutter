@@ -211,6 +211,10 @@ class OkHi {
             message: event.message.toString(),
           ),
         );
+      } else {
+        onVerificationError?.call(
+          OkHiException(code: "unknown", message: "An unknown error occurred"),
+        );
       }
       onVerificationSuccess = null;
       onVerificationError = null;
@@ -345,5 +349,10 @@ class OkHi {
     return await _channel.invokeMethod(
       OkHiNativeMethod.getLocationAccuracyLevel,
     );
+  }
+
+  static Future<void> logout() async {
+    await _channel.invokeMethod(OkHiNativeMethod.logout);
+    streamSubscription.cancel();
   }
 }

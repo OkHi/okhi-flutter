@@ -146,6 +146,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             "fetchLocationPermissionStatus" -> handleFetchLocationPermissionStatus(call, result)
             "openAppSettings" -> handleOpenAppSettings(call, result)
             "getLocationAccuracyLevel" -> handleGetLocationAccuracyLevel(call, result)
+            "logout" -> handleLogout(call, result)
             else -> result.notImplemented()
         }
     }
@@ -353,6 +354,11 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     )
                 }
             })
+    }
+
+    private fun handleLogout(call: MethodCall, result: Result) {
+        OkHi.logout(context)
+        OkHiMainThreadResult(result).success(true)
     }
 
     private fun handleGetLocationAccuracyLevel(call: MethodCall, result: Result) {

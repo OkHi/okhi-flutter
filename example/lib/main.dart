@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -5,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
-import 'package:okhi_flutter_example/widgets/full_button.dart';
 
 import 'firebase_options.dart';
 
@@ -32,6 +32,7 @@ class _MyAppState extends State<MyApp> {
   String appUserId = "";
   String userId = "No Id";
   String environment = "dev";
+  late OkHiUser okHiUser;
 
   void copyToClipboard(String type, String addressId) {
     if (addressId != "user_closed") {
@@ -39,9 +40,7 @@ class _MyAppState extends State<MyApp> {
       if (type == "userId") {
         clipboardData = ClipboardData(text: 'User ID: $addressId');
       } else {
-        clipboardData = ClipboardData(
-          text: 'Verification Type:$type\n Address ID: $addressId',
-        );
+        clipboardData = ClipboardData(text: '$type: $addressId');
       }
 
       Clipboard.setData(clipboardData).then((_) {
@@ -54,7 +53,7 @@ class _MyAppState extends State<MyApp> {
               'User ID: $addressId \nCopied to clipboard.\n\nPlease share it on the QA group';
         } else {
           text =
-              "Verification Type:$type\n Address ID: $addressId \nCopied to clipboard.\n\nPlease share it on the QA group";
+              "$type: $addressId \nCopied to clipboard.\n\nPlease share it on the QA group";
         }
 
         scaffoldMessengerKey.currentState?.showSnackBar(
@@ -73,206 +72,41 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
-  _handleRequestLocationPermission() async {
-    final result = await OkHi.requestLocationPermission();
-  }
-
-  _handleRequestBackgroundLocationPermission() async {
-    final result = await OkHi.requestBackgroundLocationPermission();
-  }
-
-  _handleRequestEnableLocationService() async {
-    final result = await OkHi.requestEnableLocationServices();
-  }
-
-  _handleRequestEnableNotifications() async {
-    final result = await OkHi.requestNotificationsPermission();
-  }
-
-  _handleExceptions() async {
-    throw Exception();
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
       home: Scaffold(
-        appBar: AppBar(title: const Text("OkHi")),
+        appBar: AppBar(
+          title: Row(
+            children: [
+              Text(
+                isUserSet ? "Welcome, ${okHiUser.firstName}" : "OkHi",
+                style: const TextStyle(
+                  color: Colors.teal,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 27,
+                ),
+              ),
+              Spacer(),
+              isUserSet && Platform.isAndroid
+                  ? IconButton(
+                      onPressed: () {
+                        _handleOkHiLogout();
+                      },
+                      icon: Icon(Icons.logout, color: Colors.teal, size: 20),
+                    )
+                  : Container(),
+            ],
+          ),
+        ),
         body: Stack(
           children: [
             SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: 13.0,
-                  children: [
-                    Card(
-                      elevation: 3.0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      shadowColor: Colors.grey[100],
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Center(
-                          child: TextFormField(
-                            keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            decoration: InputDecoration(
-                              icon: Icon(
-                                Icons.email,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                              border: InputBorder.none,
-                              hintText: "Email",
-                              hintStyle: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey.shade300,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            onChanged: (val) {
-                              setState(() {
-                                email = val;
-                              });
-                            },
-                            obscureText: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Card(
-                      elevation: 3.0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      shadowColor: Colors.grey[100],
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Center(
-                          child: TextFormField(
-                            keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            decoration: InputDecoration(
-                              icon: Icon(
-                                Icons.supervised_user_circle,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                              border: InputBorder.none,
-                              hintText: "First name",
-                              hintStyle: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey.shade300,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            onChanged: (val) {
-                              setState(() {
-                                firstName = val;
-                              });
-                            },
-                            obscureText: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Card(
-                      elevation: 3.0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      shadowColor: Colors.grey[100],
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Center(
-                          child: TextFormField(
-                            keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            decoration: InputDecoration(
-                              icon: Icon(
-                                Icons.supervised_user_circle_outlined,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                              border: InputBorder.none,
-                              hintText: "Last name",
-                              hintStyle: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey.shade300,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            onChanged: (val) {
-                              setState(() {
-                                lastName = val;
-                              });
-                            },
-                            obscureText: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Card(
-                      elevation: 3.0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      shadowColor: Colors.grey[100],
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Center(
-                          child: TextFormField(
-                            keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            decoration: InputDecoration(
-                              icon: Icon(
-                                Icons.phone_android_sharp,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                              border: InputBorder.none,
-                              hintText: "Phone number",
-                              hintStyle: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey.shade300,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            onChanged: (val) {
-                              setState(() {
-                                phone = val;
-                              });
-                            },
-                            obscureText: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                    isUserSet ? _postInitializeView() : _preInitializeView(),
-                  ],
-                ),
+                padding: const EdgeInsets.all(13.0),
+                child: isUserSet ? _postInitializeView() : _preInitializeView(),
               ),
             ),
             isLoading
@@ -284,10 +118,22 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  Color getEnvState(value) {
+    if (value == environment) {
+      return Colors.teal.shade100;
+    } else {
+      return Colors.white;
+    }
+  }
+
   _preInitializeView() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 13.0,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Card(
               elevation: 3.0,
@@ -295,48 +141,320 @@ class _MyAppState extends State<MyApp> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15.0),
               ),
-              shadowColor: Colors.grey[100],
-              child: SizedBox(
-                width: 125,
-                height: 50,
-                child: Center(
-                  child: DropdownButton<String>(
-                    value: environment,
-                    items: <String>['dev', 'prod', 'sandbox'].map((
-                      String value,
-                    ) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value, style: TextStyle(fontSize: 20)),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        environment = newValue!;
-                      });
-                    },
+              shadowColor: Colors.teal[100],
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    environment = "prod";
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15.0),
+                    border: Border.all(color: getEnvState("prod"), width: 3.0),
+                  ),
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  width: MediaQuery.of(context).size.width * 0.27,
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Center(
+                    child: Text(
+                      "PROD",
+                      style: TextStyle(
+                        color: Colors.teal,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Card(
+              elevation: 3.0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              shadowColor: Colors.teal[100],
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    environment = "sandbox";
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15.0),
+                    border: Border.all(
+                      color: getEnvState("sandbox"),
+                      width: 3.0,
+                    ),
+                  ),
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  width: MediaQuery.of(context).size.width * 0.27,
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Center(
+                    child: Text(
+                      "SANDBOX",
+                      style: TextStyle(
+                        color: Colors.teal,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Card(
+              elevation: 3.0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              shadowColor: Colors.teal[100],
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    environment = "dev";
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15.0),
+                    border: Border.all(color: getEnvState("dev"), width: 3.0),
+                  ),
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  width: MediaQuery.of(context).size.width * 0.27,
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Center(
+                    child: Text(
+                      "DEV",
+                      style: TextStyle(
+                        color: Colors.teal,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ],
         ),
-        FullButton(
-          title: "Initialize OkHi",
-          onPressed: () {
-            if (email.isNotEmpty && firstName.isNotEmpty && phone.isNotEmpty) {
-              _handleInitializeOkHi();
-            } else {
-              scaffoldMessengerKey.currentState?.showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.red[300],
-                  content: const Text(
-                    'Please fill in all required fields to proceed',
+        SizedBox(height: 3),
+        Text(
+          "Enter User credentials",
+          style: TextStyle(
+            color: Colors.teal,
+            fontWeight: FontWeight.w500,
+            fontSize: 19,
+          ),
+        ),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.grey[100],
+          child: Container(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Center(
+              child: TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Icons.email,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  border: InputBorder.none,
+                  hintText: "Email",
+                  hintStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade300,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              );
-            }
-          },
+                onChanged: (val) {
+                  setState(() {
+                    email = val;
+                  });
+                },
+                obscureText: false,
+              ),
+            ),
+          ),
+        ),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.grey[100],
+          child: Container(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Center(
+              child: TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Icons.supervised_user_circle,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  border: InputBorder.none,
+                  hintText: "First name",
+                  hintStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade300,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    firstName = val;
+                  });
+                },
+                obscureText: false,
+              ),
+            ),
+          ),
+        ),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.grey[100],
+          child: Container(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Center(
+              child: TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Icons.supervised_user_circle_outlined,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  border: InputBorder.none,
+                  hintText: "Last name",
+                  hintStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade300,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    lastName = val;
+                  });
+                },
+                obscureText: false,
+              ),
+            ),
+          ),
+        ),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.grey[100],
+          child: Container(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Center(
+              child: TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Icons.phone_android_sharp,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  border: InputBorder.none,
+                  hintText: "Phone number",
+                  hintStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade300,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    phone = val;
+                  });
+                },
+                obscureText: false,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 5),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () {
+              if (email.isNotEmpty &&
+                  firstName.isNotEmpty &&
+                  phone.isNotEmpty) {
+                _handleInitializeOkHi();
+              } else {
+                scaffoldMessengerKey.currentState?.showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.red[300],
+                    content: const Text(
+                      'Please fill in all required fields to proceed',
+                    ),
+                  ),
+                );
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Login",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -344,13 +462,95 @@ class _MyAppState extends State<MyApp> {
 
   _postInitializeView() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text(
-          "OkHi Initialized successful!",
-          style: TextStyle(
-            color: Colors.green,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+        Padding(
+          padding: EdgeInsetsGeometry.only(left: 10, right: 10),
+          child: Row(
+            children: [
+              Text(
+                "${okHiUser.email}",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+              ),
+              Container(
+                width: 5,
+                height: 5,
+                margin: EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              InkWell(
+                onTap: () async {
+                  copyToClipboard("userId", userId);
+                },
+                child: Row(
+                  children: [
+                    Text(
+                      userId,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    Icon(Icons.copy, color: Colors.teal, size: 15),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 15),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                isLoading = true;
+              });
+              OkHi.createAddress(
+                onSuccess: (locationId) {
+                  setState(() {
+                    savedAddressID = locationId.toString();
+                  });
+                  copyToClipboard("Create Address", locationId.toString());
+                },
+                onError: (error) {
+                  showSnackBarError('Create Address error: ${error.message}');
+                },
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Create address (Address book)",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
         SizedBox(height: 10),
@@ -360,154 +560,716 @@ class _MyAppState extends State<MyApp> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),
-          shadowColor: Colors.grey[100],
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              color: Colors.orange[300],
-            ),
-            width: MediaQuery.of(context).size.width - 20,
-            child: InkWell(
-              onTap: () async {
-                copyToClipboard("userId", userId);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () {
+              if (savedAddressID.isNotEmpty) {
+                setState(() {
+                  isLoading = true;
+                });
+                OkHi.startSavedAddressVerification(
+                  locationId: savedAddressID,
+                  onSuccess: (locationId) {
+                    setState(() {
+                      savedAddressID = "";
+                    });
+                    copyToClipboard(
+                      "Verifying Address Book",
+                      locationId.toString(),
+                    );
+                  },
+                  onError: (error) {
+                    showSnackBarError(
+                      'Verifying Address Book error: ${error.message}',
+                    );
+                  },
+                );
+              } else {
+                showSnackBarError('Please create an address first to proceed');
+                return;
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: savedAddressID.isNotEmpty
+                    ? Colors.teal.shade100
+                    : Colors.grey.shade400,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
                 child: Text(
-                  "Tap here to save your user ID:\n$userId",
-                  textAlign: TextAlign.center,
+                  "Verify saved address (Address book)",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.teal,
                     fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
               ),
             ),
           ),
         ),
-        SizedBox(height: 15),
-        FullButton(
-          title: "Create address (Address book)",
-          onPressed: () async {
-            setState(() {
-              isLoading = true;
-            });
-            OkHi.createAddress(
-              onSuccess: (locationId) {
-                setState(() {
-                  savedAddressID = locationId.toString();
-                });
-                copyToClipboard("Create Address", locationId.toString());
-              },
-              onError: (error) {
-                showSnackBarError('Create Address error: ${error.message}');
-              },
-            );
-          },
-        ),
-        savedAddressID.isNotEmpty
-            ? Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  color: Colors.teal,
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                isLoading = true;
+              });
+              OkHi.startDigitalAddressVerification(
+                onSuccess: (locationId) {
+                  copyToClipboard("Digital Address", locationId.toString());
+                },
+                onError: (error) {
+                  showSnackBarError('Digital Address error: ${error.message}');
+                },
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Create a digital address",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
-                width: MediaQuery.of(context).size.width - 20,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                isLoading = true;
+              });
+              OkHi.startPhysicalAddressVerification(
+                onSuccess: (locationId) {
+                  copyToClipboard("Physical Address", locationId.toString());
+                },
+                onError: (error) {
+                  showSnackBarError('Physical Address error: ${error.message}');
+                },
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Create a physical address",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                isLoading = true;
+              });
+              OkHi.startDigitalAndPhysicalAddressVerification(
+                onSuccess: (locationId) {
+                  copyToClipboard(
+                    "Physical & Digital Address",
+                    locationId.toString(),
+                  );
+                },
+                onError: (error) {
+                  showSnackBarError(
+                    'Physical & Digital Address error: ${error.message}',
+                  );
+                },
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Create a digital & physical address",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        SizedBox(height: 25),
+        Text(
+          "Resource Status Checks",
+          style: const TextStyle(
+            color: Colors.teal,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () async {
+              setState(() {
+                isLoading = true;
+              });
+              var result = await OkHi.isLocationServicesEnabled();
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[300],
+                  duration: Duration(seconds: 6),
+                  content: Text(
+                    result
+                        ? "Location services are enabled"
+                        : "Location services are disabled",
+                  ),
+                ),
+              );
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Location services status",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () async {
+              setState(() {
+                isLoading = true;
+              });
+              var result = await OkHi.isLocationPermissionGranted();
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[300],
+                  duration: Duration(seconds: 6),
+                  content: Text(
+                    result
+                        ? "Location permission is granted"
+                        : "Location permission is denied",
+                  ),
+                ),
+              );
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Location permission status",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () async {
+              setState(() {
+                isLoading = true;
+              });
+              var result = await OkHi.isBackgroundLocationPermissionGranted();
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[300],
+                  duration: Duration(seconds: 6),
+                  content: Text(
+                    result
+                        ? "Background location permission is granted"
+                        : "Background location permission is denied",
+                  ),
+                ),
+              );
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Background location permission status",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: Platform.isAndroid ? 10 : 0),
+        Platform.isAndroid
+            ? Card(
+                elevation: 3.0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                shadowColor: Colors.teal[100],
                 child: InkWell(
                   onTap: () async {
-                    if (savedAddressID.isNotEmpty) {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      OkHi.startSavedAddressVerification(
-                        locationId: savedAddressID,
-                        onSuccess: (locationId) {
-                          setState(() {
-                            savedAddressID = "";
-                          });
-                          copyToClipboard(
-                            "Verifying Address Book",
-                            locationId.toString(),
-                          );
-                        },
-                        onError: (error) {
-                          showSnackBarError(
-                            'Verifying Address Book error: ${error.message}',
-                          );
-                        },
-                      );
-                    } else {
-                      showSnackBarError(
-                        'Please create an address first to proceed',
-                      );
-                      return;
-                    }
+                    setState(() {
+                      isLoading = true;
+                    });
+                    var result = await OkHi.isGooglePlayServicesAvailable();
+                    scaffoldMessengerKey.currentState?.showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.green[300],
+                        duration: Duration(seconds: 6),
+                        content: Text(
+                          result
+                              ? "Google Play Services is available"
+                              : "Google Play Services is not available",
+                        ),
+                      ),
+                    );
+                    setState(() {
+                      isLoading = false;
+                    });
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      "Tap here to verify the saved address: $savedAddressID",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.teal.shade100,
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    height: MediaQuery.of(context).size.height * 0.06,
+                    padding: const EdgeInsets.only(left: 15.0),
+                    child: Center(
+                      child: Text(
+                        "Google Play Services status",
+                        style: TextStyle(
+                          color: Colors.teal,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ),
                 ),
               )
             : Container(),
-        FullButton(
-          title: "Create a digital address",
-          onPressed: () async {
-            setState(() {
-              isLoading = true;
-            });
-            OkHi.startDigitalAddressVerification(
-              onSuccess: (locationId) {
-                copyToClipboard("Digital Address", locationId.toString());
-              },
-              onError: (error) {
-                showSnackBarError('Digital Address error: ${error.message}');
-              },
-            );
-          },
+        SizedBox(height: 10),
+        Platform.isAndroid
+            ? Card(
+                elevation: 3.0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                shadowColor: Colors.teal[100],
+                child: InkWell(
+                  onTap: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    var result = await OkHi.isNotificationsEnabled();
+                    scaffoldMessengerKey.currentState?.showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.green[300],
+                        duration: Duration(seconds: 6),
+                        content: Text(
+                          result
+                              ? "Notifications are enabled"
+                              : "Notifications are disabled",
+                        ),
+                      ),
+                    );
+                    setState(() {
+                      isLoading = false;
+                    });
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.teal.shade100,
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    height: MediaQuery.of(context).size.height * 0.06,
+                    padding: const EdgeInsets.only(left: 15.0),
+                    child: Center(
+                      child: Text(
+                        "Notifications status",
+                        style: TextStyle(
+                          color: Colors.teal,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Container(),
+
+        SizedBox(height: 25),
+        Text(
+          "Resource Request Actions",
+          style: const TextStyle(
+            color: Colors.teal,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
-        FullButton(
-          title: "Create a physical address",
-          onPressed: () async {
-            setState(() {
-              isLoading = true;
-            });
-            OkHi.startPhysicalAddressVerification(
-              onSuccess: (locationId) {
-                copyToClipboard("Physical Address", locationId.toString());
-              },
-              onError: (error) {
-                showSnackBarError('Physical Address error: ${error.message}');
-              },
-            );
-          },
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () async {
+              setState(() {
+                isLoading = true;
+              });
+              var result = await OkHi.requestNotificationsPermission();
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[300],
+                  duration: Duration(seconds: 6),
+                  content: Text(
+                    result
+                        ? "Notifications requested successfully"
+                        : "Notifications request failed",
+                  ),
+                ),
+              );
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Request notifications permission",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
-        FullButton(
-          title: "Create a digital & physical address",
-          onPressed: () async {
-            setState(() {
-              isLoading = true;
-            });
-            OkHi.startDigitalAndPhysicalAddressVerification(
-              onSuccess: (locationId) {
-                copyToClipboard(
-                  "Physical & Digital Address",
-                  locationId.toString(),
-                );
-              },
-              onError: (error) {
-                showSnackBarError(
-                  'Physical & Digital Address error: ${error.message}',
-                );
-              },
-            );
-          },
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () async {
+              setState(() {
+                isLoading = true;
+              });
+              var result = await OkHi.requestEnableLocationServices();
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[300],
+                  duration: Duration(seconds: 6),
+                  content: Text(
+                    result
+                        ? "Enable location services requested successfully"
+                        : "Enable location services request failed",
+                  ),
+                ),
+              );
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Enable location services",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () async {
+              setState(() {
+                isLoading = true;
+              });
+              var result = await OkHi.requestLocationPermission();
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[300],
+                  duration: Duration(seconds: 6),
+                  content: Text(
+                    result
+                        ? "Location services requested successfully"
+                        : "Location services request failed",
+                  ),
+                ),
+              );
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Request location permission",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Card(
+          elevation: 3.0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          shadowColor: Colors.teal[100],
+          child: InkWell(
+            onTap: () async {
+              setState(() {
+                isLoading = true;
+              });
+              var result = await OkHi.requestBackgroundLocationPermission();
+              scaffoldMessengerKey.currentState?.showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[300],
+                  duration: Duration(seconds: 6),
+                  content: Text(
+                    result
+                        ? "Background location services requested successfully"
+                        : "Background location services request failed",
+                  ),
+                ),
+              );
+              setState(() {
+                isLoading = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              height: MediaQuery.of(context).size.height * 0.06,
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Center(
+                child: Text(
+                  "Request background location permission",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        // SizedBox(height: 10),
+        // Card(
+        //   elevation: 3.0,
+        //   color: Colors.white,
+        //   shape: RoundedRectangleBorder(
+        //     borderRadius: BorderRadius.circular(15.0),
+        //   ),
+        //   shadowColor: Colors.teal[100],
+        //   child: InkWell(
+        //     onTap: () async {
+        //       if (Platform.isIOS) {
+        //         scaffoldMessengerKey.currentState?.showSnackBar(
+        //           SnackBar(
+        //             backgroundColor: Colors.teal[300],
+        //             duration: Duration(seconds: 6),
+        //             content: Text(
+        //               "Google Play Services is only available on Android devices",
+        //             ),
+        //           ),
+        //         );
+        //         return;
+        //       }
+        //
+        //       setState(() {
+        //         isLoading = true;
+        //       });
+        //       var result = await OkHi.requestEnableGooglePlayServices();
+        //       scaffoldMessengerKey.currentState?.showSnackBar(
+        //         SnackBar(
+        //           backgroundColor: Colors.green[300],
+        //           duration: Duration(seconds: 6),
+        //           content: Text(
+        //             result
+        //                 ? "Background location services requested successfully"
+        //                 : "Background location services request failed",
+        //           ),
+        //         ),
+        //       );
+        //       setState(() {
+        //         isLoading = false;
+        //       });
+        //     },
+        //     child: Container(
+        //       decoration: BoxDecoration(
+        //         color: Colors.teal.shade100,
+        //         borderRadius: BorderRadius.circular(15.0),
+        //       ),
+        //       height: MediaQuery.of(context).size.height * 0.06,
+        //       padding: const EdgeInsets.only(left: 15.0),
+        //       child: Center(
+        //         child: Text(
+        //           "Request Google Play Services",
+        //           style: TextStyle(
+        //             color: Colors.teal,
+        //             fontWeight: FontWeight.bold,
+        //             fontSize: 17,
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        SizedBox(height: 15),
       ],
     );
   }
@@ -541,8 +1303,8 @@ class _MyAppState extends State<MyApp> {
         );
       case "sandbox":
         return OkHiAppConfiguration(
-          branchId: "89IJLMjf9M",
-          clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
+          branchId: "CJZqjVZlIG",
+          clientKey: "5dee3c5a-bc76-44db-a583-7fb35f45071f",
           env: OkHiEnv.sandbox,
         );
       default:
@@ -561,7 +1323,7 @@ class _MyAppState extends State<MyApp> {
     });
 
     final locationManagerConfiguration = OkHiLocationManagerConfiguration(
-      color: "#029e52",
+      color: "#008080",
       appName: "OkHi Flutter Demo",
       logoUrl:
           "https://storage.googleapis.com/okhi-cdn/images/logos/okhi-logo-white.png",
@@ -572,7 +1334,7 @@ class _MyAppState extends State<MyApp> {
       withStreetView: true,
     );
 
-    final okHiUser = OkHiUser(
+    okHiUser = OkHiUser(
       phone: phone,
       firstName: firstName,
       lastName: lastName,
@@ -580,6 +1342,15 @@ class _MyAppState extends State<MyApp> {
       email: email,
       id: userId,
     );
+
+    // okHiUser = OkHiUser(
+    //   phone: "+254712288371",
+    //   firstName: "Granson",
+    //   lastName: "Oyombe",
+    //   appUserId: "flutterAppUser1000000",
+    //   email: "granson@okhi.co",
+    //   id: "9098778",
+    // );
 
     OkHi.initialize(appConfig, okHiUser, locationManagerConfiguration)
         .then((result) {
@@ -598,6 +1369,28 @@ class _MyAppState extends State<MyApp> {
         })
         .onError((error, stackTrace) {
           showSnackBarError("OkHi Initialization error: $error");
+        });
+  }
+
+  _handleOkHiLogout() async {
+    OkHi.logout()
+        .then((result) {
+          setState(() {
+            isUserSet = false;
+            appUserId = "";
+            userId = "";
+            savedAddressID = "";
+            isLoading = false;
+          });
+          scaffoldMessengerKey.currentState?.showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.green[300],
+              content: const Text('OkHi Logout successful'),
+            ),
+          );
+        })
+        .onError((error, stackTrace) {
+          showSnackBarError("OkHi Logout error: $error");
         });
   }
 }

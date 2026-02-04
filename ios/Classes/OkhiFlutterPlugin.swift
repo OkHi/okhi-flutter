@@ -329,51 +329,95 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
     private func handleStartDigitalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let viewController = topViewController() else {
-            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
+            self.emit(
+                [
+                    "type": "error",
+                    "methodCall": "startDigitalVerification",
+                    "code" : "internal_error",
+                    "message" : "Unable to get root view controller"
+                ]
+            )
             return
         }
 
         OK.shared.startAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
-            if let error = error {
-                result(FlutterError(code: "verification_error", message: error.message, details: nil))
-                return
+            if let locationId = response?.location.id {
+                print("Successfully started verification for \(locationId)")
+                self.emit(
+                    [
+                        "type": "success",
+                        "methodCall": "startDigitalVerification",
+                        "locationId": locationId
+                    ]
+                )
+            } else if let error = error {
+                self.emit(
+                    [
+                        "type": "error",
+                        "methodCall": "startDigitalVerification",
+                        "code" : error.code,
+                        "message" : error.message
+                    ]
+                )
+            } else {
+                self.emit(
+                    [
+                        "type": "error",
+                        "methodCall": "startDigitalVerification",
+                        "code" : "verification_failed",
+                        "message" : "Verification failed to return a location ID"
+                    ]
+                )
             }
-            guard let locationId = response?.location.id else {
-                result(FlutterError(code: "verification_failed", message: "Verification failed to return a location ID", details: nil))
-                return
-            }
-            print("Successfully started verification for \(locationId)")
-            self.emit(
-                [
-                    "type": "success",
-                    "methodCall": "startAddressVerification",
-                    "locationId": locationId
-                ]
-            )
         }
     }
 
     private func handleStartPhysicalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let viewController = topViewController() else {
-            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
-            return
-        }
-        OK.shared.startPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
-            guard let locationId = response?.location.id else { return }
-            print("Successfully started verification for \(locationId)")
             self.emit(
                 [
-                    "type": "success",
+                    "type": "error",
                     "methodCall": "startPhysicalAddressVerification",
-                    "locationId": locationId
+                    "code" : "internal_error",
+                    "message" : "Unable to get root view controller"
                 ]
             )
+            return
+        }
+
+        OK.shared.startPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
+            if let locationId = response?.location.id {
+                print("Successfully started verification for \(locationId)")
+                self.emit(
+                    [
+                        "type": "success",
+                        "methodCall": "startPhysicalAddressVerification",
+                        "locationId": locationId
+                    ]
+                )
+            } else if let error = error {
+                self.emit(
+                    [
+                        "type": "error",
+                        "methodCall": "startPhysicalAddressVerification",
+                        "code" : error.code,
+                        "message" : error.message
+                    ]
+                )
+            }
         }
     }
 
     private func handleStartDigitalAndPhysicalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let viewController = topViewController() else {
-            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
+            self.emit(
+                [
+                    "type": "error",
+                    "methodCall": "startDigitalAndPhysicalAddressVerification",
+                    "code" : "internal_error",
+                    "message" : "Unable to get root view controller"
+                ]
+            )
             return
         }
         OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
@@ -382,7 +426,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             self.emit(
                 [
                     "type": "success",
-                    "methodCall": "startAddressVerification",
+                    "methodCall": "startDigitalAndPhysicalAddressVerification",
                     "locationId": locationId
                 ]
             )
@@ -391,7 +435,14 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
     private func handleCreateAddress(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let viewController = topViewController() else {
-            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
+            self.emit(
+                [
+                    "type": "error",
+                    "methodCall": "createAddress",
+                    "code" : "internal_error",
+                    "message" : "Unable to get root view controller"
+                ]
+            )
             return
         }
         OK.shared.createAddress(vc: viewController, theme: theme, config: appConfig) { response, error in
@@ -419,20 +470,40 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         )
 
         guard let rootViewController = topViewController() else {
-            result(FlutterError(code: "internal_error", message: "Unable to get root view controller", details: nil))
-            return
-        }
-
-        OK.shared.startAddressVerification(vc: rootViewController, theme: theme, config: appConfig, location: okhiLocation) { response, error in
-          guard let locationId = response?.location.id else { return }
-          print("Successfully created address for \(locationId)")
             self.emit(
                 [
-                    "type": "success",
-                    "methodCall": "startAddressVerification",
-                    "locationId": locationId
+                    "type": "error",
+                    "methodCall": "startSavedAddressVerification",
+                    "code" : "internal_error",
+                    "message" : "Unable to get root view controller"
                 ]
             )
+            return
+        }
+        var appConfigInstance: OkHiConfig = appConfig.withUsageTypes(
+            usageTypes: [OkHiUsageType.digitalVerification]
+        )
+        OK.shared.startAddressVerification(vc: rootViewController, theme: theme, config: appConfigInstance, location: okhiLocation) { response, error in
+
+            if let locationId = response?.location.id {
+                print("Successfully created address for \(locationId)")
+                self.emit(
+                    [
+                        "type": "success",
+                        "methodCall": "startSavedAddressVerification",
+                        "locationId": locationId
+                    ]
+                )
+            } else if let error = error {
+                self.emit(
+                    [
+                        "type": "error",
+                        "methodCall": "startAddressVerification",
+                        "code" : error.code,
+                        "message" : error.message
+                    ]
+                )
+            }
         }
     }
 
