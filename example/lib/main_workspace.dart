@@ -12,17 +12,17 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(const HomeApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class HomeApp extends StatefulWidget {
+  const HomeApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<HomeApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<HomeApp> {
   OkHiLocation? location;
   bool isUserSet = false;
   bool isLoading = false;
