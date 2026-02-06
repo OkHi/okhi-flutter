@@ -352,7 +352,7 @@ class OkHi {
   }
 
   static Future<void> logout() async {
-    await _channel.invokeMethod(OkHiNativeMethod.logout);
     streamSubscription.cancel();
+    await _channel.invokeMethod(OkHiNativeMethod.logout);
   }
 }
