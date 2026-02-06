@@ -50,16 +50,16 @@ class DefaultFirebaseOptions {
   }
 
   static FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBx9sOjDQqJMetyTnhfBVCIsYsAe1ID0gQ',
-    appId: '1:451669525763:android:3d91d4999d6d29c1bad536',
+    apiKey: '',
+    appId: '',
     messagingSenderId: '451669525763',
     projectId: 'okhi-sample',
     storageBucket: 'okhi-sample.firebasestorage.app',
   );
 
   static FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCJFp1SjbtMD6K_cdm_4vVJWq-wfcBQa4g',
-    appId: '1:451669525763:ios:4472a13e792ac61bbad536',
+    apiKey: '',
+    appId: '',
     messagingSenderId: '451669525763',
     projectId: 'okhi-sample',
     storageBucket: 'okhi-sample.firebasestorage.app',
