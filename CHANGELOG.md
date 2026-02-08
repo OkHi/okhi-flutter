@@ -1,3 +1,16 @@
+## 2.0.0
+
+- Major update: Refactored the plugin to provide a more streamlined and efficient experience for developers.
+- Easy to integrate and use with a more intuitive callback-based approach.
+- Improved and Type-Safe Error Handling with OkHiException .
+- Updated documentation and examples to reflect the new changes.
+- Upgrade: Bumped up native libraries to the latest versions for improved performance and stability.
+
+- Breaking changes: The API has been significantly changed, and existing implementations will need to be updated to work with the new version. Please refer to the updated documentation for migration guidelines.
+- We recommend testing the new version in a staging environment before deploying it to production to ensure compatibility and to take advantage of the new features and improvements.
+- Thank you for using our plugin, and we look forward to seeing how you utilize the new features and improvements in version 2.0.0!
+  
+
 ## 1.1.36
 
 - fix: Android 16KB page size compatibility
