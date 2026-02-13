@@ -1,14 +1,14 @@
-group 'io.okhi.flutter.okhi_flutter'
-version '1.0'
-
 buildscript {
+    ext.kotlin_version = "2.1.0"
     repositories {
         google()
         mavenCentral()
+        maven { url "https://repo.okhi.io/artifactory/maven" }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.8.1'
+        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
 
@@ -20,25 +20,46 @@ rootProject.allprojects {
     }
 }
 
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
 
 android {
-
     namespace = "io.okhi.flutter.okhi_flutter"
-    
-    compileSdkVersion 35
+    compileSdk = 35
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdk = 21
     }
-}
 
-dependencies {
-    implementation 'io.okhi.android:core:1.7.40'
-    implementation 'io.okhi.android:okverify:1.9.81'
+    dependencies {
+        implementation("io.okhi.android:okhi:1.0.5")
+        testImplementation("org.jetbrains.kotlin:kotlin-test")
+        testImplementation("org.mockito:mockito-core:5.0.0")
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+                events "passed", "skipped", "failed", "standardOut", "standardError"
+                outputs.upToDateWhen {false}
+                showStandardStreams = true
+            }
+        }
+    }
 }

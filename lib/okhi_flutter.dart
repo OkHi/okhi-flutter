@@ -3,29 +3,41 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:okhi_flutter/models/okhi_location.dart';
 import 'package:okhi_flutter/models/okhi_user.dart';
+import 'package:okhi_flutter/utils/utilities.dart';
 import './models/okhi_app_configuration.dart';
 import './models/okhi_native_methods.dart';
-import './models/okhi_verification_configuration.dart';
 import './models/okhi_exception.dart';
+import 'models/OkHiEvent.dart';
+import 'models/okhi_location_manager_configuration.dart';
 
 // models export
-export './okcollect/okhi_location_manager.dart';
 export './models/okhi_app_configuration.dart';
 export './models/okhi_env.dart';
 export './models/okhi_user.dart';
-export './models/okhi_location_manager_response.dart';
-export './models/okhi_location_manager_configuration.dart';
-export './models/okhi_notification.dart';
-export './models/okhi_verification_configuration.dart';
 export './models/okhi_location.dart';
 export './models/okhi_exception.dart';
 
 /// The primary class for integrating OkHi with your app.
 class OkHi {
+  static late final StreamSubscription streamSubscription;
+  static Function(String locationId)? onVerificationSuccess;
+  static Function(OkHiException exception)? onVerificationError;
+
   static const MethodChannel _channel = MethodChannel('okhi_flutter');
+  static const EventChannel _okhiVerificationEvents = EventChannel(
+    'okhi_flutter_events',
+  );
+
   static OkHiAppConfiguration? _configuration;
+
+  static Stream<OkHiEvent> get okhiVerificationStream {
+    return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
+      print("the event is: $event");
+      final map = Map<String, dynamic>.from(event);
+      return OkHiEvent.fromMap(map);
+    });
+  }
 
   ///  Returns the system version of the current platform
   static Future<String> get platformVersion async {
@@ -47,6 +59,14 @@ class OkHi {
   static Future<bool> isLocationPermissionGranted() async {
     final bool result = await _channel.invokeMethod(
       OkHiNativeMethod.isLocationPermissionGranted,
+    );
+    return result;
+  }
+
+  /// Checks whether Notifications are enabled.
+  static Future<bool> isNotificationsEnabled() async {
+    final bool result = await _channel.invokeMethod(
+      OkHiNativeMethod.isNotificationsEnabled,
     );
     return result;
   }
@@ -74,6 +94,14 @@ class OkHi {
     }
   }
 
+  /// Requests Notifications permission.
+  static Future<bool> requestNotificationsPermission() async {
+    final bool result = await _channel.invokeMethod(
+      OkHiNativeMethod.requestEnableNotifications,
+    );
+    return result;
+  }
+
   /// Requests for when in use location permission.
   static Future<bool> requestLocationPermission() async {
     final bool result = await _channel.invokeMethod(
@@ -86,6 +114,7 @@ class OkHi {
   static Future<bool> requestBackgroundLocationPermission() async {
     if (Platform.isAndroid) {
       final bool whenInUsePermission = await requestLocationPermission();
+
       if (!whenInUsePermission) {
         return false;
       }
@@ -130,35 +159,78 @@ class OkHi {
   ///  * [configuration] An instance of OkHiAppConfiguration
   ///  * [okHiUser] An instance of OkHiUser, nullable
   static Future<bool> initialize(
-      OkHiAppConfiguration configuration, OkHiUser? okHiUser) async {
+    OkHiAppConfiguration configuration,
+    OkHiUser? okHiUser,
+    OkHiLocationManagerConfiguration? locationManagerConfiguration,
+  ) async {
     _configuration = configuration;
 
     if (okHiUser == null) {
       debugPrint(
-          '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com');
+        '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com',
+      );
     }
+
     final credentials = {
       "branchId": configuration.branchId,
       "clientKey": configuration.clientKey,
       "environment": configuration.environmentRawValue,
-      "notification": configuration.notification.toMap(),
 
       // Optional arguments for addresses auto-syncing
       "phoneNumber": okHiUser?.phone,
       "userId": okHiUser?.id,
       "token": okHiUser?.token,
       "email": okHiUser?.email,
-      "firstName": okHiUser?.firstName,
-      "lastName": okHiUser?.lastName,
-      "appUserId": okHiUser?.appUserId
+      "firstname": okHiUser?.firstName,
+      "lastname": okHiUser?.lastName,
+      "appUserId": okHiUser?.appUserId,
+      "locationManagerConfiguration": locationManagerConfiguration != null
+          ? {
+              "color": locationManagerConfiguration.color,
+              "logoUrl": locationManagerConfiguration.logoUrl,
+              "withAppBar": locationManagerConfiguration.withAppBar,
+              "withCreateMode": locationManagerConfiguration.withCreateMode,
+              "withHomeAddressType":
+                  locationManagerConfiguration.withHomeAddressType,
+              "withWorkAddressType":
+                  locationManagerConfiguration.withWorkAddressType,
+              "withStreetView": locationManagerConfiguration.withStreetView,
+            }
+          : null,
     };
 
-    final initState =
-        await _channel.invokeMethod(OkHiNativeMethod.initialize, credentials);
-    if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
-        Platform.isIOS) {
-      await _channel.invokeMethod(OkHiNativeMethod.onStart);
+    streamSubscription = okhiVerificationStream.listen((OkHiEvent event) {
+      if (event.resultType == "success") {
+        if (event.locationId != null) {
+          onVerificationSuccess?.call(event.locationId!);
+        }
+      } else if (event.resultType == "error") {
+        onVerificationError?.call(
+          OkHiException(
+            code: event.code.toString(),
+            message: event.message.toString(),
+          ),
+        );
+      } else {
+        onVerificationError?.call(
+          OkHiException(code: "unknown", message: "An unknown error occurred"),
+        );
+      }
+      onVerificationSuccess = null;
+      onVerificationError = null;
+    });
+
+    bool initState = false;
+    try {
+      initState = await _channel.invokeMethod(
+        OkHiNativeMethod.initialize,
+        credentials,
+      );
+    } catch (e) {
+      appDebugPrint("OkHi Initialization error: $e");
+      // ignore
     }
+
     return initState;
   }
 
@@ -167,98 +239,64 @@ class OkHi {
     return _configuration;
   }
 
-  /// Starts verification for a particular address using the response object returned by OkHiLocationManager.
-  /// * [user] An instance of OkHiUser
-  /// * [location] An instance of OkHiLocation
-  /// * [configuration] Optional Configures how verification will start on different platforms
-  static Future<String> startVerification(
-    OkHiUser user,
-    OkHiLocation location,
-    OkHiVerificationConfiguration? configuration,
-  ) async {
-    if (location.id == null || location.lat == null || location.lon == null) {
-      throw OkHiException(
-        code: OkHiException.badRequestCode,
-        message: "Invalid arguments provided for starting verification",
-      );
-    }
-
-    final config = configuration ?? OkHiVerificationConfiguration();
-    return await _channel.invokeMethod(OkHiNativeMethod.startVerification, {
-      "phoneNumber": user.phone,
-      "userId": user.id,
-      "token": user.token,
-      "locationId": location.id,
-      "lat": location.lat,
-      "lon": location.lon,
-      "usageTypes": location.usageTypes,
-      "withForegroundService": config.withForegroundService,
-    });
-  }
-
-  /// Stops verification for a particular address.
-  /// * [user] An instance of OkHiUser
-  /// * [location] An instance of OkHiLocation
-  static Future<String> stopVerification(
-    OkHiUser user,
-    OkHiLocation location,
-  ) async {
-    if (location.id == null) {
-      throw OkHiException(
-        code: OkHiException.badRequestCode,
-        message: "Invalid arguments provided for stopping verification",
-      );
-    } else {
-      return await _channel.invokeMethod(OkHiNativeMethod.stopVerification, {
-        "phoneNumber": user.phone,
-        "locationId": location.id,
-      });
-    }
-  }
-
-  /// Android Only - Checks if the foreground service is running.
-  static Future<bool> isForegroundServiceRunning() async {
-    return await _channel.invokeMethod(
-      OkHiNativeMethod.isForegroundServiceRunning,
+  /// Starts Digital verification for a particular address.
+  static startDigitalAddressVerification({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
+    await _channel.invokeMethod(
+      OkHiNativeMethod.startDigitalAddressVerification,
     );
   }
 
-  /// Android Only - Starts a foreground service that speeds up rate of verification.
-  static Future<bool> startForegroundService() async {
-    return await _channel.invokeMethod(OkHiNativeMethod.startForegroundService);
+  /// Starts Physical verification for a particular address.
+  static startPhysicalAddressVerification({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
+    await _channel.invokeMethod(
+      OkHiNativeMethod.startPhysicalAddressVerification,
+    );
   }
 
-  /// Android Only - Stops previously started foreground services.
-  static Future<bool> stopForegroundService() async {
-    return await _channel.invokeMethod(OkHiNativeMethod.stopForegroundService);
+  /// Starts Digital And Physical verification for a particular address.
+  static startDigitalAndPhysicalAddressVerification({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
+    await _channel.invokeMethod(
+      OkHiNativeMethod.startDigitalAndPhysicalAddressVerification,
+    );
   }
 
-  /// Checks whether all necessary permissions and services are available in order to start the address verification process.
-  /// * [requestServices] Attempt to activate / request all necesarry permissions and services
-  static Future<bool> canStartVerification(bool requestServices) async {
-    if (Platform.isIOS && !(await OkHi.isLocationServicesEnabled())) {
-      throw OkHiException(
-        code: OkHiException.serviceUnavailableCode,
-        message: "Location services disabled",
-      );
-    }
-    var hasLocationServices =
-        Platform.isIOS ? true : await OkHi.isLocationServicesEnabled();
-    var hasLocationPermission =
-        await OkHi.isBackgroundLocationPermissionGranted();
-    var hasGooglePlayService =
-        Platform.isIOS ? true : await OkHi.isGooglePlayServicesAvailable();
-    if (!requestServices) {
-      return hasLocationServices &&
-          hasLocationPermission &&
-          hasGooglePlayService;
-    }
-    hasLocationServices =
-        Platform.isIOS ? true : await OkHi.requestEnableLocationServices();
-    hasLocationPermission = await OkHi.requestBackgroundLocationPermission();
-    hasGooglePlayService =
-        Platform.isIOS ? true : await OkHi.requestEnableGooglePlayServices();
-    return hasLocationServices && hasLocationPermission && hasGooglePlayService;
+  /// Create a Digital address for a particular location.
+  static createAddress({
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
+    await _channel.invokeMethod(OkHiNativeMethod.createAddress);
+  }
+
+  /// Start verification on a saved Address.
+  static startSavedAddressVerification({
+    required String locationId,
+    required Function(String locationId) onSuccess,
+    required Function(OkHiException exception) onError,
+  }) async {
+    onVerificationSuccess = onSuccess;
+    onVerificationError = onError;
+    await _channel.invokeMethod(
+      OkHiNativeMethod.startSavedAddressVerification,
+      {"locationId": locationId},
+    );
   }
 
   /// Android Only - Checks whether current device can open "Protected Apps Settings" available in Transsion Group android devices such as Infinix and Tecno
@@ -311,5 +349,10 @@ class OkHi {
     return await _channel.invokeMethod(
       OkHiNativeMethod.getLocationAccuracyLevel,
     );
+  }
+
+  static Future<void> logout() async {
+    streamSubscription.cancel();
+    await _channel.invokeMethod(OkHiNativeMethod.logout);
   }
 }

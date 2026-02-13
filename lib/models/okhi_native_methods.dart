@@ -17,11 +17,18 @@ class OkHiNativeMethod {
   static const String getAppIdentifier = "getAppIdentifier";
   static const String getAppVersion = "getAppVersion";
   static const String initialize = "initialize";
-  static const String startVerification = "startVerification";
-  static const String stopVerification = "stopVerification";
-  static const String isForegroundServiceRunning = "isForegroundServiceRunning";
-  static const String startForegroundService = "startForegroundService";
-  static const String stopForegroundService = "stopForegroundService";
+  static const String startDigitalAddressVerification =
+      "startDigitalAddressVerification";
+  static const String startPhysicalAddressVerification =
+      "startPhysicalAddressVerification";
+  static const String startDigitalAndPhysicalAddressVerification =
+      "startDigitalAndPhysicalAddressVerification";
+  static const String createAddress = "createAddress";
+  static const String startSavedAddressVerification =
+      "startSavedAddressVerification";
+
+  static const String isNotificationsEnabled = "isNotificationsEnabled";
+  static const String requestEnableNotifications = "requestEnableNotifications";
   static const String canOpenProtectedApps = "canOpenProtectedApps";
   static const String openProtectedApps = "openProtectedApps";
   static const String onStart = "onStart";
@@ -32,4 +39,5 @@ class OkHiNativeMethod {
   static const String openAppSettings = "openAppSettings";
   static const String getCurrentLocation = "getCurrentLocation";
   static const String getLocationAccuracyLevel = "getLocationAccuracyLevel";
+  static const String logout = "logout";
 }
