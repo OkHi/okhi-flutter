@@ -1,14 +1,16 @@
 class OkHiEvent {
   final String resultType;
   final String methodCall;
-  final String? locationId;
+  final dynamic user;
+  final dynamic location;
   final String? code;
   final String? message;
 
   OkHiEvent({
     required this.resultType,
     required this.methodCall,
-    this.locationId,
+    this.user,
+    this.location,
     this.code,
     this.message,
   });
@@ -17,7 +19,8 @@ class OkHiEvent {
     return OkHiEvent(
       resultType: map['type'],
       methodCall: map['methodCall'],
-      locationId: map['locationId'],
+      user: map['user'],
+      location: map['location'],
       code: map['code'],
       message: map['message'],
     );

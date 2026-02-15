@@ -81,10 +81,10 @@ class _MyAppState extends State<MyApp> {
             title: "Create a digital address",
             onPressed: () {
               OkHi.startDigitalAddressVerification(
-                onSuccess: (locationId) {
+                onSuccess: (user, location) {
                   if (kDebugMode) {
                     print(
-                      "Digital address verification successful! Location ID: $locationId",
+                      "Digital address verification successful! Location ID: ${location.id}",
                     );
                   }
                 },

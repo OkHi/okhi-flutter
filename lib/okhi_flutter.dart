@@ -8,7 +8,8 @@ import 'package:okhi_flutter/utils/utilities.dart';
 import './models/okhi_app_configuration.dart';
 import './models/okhi_native_methods.dart';
 import './models/okhi_exception.dart';
-import 'models/OkHiEvent.dart';
+import 'models/okhi_event.dart';
+import 'models/okhi_location.dart';
 import 'models/okhi_location_manager_configuration.dart';
 
 // models export
@@ -21,7 +22,7 @@ export './models/okhi_exception.dart';
 /// The primary class for integrating OkHi with your app.
 class OkHi {
   static late final StreamSubscription streamSubscription;
-  static Function(String locationId)? onVerificationSuccess;
+  static Function(OkHiUser user, OkHiLocation location)? onVerificationSuccess;
   static Function(OkHiException exception)? onVerificationError;
 
   static const MethodChannel _channel = MethodChannel('okhi_flutter');
@@ -201,9 +202,7 @@ class OkHi {
 
     streamSubscription = okhiVerificationStream.listen((OkHiEvent event) {
       if (event.resultType == "success") {
-        if (event.locationId != null) {
-          onVerificationSuccess?.call(event.locationId!);
-        }
+        onVerificationSuccess?.call(event.user, event.location);
       } else if (event.resultType == "error") {
         onVerificationError?.call(
           OkHiException(
@@ -241,7 +240,7 @@ class OkHi {
 
   /// Starts Digital verification for a particular address.
   static startDigitalAddressVerification({
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
@@ -253,7 +252,7 @@ class OkHi {
 
   /// Starts Physical verification for a particular address.
   static startPhysicalAddressVerification({
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
@@ -265,7 +264,7 @@ class OkHi {
 
   /// Starts Digital And Physical verification for a particular address.
   static startDigitalAndPhysicalAddressVerification({
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
@@ -277,7 +276,7 @@ class OkHi {
 
   /// Create a Digital address for a particular location.
   static createAddress({
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
@@ -288,7 +287,7 @@ class OkHi {
   /// Start verification on a saved Address.
   static startSavedAddressVerification({
     required String locationId,
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;

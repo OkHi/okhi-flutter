@@ -11,7 +11,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const HomeApp());
 }
 
@@ -522,11 +522,11 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.createAddress(
-                onSuccess: (locationId) {
+                onSuccess: (user, location) {
                   setState(() {
-                    savedAddressID = locationId.toString();
+                    savedAddressID = location.id.toString();
                   });
-                  copyToClipboard("Create Address", locationId.toString());
+                  copyToClipboard("Create Address", location.id.toString());
                 },
                 onError: (error) {
                   showSnackBarError('Create Address error: ${error.message}');
@@ -569,13 +569,13 @@ class _MyAppState extends State<HomeApp> {
                 });
                 OkHi.startSavedAddressVerification(
                   locationId: savedAddressID,
-                  onSuccess: (locationId) {
+                  onSuccess: (user, location) {
                     setState(() {
                       savedAddressID = "";
                     });
                     copyToClipboard(
                       "Verifying Address Book",
-                      locationId.toString(),
+                      location.id.toString(),
                     );
                   },
                   onError: (error) {
@@ -625,8 +625,8 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startDigitalAddressVerification(
-                onSuccess: (locationId) {
-                  copyToClipboard("Digital Address", locationId.toString());
+                onSuccess: (user, location) {
+                  copyToClipboard("Digital Address", location.id.toString());
                 },
                 onError: (error) {
                   showSnackBarError('Digital Address error: ${error.message}');
@@ -667,8 +667,8 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startPhysicalAddressVerification(
-                onSuccess: (locationId) {
-                  copyToClipboard("Physical Address", locationId.toString());
+                onSuccess: (user, location) {
+                  copyToClipboard("Physical Address", location.id.toString());
                 },
                 onError: (error) {
                   showSnackBarError('Physical Address error: ${error.message}');
@@ -709,10 +709,10 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startDigitalAndPhysicalAddressVerification(
-                onSuccess: (locationId) {
+                onSuccess: (user, location) {
                   copyToClipboard(
                     "Physical & Digital Address",
-                    locationId.toString(),
+                    location.id.toString(),
                   );
                 },
                 onError: (error) {

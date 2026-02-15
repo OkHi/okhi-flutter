@@ -36,6 +36,7 @@ import io.okhi.android.core.model.OkHiException
 import io.okhi.android.core.model.OkHiUser
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlinx.serialization.Serializable
 
 class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
@@ -165,7 +166,8 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                         mapOf(
                             "methodCall" to "createAddress",
                             "type" to "success",
-                            "locationId" to response.location.id
+                            "user" to response.user,
+                            "location" to response.location
                         )
                     )
                 }
@@ -209,7 +211,8 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                         mapOf(
                             "methodCall" to "startSavedAddressVerification",
                             "type" to "success",
-                            "locationId" to response.location.id
+                            "user" to response.user,
+                            "location" to response.location
                         )
                     )
                 }
@@ -249,7 +252,8 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                         mapOf(
                             "methodCall" to "startDigitalAndPhysicalAddressVerification",
                             "type" to "success",
-                            "locationId" to response.location.id
+                            "user" to response.user,
+                            "location" to response.location
                         )
                     )
                 }
@@ -289,7 +293,8 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                         mapOf(
                             "methodCall" to "startPhysicalAddressVerification",
                             "type" to "success",
-                            "locationId" to response.location.id
+                            "user" to response.user,
+                            "location" to response.location
                         )
                     )
                 }
@@ -329,7 +334,8 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                         mapOf(
                             "methodCall" to "startDigitalAddressVerification",
                             "type" to "success",
-                            "locationId" to response.location.id
+                            "user" to Json.encodeToString(response.user),
+                            "location" to Json.encodeToString(response.location)
                         )
                     )
                 }
