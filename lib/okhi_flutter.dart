@@ -34,8 +34,7 @@ class OkHi {
 
   static Stream<OkHiEvent> get okhiVerificationStream {
     return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
-      print("the event is: $event");
-      final map = Map<String, dynamic>.from(event);
+      final Map<String, dynamic> map = jsonDecode(event);
       return OkHiEvent.fromMap(map);
     });
   }
@@ -159,7 +158,7 @@ class OkHi {
   ///  Initializes the library with provided API Keys and optional notification configuration.
   ///  * [configuration] An instance of OkHiAppConfiguration
   ///  * [okHiUser] An instance of OkHiUser, nullable
-  static Future<bool> initialize(
+  static Future<bool> login(
     OkHiAppConfiguration configuration,
     OkHiUser? okHiUser,
     OkHiLocationManagerConfiguration? locationManagerConfiguration,
@@ -200,7 +199,7 @@ class OkHi {
           : null,
     };
 
-    streamSubscription = okhiVerificationStream.listen((OkHiEvent event) {
+    streamSubscription = okhiVerificationStream.listen((dynamic event) {
       if (event.resultType == "success") {
         onVerificationSuccess?.call(event.user, event.location);
       } else if (event.resultType == "error") {
@@ -239,7 +238,8 @@ class OkHi {
   }
 
   /// Starts Digital verification for a particular address.
-  static startDigitalAddressVerification({
+  static startDigitalAddressVerification(
+    String? locationId, {
     required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
@@ -247,6 +247,7 @@ class OkHi {
     onVerificationError = onError;
     await _channel.invokeMethod(
       OkHiNativeMethod.startDigitalAddressVerification,
+      {"locationId": locationId},
     );
   }
 
@@ -282,20 +283,6 @@ class OkHi {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
     await _channel.invokeMethod(OkHiNativeMethod.createAddress);
-  }
-
-  /// Start verification on a saved Address.
-  static startSavedAddressVerification({
-    required String locationId,
-    required Function(OkHiUser user, OkHiLocation location) onSuccess,
-    required Function(OkHiException exception) onError,
-  }) async {
-    onVerificationSuccess = onSuccess;
-    onVerificationError = onError;
-    await _channel.invokeMethod(
-      OkHiNativeMethod.startSavedAddressVerification,
-      {"locationId": locationId},
-    );
   }
 
   /// Android Only - Checks whether current device can open "Protected Apps Settings" available in Transsion Group android devices such as Infinix and Tecno

@@ -1,8 +1,11 @@
+import 'package:okhi_flutter/models/okhi_location.dart';
+import 'package:okhi_flutter/models/okhi_user.dart';
+
 class OkHiEvent {
   final String resultType;
   final String methodCall;
-  final dynamic user;
-  final dynamic location;
+  final OkHiUser? user;
+  final OkHiLocation? location;
   final String? code;
   final String? message;
 
@@ -19,8 +22,12 @@ class OkHiEvent {
     return OkHiEvent(
       resultType: map['type'],
       methodCall: map['methodCall'],
-      user: map['user'],
-      location: map['location'],
+      user: map['user'] != null
+          ? OkHiUser.fromMap(phone: map['user']['phone'], data: map['user'])
+          : null,
+      location: map['location'] != null
+          ? OkHiLocation.fromMap(map['location'])
+          : null,
       code: map['code'],
       message: map['message'],
     );

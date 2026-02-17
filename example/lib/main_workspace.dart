@@ -567,8 +567,8 @@ class _MyAppState extends State<HomeApp> {
                 setState(() {
                   isLoading = true;
                 });
-                OkHi.startSavedAddressVerification(
-                  locationId: savedAddressID,
+                OkHi.startDigitalAddressVerification(
+                  savedAddressID,
                   onSuccess: (user, location) {
                     setState(() {
                       savedAddressID = "";
@@ -625,6 +625,7 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startDigitalAddressVerification(
+                null,
                 onSuccess: (user, location) {
                   copyToClipboard("Digital Address", location.id.toString());
                 },
@@ -1207,68 +1208,6 @@ class _MyAppState extends State<HomeApp> {
             ),
           ),
         ),
-        // SizedBox(height: 10),
-        // Card(
-        //   elevation: 3.0,
-        //   color: Colors.white,
-        //   shape: RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.circular(15.0),
-        //   ),
-        //   shadowColor: Colors.teal[100],
-        //   child: InkWell(
-        //     onTap: () async {
-        //       if (Platform.isIOS) {
-        //         scaffoldMessengerKey.currentState?.showSnackBar(
-        //           SnackBar(
-        //             backgroundColor: Colors.teal[300],
-        //             duration: Duration(seconds: 6),
-        //             content: Text(
-        //               "Google Play Services is only available on Android devices",
-        //             ),
-        //           ),
-        //         );
-        //         return;
-        //       }
-        //
-        //       setState(() {
-        //         isLoading = true;
-        //       });
-        //       var result = await OkHi.requestEnableGooglePlayServices();
-        //       scaffoldMessengerKey.currentState?.showSnackBar(
-        //         SnackBar(
-        //           backgroundColor: Colors.green[300],
-        //           duration: Duration(seconds: 6),
-        //           content: Text(
-        //             result
-        //                 ? "Background location services requested successfully"
-        //                 : "Background location services request failed",
-        //           ),
-        //         ),
-        //       );
-        //       setState(() {
-        //         isLoading = false;
-        //       });
-        //     },
-        //     child: Container(
-        //       decoration: BoxDecoration(
-        //         color: Colors.teal.shade100,
-        //         borderRadius: BorderRadius.circular(15.0),
-        //       ),
-        //       height: MediaQuery.of(context).size.height * 0.06,
-        //       padding: const EdgeInsets.only(left: 15.0),
-        //       child: Center(
-        //         child: Text(
-        //           "Request Google Play Services",
-        //           style: TextStyle(
-        //             color: Colors.teal,
-        //             fontWeight: FontWeight.bold,
-        //             fontSize: 17,
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ),
         SizedBox(height: 15),
       ],
     );
@@ -1291,26 +1230,26 @@ class _MyAppState extends State<HomeApp> {
     switch (environment) {
       case "dev":
         return OkHiAppConfiguration(
-          branchId: "UD3tyqVt50",
-          clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.dev,
         );
       case "prod":
         return OkHiAppConfiguration(
-          branchId: "CJZqjVZlIG",
-          clientKey: "5dee3c5a-bc76-44db-a583-7fb35f45071f",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.prod,
         );
       case "sandbox":
         return OkHiAppConfiguration(
-          branchId: "CJZqjVZlIG",
-          clientKey: "5dee3c5a-bc76-44db-a583-7fb35f45071f",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.sandbox,
         );
       default:
         return OkHiAppConfiguration(
-          branchId: "UD3tyqVt50",
-          clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.dev,
         );
     }
@@ -1343,7 +1282,7 @@ class _MyAppState extends State<HomeApp> {
       id: userId,
     );
 
-    OkHi.initialize(appConfig, okHiUser, locationManagerConfiguration)
+    OkHi.login(appConfig, okHiUser, locationManagerConfiguration)
         .then((result) {
           setState(() {
             isUserSet = true;

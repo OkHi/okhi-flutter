@@ -36,7 +36,7 @@ import io.okhi.android.core.model.OkHiException
 import io.okhi.android.core.model.OkHiUser
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlinx.serialization.Serializable
+import org.json.JSONObject
 
 class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
@@ -71,9 +71,11 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         )
     }
 
-    private fun sendEvent(data: Map<String, Any?>) {
+    private fun sendEvent(data: Any) {
         Handler(Looper.getMainLooper()).post {
-            eventSink?.success(data)
+            if (eventSink != null){
+                eventSink?.success(data.toString())
+            }
         }
     }
 
@@ -133,13 +135,18 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             "getAppVersion" -> handleGetAppVersion(call, result)
             "initialize" -> handleInitialize(call, result)
 
-            "startDigitalAddressVerification" -> { handleStartDigitalVerification(call, result)
-                result.success(null)
+            "startDigitalAddressVerification" -> {
+                val locationId: String? = call.argument("locationId")
+                if(locationId != null) {
+                    handleStartSavedVerification(locationId, result)
+                } else {
+                    handleStartDigitalVerification(call, result)
+                }
             }
             "startPhysicalAddressVerification" -> handleStartPhysicalVerification(call, result)
             "startDigitalAndPhysicalAddressVerification" -> handleStartDigitalAndPhysicalVerification(call, result)
             "createAddress" -> handleCreateAddress(call, result)
-            "startSavedAddressVerification" -> handleStartSavedVerification(call, result)
+            "createAddress" -> handleCreateAddress(call, result)
 
             "canOpenProtectedApps" -> handleCanOpenProtectedApps(call, result)
             "openProtectedApps" -> handleOpenProtectedApps(call, result)
@@ -162,79 +169,24 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "createAddress",
-                            "type" to "success",
-                            "user" to response.user,
-                            "location" to response.location
-                        )
-                    )
+                    val eventObject = getSuccessEventObject("createAddress", response)
+                    sendEvent(eventObject)
                 }
 
                 override fun onClose() {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "createAddress",
-                            "type" to "closed"
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","createAddress")
+                    eventObject.put("type","closed")
+                    sendEvent(eventObject)
                 }
 
                 override fun onError(e: OkHiException) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "createAddress",
-                            "type" to "error",
-                            "code" to e.code,
-                            "message" to e.message
-                        )
-                    )
-                }
-            })
-    }
-
-    private fun handleStartSavedVerification(
-        call: MethodCall,
-        result: Result
-    ) {
-        val locationId: String? = call.argument("locationId")
-
-        val collectInstance = OkCollect(collect.style, collect.config, OkHiLocation(locationId))
-
-        OkHi.startAddressVerification(
-            activity,
-            collectInstance,
-            object : OkHiAddressVerificationCallback() {
-                override fun onSuccess(response: OkHiSuccessResponse) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startSavedAddressVerification",
-                            "type" to "success",
-                            "user" to response.user,
-                            "location" to response.location
-                        )
-                    )
-                }
-
-                override fun onClose() {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startSavedAddressVerification",
-                            "type" to "closed"
-                        )
-                    )
-                }
-
-                override fun onError(e: OkHiException) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startSavedAddressVerification",
-                            "type" to "error",
-                            "code" to e.code,
-                            "message" to e.message
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","createAddress")
+                    eventObject.put("type","error")
+                    eventObject.put("code",e.code)
+                    eventObject.put("message",e.message)
+                    sendEvent(eventObject)
                 }
             })
     }
@@ -248,34 +200,24 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startDigitalAndPhysicalAddressVerification",
-                            "type" to "success",
-                            "user" to response.user,
-                            "location" to response.location
-                        )
-                    )
+                    val eventObject = getSuccessEventObject("startDigitalAndPhysicalAddressVerification", response)
+                    sendEvent(eventObject)
                 }
 
                 override fun onClose() {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startDigitalAndPhysicalAddressVerification",
-                            "type" to "closed"
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startDigitalAndPhysicalAddressVerification")
+                    eventObject.put("type","closed")
+                    sendEvent(eventObject)
                 }
 
                 override fun onError(e: OkHiException) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startDigitalAndPhysicalAddressVerification",
-                            "type" to "error",
-                            "code" to e.code,
-                            "message" to e.message
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startDigitalAndPhysicalAddressVerification")
+                    eventObject.put("type","error")
+                    eventObject.put("code",e.code)
+                    eventObject.put("message",e.message)
+                    sendEvent(eventObject)
                 }
             })
     }
@@ -289,34 +231,24 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startPhysicalAddressVerification",
-                            "type" to "success",
-                            "user" to response.user,
-                            "location" to response.location
-                        )
-                    )
+                    val eventObject = getSuccessEventObject("startPhysicalAddressVerification", response)
+                    sendEvent(eventObject)
                 }
 
                 override fun onClose() {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startPhysicalAddressVerification",
-                            "type" to "closed"
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startPhysicalAddressVerification")
+                    eventObject.put("type","closed")
+                    sendEvent(eventObject)
                 }
 
                 override fun onError(e: OkHiException) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startPhysicalAddressVerification",
-                            "type" to "error",
-                            "code" to e.code,
-                            "message" to e.message
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startPhysicalAddressVerification")
+                    eventObject.put("type","error")
+                    eventObject.put("code",e.code)
+                    eventObject.put("message",e.message)
+                    sendEvent(eventObject)
                 }
             })
     }
@@ -330,36 +262,118 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startDigitalAddressVerification",
-                            "type" to "success",
-                            "user" to Json.encodeToString(response.user),
-                            "location" to Json.encodeToString(response.location)
-                        )
-                    )
+                    val eventObject = getSuccessEventObject("startDigitalAddressVerification", response)
+                    sendEvent(eventObject)
                 }
 
                 override fun onClose() {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startDigitalAddressVerification",
-                            "type" to "closed"
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startDigitalAddressVerification")
+                    eventObject.put("type","closed")
+                    sendEvent(eventObject)
                 }
 
                 override fun onError(e: OkHiException) {
-                    sendEvent(
-                        mapOf(
-                            "methodCall" to "startDigitalAddressVerification",
-                            "type" to "error",
-                            "code" to e.code,
-                            "message" to e.message
-                        )
-                    )
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startDigitalAddressVerification")
+                    eventObject.put("type","error")
+                    eventObject.put("code",e.code)
+                    eventObject.put("message",e.message)
+                    sendEvent(eventObject)
                 }
-            })
+            }
+        )
+    }
+
+    private fun handleStartSavedVerification(
+        locationId: String,
+        result: Result
+    ) {
+        val collectInstance = OkCollect(collect.style, collect.config, OkHiLocation(locationId))
+        OkHi.startAddressVerification(
+            activity,
+            collectInstance,
+            object : OkHiAddressVerificationCallback() {
+                override fun onSuccess(response: OkHiSuccessResponse) {
+                    val eventObject = getSuccessEventObject("startSavedAddressVerification", response)
+                    sendEvent(eventObject)
+                }
+
+                override fun onClose() {
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startSavedAddressVerification")
+                    eventObject.put("type","closed")
+                    sendEvent(eventObject)
+                }
+
+                override fun onError(e: OkHiException) {
+                    val eventObject= JSONObject()
+                    eventObject.put("methodCall","startSavedAddressVerification")
+                    eventObject.put("type","error")
+                    eventObject.put("code",e.code)
+                    eventObject.put("message",e.message)
+                    sendEvent(eventObject)
+                }
+
+            }
+        )
+    }
+
+    private fun getSuccessEventObject(methodCall: String,response: OkHiSuccessResponse): JSONObject {
+
+        val eventObject= JSONObject()
+        eventObject.put("methodCall",methodCall)
+        eventObject.put("type","success")
+
+        val userObject= JSONObject()
+        userObject.put("email",response.user.email)
+        userObject.put("firstName",response.user.firstName)
+        userObject.put("lastName",response.user.lastName)
+        userObject.put("id",response.user.okhiUserId)
+        userObject.put("phone",response.user.phone)
+        userObject.put("appUserId",response.user.appUserId)
+        userObject.put("token",response.user.token)
+        eventObject.put("user",userObject)
+
+        val locationObject= JSONObject()
+        locationObject.put("id",response.location.id)
+        locationObject.put("lat",response.location.lat)
+        locationObject.put("lng",response.location.lng)
+        locationObject.put("city",response.location.city)
+        locationObject.put("country",response.location.country)
+        locationObject.put("directions",response.location.directions)
+        locationObject.put("displayTitle",response.location.displayTitle)
+        locationObject.put("otherInformation",response.location.otherInformation)
+        locationObject.put("photoUrl",response.location.photoUrl)
+        locationObject.put("placeId",response.location.placeId)
+        locationObject.put("plusCode",response.location.plusCode)
+        locationObject.put("propertyName",response.location.propertyName)
+        locationObject.put("propertyNumber",response.location.propertyNumber)
+        locationObject.put("state",response.location.state)
+        locationObject.put("streetName",response.location.streetName)
+        locationObject.put("streetViewPanoId",response.location.streetViewPanoId)
+        locationObject.put("streetViewPanoUrl",response.location.streetViewPanoUrl)
+        locationObject.put("subtitle",response.location.subtitle)
+        locationObject.put("title",response.location.title)
+        locationObject.put("url",response.location.url)
+        locationObject.put("userId",response.location.userId)
+        locationObject.put("neighborhood",response.location.neighborhood)
+        locationObject.put("countryCode",response.location.countryCode)
+        locationObject.put("usageTypes",response.location.usageTypes)
+        locationObject.put("ward",response.location.ward)
+        locationObject.put("formattedAddress",response.location.formattedAddress)
+        locationObject.put("postCode",response.location.postCode)
+        locationObject.put("lga",response.location.lga)
+        locationObject.put("lgaCode",response.location.lgaCode)
+        locationObject.put("unit",response.location.unit)
+        locationObject.put("gpsAccuracy",response.location.gpsAccuracy)
+        locationObject.put("businessName",response.location.businessName)
+        locationObject.put("type",response.location.type)
+        locationObject.put("district",response.location.district)
+        locationObject.put("addressLine",response.location.addressLine)
+
+        eventObject.put("location",locationObject)
+        return eventObject
     }
 
     private fun handleLogout(call: MethodCall, result: Result) {
@@ -466,7 +480,6 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 var config = OkCollectConfig(true, true, false, true)
 
                 if(locationManagerConfiguration != null) {
-
                     style = OkCollectStyle(locationManagerConfiguration["color"].toString(), locationManagerConfiguration["appName"].toString(), locationManagerConfiguration["logoUrl"].toString())
                     config = OkCollectConfig(
                         locationManagerConfiguration["withStreetView"] == "true",

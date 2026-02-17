@@ -66,6 +66,7 @@ class _HomeState extends State<Home> {
                 title: "Create a digital address",
                 onPressed: () async {
                   OkHi.startDigitalAddressVerification(
+                    null,
                     onError: (message) {},
                     onSuccess: (user, location) {},
                   );
