@@ -167,7 +167,7 @@ class OkHi {
 
     if (okHiUser == null) {
       debugPrint(
-        '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com',
+        '⚠️ [OkHi]: Missing OkHiUser parameter in login(). Providing a user helps verify previous addresses. See https://docs.okhi.com',
       );
     }
 

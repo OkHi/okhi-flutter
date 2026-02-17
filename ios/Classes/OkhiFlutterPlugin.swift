@@ -293,10 +293,11 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         
         let email = arguments["email"] as? String
         let userId = arguments["userId"] as? String
+        let appUserId = arguments["appUserId"] as? String
         let token = arguments["token"] as? String
 
         if let branchId = branchId, let clientKey = clientKey {
-            guard let phoneNumber = phoneNumber, let userId = userId, let firstName = firstName else {
+            guard let phoneNumber = phoneNumber, let firstName = firstName else {
                 result(FlutterError(code: "bad_request", message: "Invalid arguments provided for verification", details: nil))
                 return
             }
@@ -312,9 +313,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 .with(firstName: firstName)
                 .with(lastName: lastName ?? "")
                 .with(email: email ?? "")
-                .with(appUserId: userId) // Verify if this is a required field
+                .with(appUserId: appUserId ?? "")
                 .with(token: token ?? "")
-                .with(okHiId: userId)
+                .with(okHiId: userId ?? "")
 
             appConfig = OkHiConfig()
                 .withAddressTypes(

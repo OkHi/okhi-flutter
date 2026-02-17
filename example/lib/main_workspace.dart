@@ -30,7 +30,7 @@ class _MyAppState extends State<HomeApp> {
 
   String savedAddressID = "";
   String appUserId = "";
-  String userId = "No Id";
+  String? userId;
   String environment = "dev";
   late OkHiUser okHiUser;
 
@@ -488,12 +488,12 @@ class _MyAppState extends State<HomeApp> {
               ),
               InkWell(
                 onTap: () async {
-                  copyToClipboard("userId", userId);
+                  copyToClipboard("userId", userId.toString());
                 },
                 child: Row(
                   children: [
                     Text(
-                      userId,
+                      userId.toString(),
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
