@@ -146,7 +146,6 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             "startPhysicalAddressVerification" -> handleStartPhysicalVerification(call, result)
             "startDigitalAndPhysicalAddressVerification" -> handleStartDigitalAndPhysicalVerification(call, result)
             "createAddress" -> handleCreateAddress(call, result)
-            "createAddress" -> handleCreateAddress(call, result)
 
             "canOpenProtectedApps" -> handleCanOpenProtectedApps(call, result)
             "openProtectedApps" -> handleOpenProtectedApps(call, result)
