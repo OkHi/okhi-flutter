@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import OkHi
 import CoreLocation
+import Foundation
 
 public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     private enum LocationPermissionRequestType: String {
@@ -68,9 +69,18 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         return nil
     }
 
-    func emit(_ data: [String: Any?]) {
-        DispatchQueue.main.async {
-            self.eventSink?(data)
+    private func emit(_ data: [String: Any?]) {
+        do {
+            let jsonSafeData = data.compactMapValues { $0 } as [String: Any]
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonSafeData, options: [])
+
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                DispatchQueue.main.async {
+                    self.eventSink?(jsonString)
+                }
+            }
+        } catch {
+            print("Error serializing JSON: \(error)")
         }
     }
 
@@ -123,9 +133,6 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         case "createAddress":
             handleCreateAddress(call, result)
             break
-        case "startSavedAddressVerification":
-            handleVerifySavedAddress(call, result)
-            break
         case "stopVerification":
             handleStopVerification(call, result)
             break
@@ -148,6 +155,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             handleOpenAppSettings(call, result)
         case "getLocationAccuracyLevel":
             handleGetLocationAccuracyLevel(call, result)
+            break
+        case "logout":
+            handleLogout(call, result)
             break
         default:
             result(FlutterMethodNotImplemented)
@@ -286,10 +296,11 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         
         let email = arguments["email"] as? String
         let userId = arguments["userId"] as? String
+        let appUserId = arguments["appUserId"] as? String
         let token = arguments["token"] as? String
 
         if let branchId = branchId, let clientKey = clientKey {
-            guard let phoneNumber = phoneNumber, let userId = userId, let firstName = firstName else {
+            guard let phoneNumber = phoneNumber, let firstName = firstName else {
                 result(FlutterError(code: "bad_request", message: "Invalid arguments provided for verification", details: nil))
                 return
             }
@@ -305,9 +316,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 .with(firstName: firstName)
                 .with(lastName: lastName ?? "")
                 .with(email: email ?? "")
-                .with(appUserId: userId) // Verify if this is a required field
+                .with(appUserId: appUserId ?? "")
                 .with(token: token ?? "")
-                .with(okHiId: userId)
+                .with(okHiId: userId ?? "")
 
             appConfig = OkHiConfig()
                 .withAddressTypes(
@@ -327,12 +338,35 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         }
     }
 
+    private func handleLogout(_ call: FlutterMethodCall, _ result: FlutterResult) {
+        result("Not implemented")
+        // OK.shared.logout() { locationIds in
+        //     result(locationIds)
+        // }
+    }
+
     private func handleStartDigitalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        var okhiLocation: OkHiLocation? = nil
+        var appConfigInstance: OkHiConfig = appConfig
+        var method = "startDigitalAddressVerification"
+
+        let arguments = call.arguments as? [String: Any] ?? [:]
+        let locationId = arguments["locationId"] as? String
+        if(locationId != nil) {
+            okhiLocation = OkHiLocation(
+                identifier: locationId ?? ""
+            )
+            appConfigInstance = appConfig.withUsageTypes(
+                usageTypes: [OkHiUsageType.digitalVerification]
+            )
+            method = "startSavedAddressVerification"
+        }
+
         guard let viewController = topViewController() else {
             self.emit(
                 [
                     "type": "error",
-                    "methodCall": "startDigitalVerification",
+                    "methodCall": method,
                     "code" : "internal_error",
                     "message" : "Unable to get root view controller"
                 ]
@@ -340,32 +374,16 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
 
-        OK.shared.startAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
-            if let locationId = response?.location.id {
-                print("Successfully started verification for \(locationId)")
-                self.emit(
-                    [
-                        "type": "success",
-                        "methodCall": "startDigitalVerification",
-                        "locationId": locationId
-                    ]
-                )
+        OK.shared.startAddressVerification(vc: viewController, theme: theme, config: appConfigInstance, location: okhiLocation) { response, error in
+            if let validResponse = response {
+                self.emit(self.getSuccessEvent(methodCall: method, response: validResponse))
             } else if let error = error {
                 self.emit(
                     [
                         "type": "error",
-                        "methodCall": "startDigitalVerification",
+                        "methodCall": method,
                         "code" : error.code,
                         "message" : error.message
-                    ]
-                )
-            } else {
-                self.emit(
-                    [
-                        "type": "error",
-                        "methodCall": "startDigitalVerification",
-                        "code" : "verification_failed",
-                        "message" : "Verification failed to return a location ID"
                     ]
                 )
             }
@@ -386,15 +404,8 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         }
 
         OK.shared.startPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
-            if let locationId = response?.location.id {
-                print("Successfully started verification for \(locationId)")
-                self.emit(
-                    [
-                        "type": "success",
-                        "methodCall": "startPhysicalAddressVerification",
-                        "locationId": locationId
-                    ]
-                )
+            if let validResponse = response {
+                self.emit(self.getSuccessEvent(methodCall: "startPhysicalAddressVerification", response: validResponse))
             } else if let error = error {
                 self.emit(
                     [
@@ -421,15 +432,18 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
         OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
-            guard let locationId = response?.location.id else { return }
-            print("Successfully started verification for \(locationId)")
-            self.emit(
-                [
-                    "type": "success",
-                    "methodCall": "startDigitalAndPhysicalAddressVerification",
-                    "locationId": locationId
-                ]
-            )
+            if let validResponse = response {
+                self.emit(self.getSuccessEvent(methodCall: "startDigitalAndPhysicalAddressVerification", response: validResponse))
+            } else if let error = error {
+                self.emit(
+                    [
+                        "type": "error",
+                        "methodCall": "startDigitalAndPhysicalAddressVerification",
+                        "code" : error.code,
+                        "message" : error.message
+                    ]
+                )
+            }
         }
     }
 
@@ -446,65 +460,77 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
         OK.shared.createAddress(vc: viewController, theme: theme, config: appConfig) { response, error in
-            guard let locationId = response?.location.id else { return }
-            print("Successfully created address for \(locationId)")
-            do {
-                self.emit(
-                    [
-                        "type": "success",
-                        "methodCall": "createAddress",
-                        "locationId": locationId
-                    ]
-                )
-            } catch {
-                print("Error on emit: \(error)")
-            }
-        }
-    }
-
-    private func handleVerifySavedAddress(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments = call.arguments as? [String: Any] ?? [:]
-        let locationId = arguments["locationId"] as? String
-        let okhiLocation: OkHiLocation = OkHiLocation(
-            identifier: locationId ?? ""
-        )
-
-        guard let rootViewController = topViewController() else {
-            self.emit(
-                [
-                    "type": "error",
-                    "methodCall": "startSavedAddressVerification",
-                    "code" : "internal_error",
-                    "message" : "Unable to get root view controller"
-                ]
-            )
-            return
-        }
-        var appConfigInstance: OkHiConfig = appConfig.withUsageTypes(
-            usageTypes: [OkHiUsageType.digitalVerification]
-        )
-        OK.shared.startAddressVerification(vc: rootViewController, theme: theme, config: appConfigInstance, location: okhiLocation) { response, error in
-
-            if let locationId = response?.location.id {
-                print("Successfully created address for \(locationId)")
-                self.emit(
-                    [
-                        "type": "success",
-                        "methodCall": "startSavedAddressVerification",
-                        "locationId": locationId
-                    ]
-                )
+            if let validResponse = response {
+                self.emit(self.getSuccessEvent(methodCall: "createAddress", response: validResponse))
             } else if let error = error {
                 self.emit(
                     [
                         "type": "error",
-                        "methodCall": "startAddressVerification",
+                        "methodCall": "createAddress",
                         "code" : error.code,
                         "message" : error.message
                     ]
                 )
             }
         }
+    }
+
+    private func getSuccessEvent(methodCall: String, response: OkHiSuccessResponse) -> [String : Any?] {
+        let user = response.user
+        let location = response.location
+        let geo = location.geoPoint
+
+        var okUser: [String: Any?] = [:]
+        okUser["phone"] = user.phone ?? ""
+        okUser["firstName"] = user.firstName ?? ""
+        okUser["lastName"] = user.lastName ?? ""
+        okUser["email"] = user.email ?? ""
+        okUser["appUserId"] = user.appUserId ?? ""
+        okUser["token"] = user.token ?? ""
+        okUser["id"] = user.id ?? ""
+
+        var okLocation: [String: Any?] = [:]
+        okLocation["id"] = location.id ?? ""
+        okLocation["lat"] = geo.lat ?? 0.0
+        okLocation["lng"] = geo.lon ?? 0.0
+        okLocation["city"] = location.city ?? ""
+        okLocation["country"] = location.country ?? ""
+        okLocation["directions"] = location.directions ?? ""
+        okLocation["displayTitle"] = location.displayTitle ?? ""
+        okLocation["otherInformation"] = location.otherInformation ?? ""
+        okLocation["photoUrl"] = location.photo ?? ""
+        okLocation["plusCode"] = location.plusCode ?? ""
+        okLocation["propertyName"] = location.propertyName ?? ""
+        okLocation["propertyNumber"] = location.propertyNumber ?? ""
+        okLocation["state"] = location.state ?? ""
+        okLocation["streetName"] = location.streetName ?? ""
+        okLocation["streetViewPanoId"] = location.streetView?.panoId ?? ""
+        okLocation["streetViewPanoUrl"] = location.streetView?.url ?? ""
+        okLocation["subtitle"] = location.subtitle ?? ""
+        okLocation["title"] = location.title ?? ""
+        okLocation["url"] = location.url ?? ""
+        okLocation["userId"] = location.userId ?? ""
+        okLocation["neighborhood"] = location.neighborhood ?? ""
+        okLocation["countryCode"] = location.countryCode ?? ""
+        okLocation["usageTypes"] = location.usageTypes ?? ""
+        okLocation["ward"] = location.ward ?? ""
+        okLocation["formattedAddress"] = location.formattedAddress ?? ""
+        okLocation["postCode"] = location.postCode ?? ""
+        okLocation["lga"] = location.lga ?? ""
+        okLocation["lgaCode"] = location.lgaCode ?? ""
+        okLocation["unit"] = location.unit ?? ""
+        okLocation["gpsAccuracy"] = location.gpsAccuracy ?? ""
+        okLocation["businessName"] = location.businessName ?? ""
+        okLocation["type"] = location.type ?? ""
+        okLocation["district"] = location.district ?? ""
+        okLocation["addressLine"] = location.addressLine ?? ""
+
+        return [
+            "type": "success",
+            "methodCall": methodCall,
+            "user": okUser,
+            "location": okLocation
+        ]
     }
 
     private func handleStopVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {

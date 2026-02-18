@@ -6,12 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
+import 'package:okhi_flutter/utils/utilities.dart';
 
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const HomeApp());
 }
 
@@ -30,7 +31,7 @@ class _MyAppState extends State<HomeApp> {
 
   String savedAddressID = "";
   String appUserId = "";
-  String userId = "No Id";
+  String? userId;
   String environment = "dev";
   late OkHiUser okHiUser;
 
@@ -90,7 +91,7 @@ class _MyAppState extends State<HomeApp> {
                 ),
               ),
               Spacer(),
-              isUserSet && Platform.isAndroid
+              isUserSet
                   ? IconButton(
                       onPressed: () {
                         _handleOkHiLogout();
@@ -421,20 +422,20 @@ class _MyAppState extends State<HomeApp> {
           shadowColor: Colors.teal[100],
           child: InkWell(
             onTap: () {
-              if (email.isNotEmpty &&
-                  firstName.isNotEmpty &&
-                  phone.isNotEmpty) {
-                _handleInitializeOkHi();
-              } else {
-                scaffoldMessengerKey.currentState?.showSnackBar(
-                  SnackBar(
-                    backgroundColor: Colors.red[300],
-                    content: const Text(
-                      'Please fill in all required fields to proceed',
-                    ),
-                  ),
-                );
-              }
+              // if (email.isNotEmpty &&
+              //     firstName.isNotEmpty &&
+              //     phone.isNotEmpty) {
+              _handleInitializeOkHi();
+              // } else {
+              //   scaffoldMessengerKey.currentState?.showSnackBar(
+              //     SnackBar(
+              //       backgroundColor: Colors.red[300],
+              //       content: const Text(
+              //         'Please fill in all required fields to proceed',
+              //       ),
+              //     ),
+              //   );
+              // }
             },
             child: Container(
               decoration: BoxDecoration(
@@ -488,12 +489,12 @@ class _MyAppState extends State<HomeApp> {
               ),
               InkWell(
                 onTap: () async {
-                  copyToClipboard("userId", userId);
+                  copyToClipboard("userId", userId.toString());
                 },
                 child: Row(
                   children: [
                     Text(
-                      userId,
+                      userId.toString(),
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
@@ -522,11 +523,11 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.createAddress(
-                onSuccess: (locationId) {
+                onSuccess: (user, location) {
                   setState(() {
-                    savedAddressID = locationId.toString();
+                    savedAddressID = location.id.toString();
                   });
-                  copyToClipboard("Create Address", locationId.toString());
+                  copyToClipboard("Create Address", location.id.toString());
                 },
                 onError: (error) {
                   showSnackBarError('Create Address error: ${error.message}');
@@ -567,15 +568,15 @@ class _MyAppState extends State<HomeApp> {
                 setState(() {
                   isLoading = true;
                 });
-                OkHi.startSavedAddressVerification(
+                OkHi.startDigitalAddressVerification(
                   locationId: savedAddressID,
-                  onSuccess: (locationId) {
+                  onSuccess: (user, location) {
                     setState(() {
                       savedAddressID = "";
                     });
                     copyToClipboard(
                       "Verifying Address Book",
-                      locationId.toString(),
+                      location.id.toString(),
                     );
                   },
                   onError: (error) {
@@ -625,8 +626,8 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startDigitalAddressVerification(
-                onSuccess: (locationId) {
-                  copyToClipboard("Digital Address", locationId.toString());
+                onSuccess: (user, location) {
+                  copyToClipboard("Digital Address", location.id.toString());
                 },
                 onError: (error) {
                   showSnackBarError('Digital Address error: ${error.message}');
@@ -667,8 +668,8 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startPhysicalAddressVerification(
-                onSuccess: (locationId) {
-                  copyToClipboard("Physical Address", locationId.toString());
+                onSuccess: (user, location) {
+                  copyToClipboard("Physical Address", location.id.toString());
                 },
                 onError: (error) {
                   showSnackBarError('Physical Address error: ${error.message}');
@@ -709,10 +710,10 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startDigitalAndPhysicalAddressVerification(
-                onSuccess: (locationId) {
+                onSuccess: (user, location) {
                   copyToClipboard(
                     "Physical & Digital Address",
-                    locationId.toString(),
+                    location.id.toString(),
                   );
                 },
                 onError: (error) {
@@ -1207,68 +1208,6 @@ class _MyAppState extends State<HomeApp> {
             ),
           ),
         ),
-        // SizedBox(height: 10),
-        // Card(
-        //   elevation: 3.0,
-        //   color: Colors.white,
-        //   shape: RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.circular(15.0),
-        //   ),
-        //   shadowColor: Colors.teal[100],
-        //   child: InkWell(
-        //     onTap: () async {
-        //       if (Platform.isIOS) {
-        //         scaffoldMessengerKey.currentState?.showSnackBar(
-        //           SnackBar(
-        //             backgroundColor: Colors.teal[300],
-        //             duration: Duration(seconds: 6),
-        //             content: Text(
-        //               "Google Play Services is only available on Android devices",
-        //             ),
-        //           ),
-        //         );
-        //         return;
-        //       }
-        //
-        //       setState(() {
-        //         isLoading = true;
-        //       });
-        //       var result = await OkHi.requestEnableGooglePlayServices();
-        //       scaffoldMessengerKey.currentState?.showSnackBar(
-        //         SnackBar(
-        //           backgroundColor: Colors.green[300],
-        //           duration: Duration(seconds: 6),
-        //           content: Text(
-        //             result
-        //                 ? "Background location services requested successfully"
-        //                 : "Background location services request failed",
-        //           ),
-        //         ),
-        //       );
-        //       setState(() {
-        //         isLoading = false;
-        //       });
-        //     },
-        //     child: Container(
-        //       decoration: BoxDecoration(
-        //         color: Colors.teal.shade100,
-        //         borderRadius: BorderRadius.circular(15.0),
-        //       ),
-        //       height: MediaQuery.of(context).size.height * 0.06,
-        //       padding: const EdgeInsets.only(left: 15.0),
-        //       child: Center(
-        //         child: Text(
-        //           "Request Google Play Services",
-        //           style: TextStyle(
-        //             color: Colors.teal,
-        //             fontWeight: FontWeight.bold,
-        //             fontSize: 17,
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ),
         SizedBox(height: 15),
       ],
     );
@@ -1335,15 +1274,15 @@ class _MyAppState extends State<HomeApp> {
     );
 
     okHiUser = OkHiUser(
-      phone: phone,
-      firstName: firstName,
-      lastName: lastName,
+      phone: "+254712288371", // phone,
+      firstName: "Granson", //firstName,
+      lastName: "Oyombe", //lastName,
       appUserId: "flutterAppUser1000000",
-      email: email,
+      email: "granson@okhi.co", //email,
       id: userId,
     );
 
-    OkHi.initialize(appConfig, okHiUser, locationManagerConfiguration)
+    OkHi.login(appConfig, okHiUser, locationManagerConfiguration)
         .then((result) {
           setState(() {
             isUserSet = true;
@@ -1366,6 +1305,8 @@ class _MyAppState extends State<HomeApp> {
   _handleOkHiLogout() async {
     OkHi.logout()
         .then((result) {
+          appDebugPrint("The returned ids are: $result");
+
           setState(() {
             isUserSet = false;
             appUserId = "";

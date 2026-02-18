@@ -8,7 +8,8 @@ import 'package:okhi_flutter/utils/utilities.dart';
 import './models/okhi_app_configuration.dart';
 import './models/okhi_native_methods.dart';
 import './models/okhi_exception.dart';
-import 'models/OkHiEvent.dart';
+import 'models/okhi_event.dart';
+import 'models/okhi_location.dart';
 import 'models/okhi_location_manager_configuration.dart';
 
 // models export
@@ -20,8 +21,8 @@ export './models/okhi_exception.dart';
 
 /// The primary class for integrating OkHi with your app.
 class OkHi {
-  static late final StreamSubscription streamSubscription;
-  static Function(String locationId)? onVerificationSuccess;
+  static StreamSubscription? streamSubscription;
+  static Function(OkHiUser user, OkHiLocation location)? onVerificationSuccess;
   static Function(OkHiException exception)? onVerificationError;
 
   static const MethodChannel _channel = MethodChannel('okhi_flutter');
@@ -33,8 +34,8 @@ class OkHi {
 
   static Stream<OkHiEvent> get okhiVerificationStream {
     return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
-      print("the event is: $event");
-      final map = Map<String, dynamic>.from(event);
+      appDebugPrint('Received event: $event');
+      final Map<String, dynamic> map = jsonDecode(event);
       return OkHiEvent.fromMap(map);
     });
   }
@@ -158,7 +159,7 @@ class OkHi {
   ///  Initializes the library with provided API Keys and optional notification configuration.
   ///  * [configuration] An instance of OkHiAppConfiguration
   ///  * [okHiUser] An instance of OkHiUser, nullable
-  static Future<bool> initialize(
+  static Future<bool> login(
     OkHiAppConfiguration configuration,
     OkHiUser? okHiUser,
     OkHiLocationManagerConfiguration? locationManagerConfiguration,
@@ -167,7 +168,7 @@ class OkHi {
 
     if (okHiUser == null) {
       debugPrint(
-        '⚠️ [OkHi]: Missing OkHiUser parameter in initialize(). Providing a user helps verify previous addresses. See https://docs.okhi.com',
+        '⚠️ [OkHi]: Missing OkHiUser parameter in login(). Providing a user helps verify previous addresses. See https://docs.okhi.com',
       );
     }
 
@@ -199,10 +200,17 @@ class OkHi {
           : null,
     };
 
-    streamSubscription = okhiVerificationStream.listen((OkHiEvent event) {
+    streamSubscription = okhiVerificationStream.listen((dynamic event) {
       if (event.resultType == "success") {
-        if (event.locationId != null) {
-          onVerificationSuccess?.call(event.locationId!);
+        if (event.user != null && event.location != null) {
+          onVerificationSuccess?.call(event.user!, event.location!);
+        } else {
+          onVerificationError?.call(
+            OkHiException(
+              code: "invalid_response",
+              message: "Missing user or location in success response",
+            ),
+          );
         }
       } else if (event.resultType == "error") {
         onVerificationError?.call(
@@ -241,19 +249,21 @@ class OkHi {
 
   /// Starts Digital verification for a particular address.
   static startDigitalAddressVerification({
-    required Function(String locationId) onSuccess,
+    String? locationId,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
     await _channel.invokeMethod(
       OkHiNativeMethod.startDigitalAddressVerification,
+      {"locationId": locationId},
     );
   }
 
   /// Starts Physical verification for a particular address.
   static startPhysicalAddressVerification({
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
@@ -265,7 +275,7 @@ class OkHi {
 
   /// Starts Digital And Physical verification for a particular address.
   static startDigitalAndPhysicalAddressVerification({
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
@@ -277,26 +287,12 @@ class OkHi {
 
   /// Create a Digital address for a particular location.
   static createAddress({
-    required Function(String locationId) onSuccess,
+    required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
     onVerificationSuccess = onSuccess;
     onVerificationError = onError;
     await _channel.invokeMethod(OkHiNativeMethod.createAddress);
-  }
-
-  /// Start verification on a saved Address.
-  static startSavedAddressVerification({
-    required String locationId,
-    required Function(String locationId) onSuccess,
-    required Function(OkHiException exception) onError,
-  }) async {
-    onVerificationSuccess = onSuccess;
-    onVerificationError = onError;
-    await _channel.invokeMethod(
-      OkHiNativeMethod.startSavedAddressVerification,
-      {"locationId": locationId},
-    );
   }
 
   /// Android Only - Checks whether current device can open "Protected Apps Settings" available in Transsion Group android devices such as Infinix and Tecno
@@ -351,8 +347,10 @@ class OkHi {
     );
   }
 
-  static Future<void> logout() async {
-    streamSubscription.cancel();
-    await _channel.invokeMethod(OkHiNativeMethod.logout);
+  static Future<String> logout() async {
+    await streamSubscription?.cancel();
+    streamSubscription = null;
+    var ids = await _channel.invokeMethod(OkHiNativeMethod.logout);
+    return ids;
   }
 }

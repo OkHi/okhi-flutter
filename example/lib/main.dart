@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
         child: ElevatedButton(
           onPressed: () {
             final user = _createOkHiUser();
-            OkHi.initialize(appConfig, user, locationManagerConfiguration)
+            OkHi.login(appConfig, user, locationManagerConfiguration)
                 .then((result) {
                   setState(() {
                     isInitialized = true;
@@ -81,10 +81,11 @@ class _MyAppState extends State<MyApp> {
             title: "Create a digital address",
             onPressed: () {
               OkHi.startDigitalAddressVerification(
-                onSuccess: (locationId) {
+                locationId: null,
+                onSuccess: (user, location) {
                   if (kDebugMode) {
                     print(
-                      "Digital address verification successful! Location ID: $locationId",
+                      "Digital address verification successful! Location ID: ${location.id}",
                     );
                   }
                 },

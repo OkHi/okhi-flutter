@@ -66,8 +66,9 @@ class _HomeState extends State<Home> {
                 title: "Create a digital address",
                 onPressed: () async {
                   OkHi.startDigitalAddressVerification(
+                    locationId: null,
                     onError: (message) {},
-                    onSuccess: (locationId) {},
+                    onSuccess: (user, location) {},
                   );
                 },
               ),
@@ -76,7 +77,7 @@ class _HomeState extends State<Home> {
                 onPressed: () async {
                   OkHi.startPhysicalAddressVerification(
                     onError: (message) {},
-                    onSuccess: (locationId) {},
+                    onSuccess: (user, location) {},
                   );
                 },
               ),
@@ -85,7 +86,7 @@ class _HomeState extends State<Home> {
                 onPressed: () async {
                   OkHi.startDigitalAndPhysicalAddressVerification(
                     onError: (message) {},
-                    onSuccess: (locationId) {},
+                    onSuccess: (user, location) {},
                   );
                 },
               ),
@@ -94,7 +95,7 @@ class _HomeState extends State<Home> {
                 onPressed: () async {
                   OkHi.createAddress(
                     onError: (message) {},
-                    onSuccess: (locationId) {},
+                    onSuccess: (user, location) {},
                   );
                 },
               ),

@@ -4,7 +4,7 @@ import 'dart:convert';
 class OkHiLocation {
   String? id;
   double? lat;
-  double? lon;
+  double? lng;
   String? city;
   String? country;
   String? directions;
@@ -41,7 +41,7 @@ class OkHiLocation {
   OkHiLocation({
     this.id,
     this.lat,
-    this.lon,
+    this.lng,
     this.city,
     this.country,
     this.directions,
@@ -79,36 +79,43 @@ class OkHiLocation {
   OkHiLocation.fromMap(Map<String, dynamic> data) {
     id = data.containsKey("id") ? data["id"] : null;
     lat = data.containsKey("geo_point") ? data["geo_point"]["lat"] : null;
-    lon = data.containsKey("geo_point") ? data["geo_point"]["lon"] : null;
+    lng = data.containsKey("geo_point") ? data["geo_point"]["lng"] : null;
     city = data.containsKey("city") ? data["city"] : null;
     country = data.containsKey("country") ? data["country"] : null;
     directions = data.containsKey("directions") ? data["directions"] : null;
-    displayTitle =
-        data.containsKey("display_title") ? data["display_title"] : null;
+    displayTitle = data.containsKey("display_title")
+        ? data["display_title"]
+        : null;
     otherInformation = data.containsKey("other_information")
         ? data["other_information"]
         : null;
     photoUrl = data.containsKey("photo") ? data["photo"] : null;
     placeId = data.containsKey("place_id") ? data["place_id"] : null;
     plusCode = data.containsKey("plus_code") ? data["plus_code"] : null;
-    propertyName =
-        data.containsKey("property_name") ? data["property_name"] : null;
-    propertyNumber =
-        data.containsKey("property_number") ? data["property_number"] : null;
+    propertyName = data.containsKey("property_name")
+        ? data["property_name"]
+        : null;
+    propertyNumber = data.containsKey("property_number")
+        ? data["property_number"]
+        : null;
     state = data.containsKey("state") ? data["state"] : null;
     streetName = data.containsKey("street_name") ? data["street_name"] : null;
-    streetViewPanoId =
-        data.containsKey("street_view") ? data["street_view"]["pano_id"] : null;
-    streetViewPanoUrl =
-        data.containsKey("street_view") ? data["street_view"]["url"] : null;
+    streetViewPanoId = data.containsKey("street_view")
+        ? data["street_view"]["pano_id"]
+        : null;
+    streetViewPanoUrl = data.containsKey("street_view")
+        ? data["street_view"]["url"]
+        : null;
     subtitle = data.containsKey("subtitle") ? data["subtitle"] : null;
     title = data.containsKey("title") ? data["title"] : null;
     url = data.containsKey("url") ? data["url"] : null;
     userId = data.containsKey("user_id") ? data["user_id"] : null;
-    neighborhood =
-        data.containsKey("neighborhood") ? data["neighborhood"] : null;
-    countryCode =
-        data.containsKey("country_code") ? data["country_code"] : null;
+    neighborhood = data.containsKey("neighborhood")
+        ? data["neighborhood"]
+        : null;
+    countryCode = data.containsKey("country_code")
+        ? data["country_code"]
+        : null;
     usageTypes =
         (data.containsKey("usage_types") ? data["usage_types"] as List : [])
             .cast<String>();
@@ -123,12 +130,14 @@ class OkHiLocation {
     gpsAccuracy = data.containsKey("gps_accuracy")
         ? data["gps_accuracy"].toString()
         : null;
-    businessName =
-        data.containsKey("business_name") ? data["business_name"] : null;
+    businessName = data.containsKey("business_name")
+        ? data["business_name"]
+        : null;
     type = data.containsKey("type") ? data["type"] : null;
     district = data.containsKey("district") ? data["district"] : null;
-    addressLine =
-        data.containsKey("address_line_1") ? data["address_line_1"] : null;
+    addressLine = data.containsKey("address_line_1")
+        ? data["address_line_1"]
+        : null;
   }
 
   @override
@@ -136,7 +145,7 @@ class OkHiLocation {
     return jsonEncode({
       "id": id,
       "lat": lat,
-      "lon": lon,
+      "lng": lng,
       "city": city,
       "country": country,
       "directions": directions,
