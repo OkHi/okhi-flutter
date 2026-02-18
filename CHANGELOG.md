@@ -1,3 +1,7 @@
+## 2.0.1
+- Added OkHiUser and OkHiLocation object to success callback
+- Removed UserId hard requirement on iOS
+
 ## 2.0.0
 
 - Major update: Refactored the plugin to provide a more streamlined and efficient experience for developers.
@@ -9,7 +13,6 @@
 - Breaking changes: The API has been significantly changed, and existing implementations will need to be updated to work with the new version. Please refer to the updated documentation for migration guidelines.
 - We recommend testing the new version in a staging environment before deploying it to production to ensure compatibility and to take advantage of the new features and improvements.
 - Thank you for using our plugin, and we look forward to seeing how you utilize the new features and improvements in version 2.0.0!
-  
 
 ## 1.1.36
 
