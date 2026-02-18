@@ -1230,26 +1230,26 @@ class _MyAppState extends State<HomeApp> {
     switch (environment) {
       case "dev":
         return OkHiAppConfiguration(
-          branchId: "UD3tyqVt50",
-          clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.dev,
         );
       case "prod":
         return OkHiAppConfiguration(
-          branchId: "CJZqjVZlIG",
-          clientKey: "5dee3c5a-bc76-44db-a583-7fb35f45071f",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.prod,
         );
       case "sandbox":
         return OkHiAppConfiguration(
-          branchId: "CJZqjVZlIG",
-          clientKey: "5dee3c5a-bc76-44db-a583-7fb35f45071f",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.sandbox,
         );
       default:
         return OkHiAppConfiguration(
-          branchId: "UD3tyqVt50",
-          clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
+          branchId: "",
+          clientKey: "",
           env: OkHiEnv.dev,
         );
     }
@@ -1274,11 +1274,11 @@ class _MyAppState extends State<HomeApp> {
     );
 
     okHiUser = OkHiUser(
-      phone: "+254712288371", // phone,
-      firstName: "Granson", //firstName,
-      lastName: "Oyombe", //lastName,
+      phone: phone,
+      firstName: firstName,
+      lastName: lastName,
       appUserId: "flutterAppUser1000000",
-      email: "granson@okhi.co", //email,
+      email: email,
       id: userId,
     );
 
