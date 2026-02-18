@@ -81,7 +81,7 @@ class _MyAppState extends State<MyApp> {
             title: "Create a digital address",
             onPressed: () {
               OkHi.startDigitalAddressVerification(
-                null,
+                locationId: null,
                 onSuccess: (user, location) {
                   if (kDebugMode) {
                     print(

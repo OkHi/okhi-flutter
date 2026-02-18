@@ -80,7 +80,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 }
             }
         } catch {
-            print("Error serializing JSON: \\(error)")
+            print("Error serializing JSON: \(error)")
         }
     }
 
@@ -155,6 +155,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             handleOpenAppSettings(call, result)
         case "getLocationAccuracyLevel":
             handleGetLocationAccuracyLevel(call, result)
+            break
+        case "logout":
+            handleLogout(call, result)
             break
         default:
             result(FlutterMethodNotImplemented)
@@ -335,6 +338,13 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         }
     }
 
+    private func handleLogout(_ call: FlutterMethodCall, _ result: FlutterResult) {
+        result("Not implemented")
+        // OK.shared.logout() { locationIds in
+        //     result(locationIds)
+        // }
+    }
+
     private func handleStartDigitalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         var okhiLocation: OkHiLocation? = nil
         var appConfigInstance: OkHiConfig = appConfig
@@ -422,8 +432,6 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
         OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
-            guard let locationId = response?.location.id else { return }
-            print("Successfully started verification for \(locationId)")
             if let validResponse = response {
                 self.emit(self.getSuccessEvent(methodCall: "startDigitalAndPhysicalAddressVerification", response: validResponse))
             } else if let error = error {
@@ -452,8 +460,6 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
         OK.shared.createAddress(vc: viewController, theme: theme, config: appConfig) { response, error in
-            guard let locationId = response?.location.id else { return }
-
             if let validResponse = response {
                 self.emit(self.getSuccessEvent(methodCall: "createAddress", response: validResponse))
             } else if let error = error {
@@ -498,8 +504,8 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         okLocation["propertyNumber"] = location.propertyNumber ?? ""
         okLocation["state"] = location.state ?? ""
         okLocation["streetName"] = location.streetName ?? ""
-        okLocation["streetViewPanoId"] = ""
-        okLocation["streetViewPanoUrl"] = ""
+        okLocation["streetViewPanoId"] = location.streetView?.panoId ?? ""
+        okLocation["streetViewPanoUrl"] = location.streetView?.url ?? ""
         okLocation["subtitle"] = location.subtitle ?? ""
         okLocation["title"] = location.title ?? ""
         okLocation["url"] = location.url ?? ""

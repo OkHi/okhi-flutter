@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
+import 'package:okhi_flutter/utils/utilities.dart';
 
 import 'firebase_options.dart';
 
@@ -90,7 +91,7 @@ class _MyAppState extends State<HomeApp> {
                 ),
               ),
               Spacer(),
-              isUserSet && Platform.isAndroid
+              isUserSet
                   ? IconButton(
                       onPressed: () {
                         _handleOkHiLogout();
@@ -421,20 +422,20 @@ class _MyAppState extends State<HomeApp> {
           shadowColor: Colors.teal[100],
           child: InkWell(
             onTap: () {
-              if (email.isNotEmpty &&
-                  firstName.isNotEmpty &&
-                  phone.isNotEmpty) {
-                _handleInitializeOkHi();
-              } else {
-                scaffoldMessengerKey.currentState?.showSnackBar(
-                  SnackBar(
-                    backgroundColor: Colors.red[300],
-                    content: const Text(
-                      'Please fill in all required fields to proceed',
-                    ),
-                  ),
-                );
-              }
+              // if (email.isNotEmpty &&
+              //     firstName.isNotEmpty &&
+              //     phone.isNotEmpty) {
+              _handleInitializeOkHi();
+              // } else {
+              //   scaffoldMessengerKey.currentState?.showSnackBar(
+              //     SnackBar(
+              //       backgroundColor: Colors.red[300],
+              //       content: const Text(
+              //         'Please fill in all required fields to proceed',
+              //       ),
+              //     ),
+              //   );
+              // }
             },
             child: Container(
               decoration: BoxDecoration(
@@ -568,7 +569,7 @@ class _MyAppState extends State<HomeApp> {
                   isLoading = true;
                 });
                 OkHi.startDigitalAddressVerification(
-                  savedAddressID,
+                  locationId: savedAddressID,
                   onSuccess: (user, location) {
                     setState(() {
                       savedAddressID = "";
@@ -625,7 +626,6 @@ class _MyAppState extends State<HomeApp> {
                 isLoading = true;
               });
               OkHi.startDigitalAddressVerification(
-                null,
                 onSuccess: (user, location) {
                   copyToClipboard("Digital Address", location.id.toString());
                 },
@@ -1230,26 +1230,26 @@ class _MyAppState extends State<HomeApp> {
     switch (environment) {
       case "dev":
         return OkHiAppConfiguration(
-          branchId: "",
-          clientKey: "",
+          branchId: "UD3tyqVt50",
+          clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
           env: OkHiEnv.dev,
         );
       case "prod":
         return OkHiAppConfiguration(
-          branchId: "",
-          clientKey: "",
+          branchId: "CJZqjVZlIG",
+          clientKey: "5dee3c5a-bc76-44db-a583-7fb35f45071f",
           env: OkHiEnv.prod,
         );
       case "sandbox":
         return OkHiAppConfiguration(
-          branchId: "",
-          clientKey: "",
+          branchId: "CJZqjVZlIG",
+          clientKey: "5dee3c5a-bc76-44db-a583-7fb35f45071f",
           env: OkHiEnv.sandbox,
         );
       default:
         return OkHiAppConfiguration(
-          branchId: "",
-          clientKey: "",
+          branchId: "UD3tyqVt50",
+          clientKey: "bcb6e880-5294-4045-b0c7-5303cc1a9983",
           env: OkHiEnv.dev,
         );
     }
@@ -1274,11 +1274,11 @@ class _MyAppState extends State<HomeApp> {
     );
 
     okHiUser = OkHiUser(
-      phone: phone,
-      firstName: firstName,
-      lastName: lastName,
+      phone: "+254712288371", // phone,
+      firstName: "Granson", //firstName,
+      lastName: "Oyombe", //lastName,
       appUserId: "flutterAppUser1000000",
-      email: email,
+      email: "granson@okhi.co", //email,
       id: userId,
     );
 
@@ -1305,6 +1305,8 @@ class _MyAppState extends State<HomeApp> {
   _handleOkHiLogout() async {
     OkHi.logout()
         .then((result) {
+          appDebugPrint("The returned ids are: $result");
+
           setState(() {
             isUserSet = false;
             appUserId = "";

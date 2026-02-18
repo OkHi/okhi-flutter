@@ -162,7 +162,6 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         call: MethodCall,
         result: Result
     ) {
-        var isReplied = false
         OkHi.createAddress(
             activity,
             collect,
@@ -318,7 +317,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         )
     }
 
-    private fun getSuccessEventObject(methodCall: String,response: OkHiSuccessResponse): JSONObject {
+    private fun getSuccessEventObject(methodCall: String, response: OkHiSuccessResponse): JSONObject {
 
         val eventObject= JSONObject()
         eventObject.put("methodCall",methodCall)
@@ -376,8 +375,9 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun handleLogout(call: MethodCall, result: Result) {
-        OkHi.logout(context)
-        OkHiMainThreadResult(result).success(true)
+        OkHi.logout(context) { list ->
+            OkHiMainThreadResult(result).success(list.toString())
+        }
     }
 
     private fun handleGetLocationAccuracyLevel(call: MethodCall, result: Result) {

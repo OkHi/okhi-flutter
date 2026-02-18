@@ -21,7 +21,7 @@ export './models/okhi_exception.dart';
 
 /// The primary class for integrating OkHi with your app.
 class OkHi {
-  static late final StreamSubscription streamSubscription;
+  static StreamSubscription? streamSubscription;
   static Function(OkHiUser user, OkHiLocation location)? onVerificationSuccess;
   static Function(OkHiException exception)? onVerificationError;
 
@@ -34,6 +34,7 @@ class OkHi {
 
   static Stream<OkHiEvent> get okhiVerificationStream {
     return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
+      appDebugPrint('Received event: $event');
       final Map<String, dynamic> map = jsonDecode(event);
       return OkHiEvent.fromMap(map);
     });
@@ -201,7 +202,16 @@ class OkHi {
 
     streamSubscription = okhiVerificationStream.listen((dynamic event) {
       if (event.resultType == "success") {
-        onVerificationSuccess?.call(event.user, event.location);
+        if (event.user != null && event.location != null) {
+          onVerificationSuccess?.call(event.user!, event.location!);
+        } else {
+          onVerificationError?.call(
+            OkHiException(
+              code: "invalid_response",
+              message: "Missing user or location in success response",
+            ),
+          );
+        }
       } else if (event.resultType == "error") {
         onVerificationError?.call(
           OkHiException(
@@ -238,8 +248,8 @@ class OkHi {
   }
 
   /// Starts Digital verification for a particular address.
-  static startDigitalAddressVerification(
-    String? locationId, {
+  static startDigitalAddressVerification({
+    String? locationId,
     required Function(OkHiUser user, OkHiLocation location) onSuccess,
     required Function(OkHiException exception) onError,
   }) async {
@@ -337,8 +347,10 @@ class OkHi {
     );
   }
 
-  static Future<void> logout() async {
-    streamSubscription.cancel();
-    await _channel.invokeMethod(OkHiNativeMethod.logout);
+  static Future<String> logout() async {
+    await streamSubscription?.cancel();
+    streamSubscription = null;
+    var ids = await _channel.invokeMethod(OkHiNativeMethod.logout);
+    return ids;
   }
 }
