@@ -219,6 +219,13 @@ class OkHi {
             message: event.message.toString(),
           ),
         );
+      } else if (event.resultType == "closed") {
+        onVerificationError?.call(
+          OkHiException(
+            code: "user_closed",
+            message: "User exited address creation",
+          ),
+        );
       } else {
         onVerificationError?.call(
           OkHiException(code: "unknown", message: "An unknown error occurred"),
