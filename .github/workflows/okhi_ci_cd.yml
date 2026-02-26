@@ -2,9 +2,9 @@ name: OkHi Flutter CI/CD  2026
 
 on:
   push:
-    branches: [ master ]
+    branches: [ develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ develop ]
 
 permissions:
   contents: write   # allow creating/updating Releases & uploading assets
