@@ -9,7 +9,7 @@ android {
 
     namespace = "io.okhi.flutter.okhi_flutter_example"
     compileSdk = flutter.compileSdkVersion
-    flutterNdkVersion = flutter.ndkVersion
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -29,7 +29,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
-        ndkVersion = flutter.ndkVersion //"29.0.13599879" // Added this for my local environment.
+        ndkVersion = flutter.ndkVersion // "29.0.13599879" // Added this for my local environment.
     }
 
     buildTypes {
