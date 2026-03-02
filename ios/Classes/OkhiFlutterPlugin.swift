@@ -330,19 +330,22 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 .with(primaryColor: locationManagerConfiguration["color"] as? String ?? "")
                 .with(logoUrl: locationManagerConfiguration["logoUrl"] as? String ?? "")
 
-            OK.shared.login(auth: auth, user: user)
-            print("OkHi Initialized successfully on iOS platform")
-            result(true)
+            OK.shared.login(auth: auth, user: user){ list in
+                print("OkHi Initialized successfully on iOS platform: \(list)")
+                result(true)
+            }
+            result(false)
         } else {
             result(FlutterError(code: "unauthorized", message: "invalid initialization credentials provided", details: nil))
         }
     }
 
-    private func handleLogout(_ call: FlutterMethodCall, _ result: FlutterResult) {
-        result("Not implemented")
-        // OK.shared.logout() { locationIds in
-        //     result(locationIds)
-        // }
+    private func handleLogout(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        OK.shared.logout() { locationIds in
+            DispatchQueue.main.async {
+                result(locationIds)
+            }
+        }
     }
 
     private func handleStartDigitalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {

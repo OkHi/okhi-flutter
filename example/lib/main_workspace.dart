@@ -422,20 +422,20 @@ class _MyAppState extends State<HomeApp> {
           shadowColor: Colors.teal[100],
           child: InkWell(
             onTap: () {
-              // if (email.isNotEmpty &&
-              //     firstName.isNotEmpty &&
-              //     phone.isNotEmpty) {
-              _handleInitializeOkHi();
-              // } else {
-              //   scaffoldMessengerKey.currentState?.showSnackBar(
-              //     SnackBar(
-              //       backgroundColor: Colors.red[300],
-              //       content: const Text(
-              //         'Please fill in all required fields to proceed',
-              //       ),
-              //     ),
-              //   );
-              // }
+              if (email.isNotEmpty &&
+                  firstName.isNotEmpty &&
+                  phone.isNotEmpty) {
+                _handleInitializeOkHi();
+              } else {
+                scaffoldMessengerKey.currentState?.showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.red[300],
+                    content: const Text(
+                      'Please fill in all required fields to proceed',
+                    ),
+                  ),
+                );
+              }
             },
             child: Container(
               decoration: BoxDecoration(
