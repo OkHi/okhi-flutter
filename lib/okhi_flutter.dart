@@ -354,7 +354,7 @@ class OkHi {
     );
   }
 
-  static Future<dynamic> logout() async {
+  static Future<List<dynamic>> logout() async {
     await streamSubscription?.cancel();
     streamSubscription = null;
     var ids = await _channel.invokeMethod(OkHiNativeMethod.logout);
