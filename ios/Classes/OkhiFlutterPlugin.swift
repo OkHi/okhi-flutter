@@ -330,11 +330,14 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 .with(primaryColor: locationManagerConfiguration["color"] as? String ?? "")
                 .with(logoUrl: locationManagerConfiguration["logoUrl"] as? String ?? "")
 
-            OK.shared.login(auth: auth, user: user){ list in
-                print("OkHi Initialized successfully on iOS platform: \(list)")
-                result(true)
+            do {
+                OK.shared.login(auth: auth, user: user){ list in
+                    print("OkHi Initialized successfully on iOS platform: \(list)")
+                    result(true)
+                }
+            } catch {
+                result(false)
             }
-            result(false)
         } else {
             result(FlutterError(code: "unauthorized", message: "invalid initialization credentials provided", details: nil))
         }
@@ -342,8 +345,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
     private func handleLogout(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         OK.shared.logout() { locationIds in
+            let ids = locationIds as? [String] ?? []
             DispatchQueue.main.async {
-                result(locationIds)
+                result(ids)
             }
         }
     }

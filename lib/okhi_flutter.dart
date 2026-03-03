@@ -357,7 +357,9 @@ class OkHi {
   static Future<List<dynamic>> logout() async {
     await streamSubscription?.cancel();
     streamSubscription = null;
-    var ids = await _channel.invokeMethod(OkHiNativeMethod.logout);
+    List ids = await _channel.invokeMethod(OkHiNativeMethod.logout);
+    onVerificationSuccess = null;
+    onVerificationError = null;
     return ids;
   }
 }
