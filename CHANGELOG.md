@@ -1,3 +1,8 @@
+## 2.0.2
+- Added logout for iOS
+- Added return list object on logout
+- Added Agent.md file for Agentic AI builds
+
 ## 2.0.1
 - Added OkHiUser and OkHiLocation object to success callback
 - Removed UserId hard requirement on iOS

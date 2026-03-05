@@ -1,16 +1,6 @@
-import 'dart:io';
-import 'dart:math';
-
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
-import 'package:okhi_flutter/okhi_flutter.dart';
-import 'package:okhi_flutter/utils/utilities.dart';
-
-import 'firebase_options.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
 // void main() async {
