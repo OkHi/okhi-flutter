@@ -422,9 +422,11 @@ class _MyAppState extends State<HomeApp> {
           shadowColor: Colors.teal[100],
           child: InkWell(
             onTap: () {
-              if (email.isNotEmpty &&
-                  firstName.isNotEmpty &&
-                  phone.isNotEmpty) {
+              final hasRequiredFields =
+                  email.trim().isNotEmpty &&
+                  firstName.trim().isNotEmpty &&
+                  phone.trim().isNotEmpty;
+              if (hasRequiredFields) {
                 _handleInitializeOkHi();
               } else {
                 scaffoldMessengerKey.currentState?.showSnackBar(
