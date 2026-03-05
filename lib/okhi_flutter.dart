@@ -354,10 +354,27 @@ class OkHi {
     );
   }
 
-  static Future<String> logout() async {
+  static Future<List<String>> logout() async {
     await streamSubscription?.cancel();
     streamSubscription = null;
-    var ids = await _channel.invokeMethod(OkHiNativeMethod.logout);
-    return ids;
+    final raw = await _channel.invokeMethod(OkHiNativeMethod.logout);
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toList(growable: false);
+    }
+    if (raw is String) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          return decoded.map((e) => e.toString()).toList(growable: false);
+        }
+      } catch (_) {
+        // Do nothing
+      }
+      return raw.isEmpty ? const [] : <String>[raw];
+    }
+    throw OkHiException(
+      code: "invalid_response",
+      message: "Unexpected logout payload type: ${raw.runtimeType}",
+    );
   }
 }

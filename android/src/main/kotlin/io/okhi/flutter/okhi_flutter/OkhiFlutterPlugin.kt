@@ -376,7 +376,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun handleLogout(call: MethodCall, result: Result) {
         OkHi.logout(context) { list ->
-            OkHiMainThreadResult(result).success(list.toString())
+            OkHiMainThreadResult(result).success(list)
         }
     }
 
