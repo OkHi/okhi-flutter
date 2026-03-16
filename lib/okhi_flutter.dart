@@ -182,8 +182,8 @@ class OkHi {
       "userId": okHiUser?.id,
       "token": okHiUser?.token,
       "email": okHiUser?.email,
-      "firstname": okHiUser?.firstName,
-      "lastname": okHiUser?.lastName,
+      "firstName": okHiUser?.firstName,
+      "lastName": okHiUser?.lastName,
       "appUserId": okHiUser?.appUserId,
       "locationManagerConfiguration": locationManagerConfiguration != null
           ? {
