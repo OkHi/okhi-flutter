@@ -291,8 +291,8 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         
         
         let phoneNumber = arguments["phoneNumber"] as? String
-        let firstName = arguments["firstname"] as? String
-        let lastName = arguments["lastname"] as? String
+        let firstName = arguments["firstName"] as? String
+        let lastName = arguments["lastName"] as? String
         
         let email = arguments["email"] as? String
         let userId = arguments["userId"] as? String
