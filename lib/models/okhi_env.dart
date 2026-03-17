@@ -1,1 +1,1 @@
-enum OkHiEnv { sandbox, prod }
+enum OkHiEnv { sandbox, prod, dev }
