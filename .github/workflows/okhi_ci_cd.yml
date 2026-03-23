@@ -38,6 +38,14 @@ jobs:
       - name: 🏗️ Build iOS
         run: flutter build ios --release --no-codesign
 
+
+      - name: 📦 Prepare & Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ipa
+          # Path to the release files
+          path: example/build/ios/ipa/*.ipa
+
       - name: 💎 Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
