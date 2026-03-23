@@ -36,8 +36,7 @@ jobs:
 #        run: flutter test
 
       - name: 🏗️ Build iOS
-        run: flutter build ios --release --no-codesign
-
+        run:  flutter build ios -t example/lib/main_workspace.dart --release --no-codesign
 
       - name: 📦 Prepare & Upload artifact
         uses: actions/upload-artifact@v4
@@ -85,21 +84,21 @@ jobs:
           key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: ${{ runner.os }}-pub-
 
-      - name: ☕️ Setup Java (Temurin 17)
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: 🦋 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: 🧭 Navigate to example app and Get dependencies
-        run: |
-          cd example
-          flutter pub get
+#      - name: ☕️ Setup Java (Temurin 17)
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: temurin
+#          java-version: '17'
+#
+#      - name: 🦋 Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          channel: stable
+#
+#      - name: 🧭 Navigate to example app and Get dependencies
+#        run: |
+#          cd example
+#          flutter pub get
 
       # - name: ☄️ Analyze code
       #   run: flutter analyze
@@ -107,16 +106,16 @@ jobs:
       # - name: ✅ Run tests
       #   run: flutter test
 
-      - name: 🏗️ Build APKs
-        run:  |
-          cd example
-          flutter build apk --release
-
-      - name: 📦 Prepare & Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: example/build/app/outputs/flutter-apk/app-release.apk
+#      - name: 🏗️ Build APKs
+#        run:  |
+#          cd example
+#          flutter build apk --release
+#
+#      - name: 📦 Prepare & Upload artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: android-apk
+#          path: example/build/app/outputs/flutter-apk/app-release.apk
 
 ##         For firebase distribution configuration
 #      - name: 🔥 Distribute APK via Firebase
