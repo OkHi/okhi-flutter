@@ -45,18 +45,17 @@ jobs:
         with:
           name: release-ipa
           # Path to the release files
-          path: example/build/ios/ipa/*.ipa
+          path: build/ios/iphoneos/OkHiFlutterForIOS.app
 
       - name: 💎 Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
 
-      - name: 🏁 Install Fastlane
-        run: gem install fastlane
-
       - name: ⚙️ Fastlane Match Setup
         run: |
+          cd example/ios
+          bundle install
           bundle exec fastlane match appstore
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
