@@ -53,15 +53,16 @@ jobs:
           ruby-version: '3.2'
 
       - name: ⚙️ Fastlane Match Setup
-        run: |
-          cd example/ios
-          bundle install
-          bundle exec fastlane match appstore
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_USERNAME: ${{ secrets.MATCH_USERNAME }}
-          GIT_AUTHORIZATION: ${{ secrets.MATCH_GIT_AUTH }}
+          #          GIT_AUTHORIZATION: ${{ secrets.MATCH_GIT_AUTH }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.FASTLANE_GITHUB_TOKEN }}
+        run: |
+          cd example/ios
+          bundle install
+          bundle exec fastlane match appstore
 
 #      - name: 🚀 Deploy to TestFlight
 #        run: |
