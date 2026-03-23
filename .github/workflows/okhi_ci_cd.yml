@@ -52,13 +52,10 @@ jobs:
         with:
           ruby-version: '3.2'
 
+#      Get the certificate repo then give access
       - name: ⚙️ Fastlane Match Setup
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-          MATCH_USERNAME: ${{ secrets.MATCH_USERNAME }}
-          #          GIT_AUTHORIZATION: ${{ secrets.MATCH_GIT_AUTH }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.FASTLANE_GITHUB_TOKEN }}
         run: |
           cd example/ios
           bundle install
@@ -66,7 +63,7 @@ jobs:
 
 #      - name: 🚀 Deploy to TestFlight
 #        run: |
-#          cd ios
+#          cd example/ios
 #          fastlane beta
 #        env:
 #          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
