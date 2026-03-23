@@ -59,6 +59,8 @@ jobs:
           bundle exec fastlane match appstore
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_USERNAME: ${{ secrets.MATCH_USERNAME }}
           GIT_AUTHORIZATION: ${{ secrets.MATCH_GIT_AUTH }}
 
 #      - name: 🚀 Deploy to TestFlight
