@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
-import 'package:okhi_flutter_example/widgets/full_button.dart';
 
 void main() {
   runApp(const MyApp());
@@ -77,9 +76,9 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           SizedBox(height: 10),
-          FullButton(
-            title: "Create a digital address",
-            onPressed: () {
+          InkWell(
+            child: Text("Create a digital address"),
+            onTap: () {
               OkHi.startDigitalAddressVerification(
                 locationId: null,
                 onSuccess: (user, location) {
