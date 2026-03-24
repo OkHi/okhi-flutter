@@ -12,6 +12,7 @@ class MockOkhiFlutterPlatform
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final OkhiFlutterPlatform initialPlatform = OkhiFlutterPlatform.instance;
 
   test('$MethodChannelOkhiFlutter is the default instance', () {
