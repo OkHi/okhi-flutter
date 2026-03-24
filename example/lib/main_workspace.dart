@@ -525,8 +525,8 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: isLoggedIn
-            ? Colors.teal.withOpacity(0.1)
-            : Colors.orange.withOpacity(0.1),
+            ? Colors.teal.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: isLoggedIn ? Colors.teal : Colors.orange),
       ),
