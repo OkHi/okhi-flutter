@@ -29,8 +29,8 @@ jobs:
           cd example
           flutter pub get
 
-#      - name: ☄️ Analyze code
-#        run: flutter analyze
+      - name: ☄️ Analyze code
+        run: flutter analyze
 #
 #      - name: ✅ Run tests
 #        run: flutter test
@@ -52,15 +52,15 @@ jobs:
         with:
           ruby-version: '3.2'
 
-#      Get the certificate repo then give access
-      - name: ⚙️ Fastlane Match Setup
-        env:
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-        run: |
-          cd example/ios
-          bundle install
-          bundle exec fastlane match appstore
-
+#      todo: Get the certificate repo then give access
+#      - name: ⚙️ Fastlane Match Setup
+#        env:
+#          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+#        run: |
+#          cd example/ios
+#          bundle install
+#          bundle exec fastlane match appstore
+#      todo: Get testflight credentials
 #      - name: 🚀 Deploy to TestFlight
 #        run: |
 #          cd example/ios
