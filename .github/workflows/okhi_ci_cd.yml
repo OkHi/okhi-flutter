@@ -29,8 +29,8 @@ jobs:
           cd example
           flutter pub get
 
-#      - name: ☄️ Analyze code
-#        run: flutter analyze
+      - name: ☄️ Analyze code
+        run: flutter analyze
 
       - name: ✅ Run tests
         run: flutter test
@@ -84,38 +84,38 @@ jobs:
           key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: ${{ runner.os }}-pub-
 
-#      - name: ☕️ Setup Java (Temurin 17)
-#        uses: actions/setup-java@v4
-#        with:
-#          distribution: temurin
-#          java-version: '17'
-#
-#      - name: 🦋 Setup Flutter
-#        uses: subosito/flutter-action@v2
-#        with:
-#          channel: stable
-#
-#      - name: 🧭 Navigate to example app and Get dependencies
-#        run: |
-#          cd example
-#          flutter pub get
+      - name: ☕️ Setup Java (Temurin 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-      # - name: ☄️ Analyze code
-      #   run: flutter analyze
+      - name: 🦋 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
 
-      # - name: ✅ Run tests
-      #   run: flutter test
+      - name: 🧭 Navigate to example app and Get dependencies
+        run: |
+          cd example
+          flutter pub get
 
-#      - name: 🏗️ Build APKs
-#        run:  |
-#          cd example
-#          flutter build apk --release
-#
-#      - name: 📦 Prepare & Upload artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: android-apk
-#          path: example/build/app/outputs/flutter-apk/app-release.apk
+      - name: ☄️ Analyze code
+        run: flutter analyze
+
+      - name: ✅ Run tests
+        run: flutter test
+
+      - name: 🏗️ Build APKs
+        run:  |
+          cd example
+          flutter build apk --release
+
+      - name: 📦 Prepare & Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: example/build/app/outputs/flutter-apk/app-release.apk
 
 ##         For firebase distribution configuration
 #      - name: 🔥 Distribute APK via Firebase
