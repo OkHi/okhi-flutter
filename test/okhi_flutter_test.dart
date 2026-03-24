@@ -23,6 +23,6 @@ void main() {
     MockOkhiFlutterPlatform fakePlatform = MockOkhiFlutterPlatform();
     OkhiFlutterPlatform.instance = fakePlatform;
 
-    expect(await OkHi.platformVersion, '42');
+    expect(await fakePlatform.getPlatformVersion(), '42');
   });
 }
