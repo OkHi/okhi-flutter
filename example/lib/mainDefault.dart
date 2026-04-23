@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
-void main() {
+void mainDefault() {
   runApp(const MyApp());
 }
 

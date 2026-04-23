@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:okhi_flutter/utils/utilities.dart';
+
 /// Defines the structure of the OkHi location object once an address has been successfully created by the user.
 class OkHiLocation {
   String? id;
@@ -25,7 +27,7 @@ class OkHiLocation {
   String? userId;
   String? neighborhood;
   String? countryCode;
-  List<String>? usageTypes = [];
+  List<dynamic>? usageTypes = [];
   String? ward;
   String? formattedAddress;
   String? postCode;
@@ -77,67 +79,61 @@ class OkHiLocation {
   });
 
   OkHiLocation.fromMap(Map<String, dynamic> data) {
-    id = data.containsKey("id") ? data["id"] : null;
-    lat = data.containsKey("geo_point") ? data["geo_point"]["lat"] : null;
-    lng = data.containsKey("geo_point") ? data["geo_point"]["lng"] : null;
-    city = data.containsKey("city") ? data["city"] : null;
-    country = data.containsKey("country") ? data["country"] : null;
-    directions = data.containsKey("directions") ? data["directions"] : null;
-    displayTitle = data.containsKey("display_title")
-        ? data["display_title"]
-        : null;
-    otherInformation = data.containsKey("other_information")
-        ? data["other_information"]
-        : null;
-    photoUrl = data.containsKey("photo") ? data["photo"] : null;
-    placeId = data.containsKey("place_id") ? data["place_id"] : null;
-    plusCode = data.containsKey("plus_code") ? data["plus_code"] : null;
-    propertyName = data.containsKey("property_name")
-        ? data["property_name"]
-        : null;
-    propertyNumber = data.containsKey("property_number")
-        ? data["property_number"]
-        : null;
-    state = data.containsKey("state") ? data["state"] : null;
-    streetName = data.containsKey("street_name") ? data["street_name"] : null;
-    streetViewPanoId = data.containsKey("street_view")
-        ? data["street_view"]["pano_id"]
-        : null;
-    streetViewPanoUrl = data.containsKey("street_view")
-        ? data["street_view"]["url"]
-        : null;
-    subtitle = data.containsKey("subtitle") ? data["subtitle"] : null;
-    title = data.containsKey("title") ? data["title"] : null;
-    url = data.containsKey("url") ? data["url"] : null;
-    userId = data.containsKey("user_id") ? data["user_id"] : null;
-    neighborhood = data.containsKey("neighborhood")
-        ? data["neighborhood"]
-        : null;
-    countryCode = data.containsKey("country_code")
-        ? data["country_code"]
-        : null;
-    usageTypes =
-        (data.containsKey("usage_types") ? data["usage_types"] as List : [])
-            .cast<String>();
-    ward = data.containsKey("ward") ? data["ward"] : null;
-    formattedAddress = data.containsKey("formatted_address")
-        ? data["formatted_address"]
-        : null;
-    postCode = data.containsKey("post_code") ? data["post_code"] : null;
-    lga = data.containsKey("lga") ? data["lga"] : null;
-    lgaCode = data.containsKey("lga_code") ? data["lga_code"] : null;
-    unit = data.containsKey("unit") ? data["unit"] : null;
-    gpsAccuracy = data.containsKey("gps_accuracy")
-        ? data["gps_accuracy"].toString()
-        : null;
-    businessName = data.containsKey("business_name")
-        ? data["business_name"]
-        : null;
-    type = data.containsKey("type") ? data["type"] : null;
-    district = data.containsKey("district") ? data["district"] : null;
-    addressLine = data.containsKey("address_line_1")
-        ? data["address_line_1"]
-        : null;
+    id = data["id"];
+    // Native plugins send flat lat/lng; backend API nests them under geo_point
+    if (data.containsKey("lat") || data.containsKey("lng")) {
+      lat = data["lat"] != null ? (data["lat"] as num).toDouble() : null;
+      lng = data["lng"] != null ? (data["lng"] as num).toDouble() : null;
+    } else if (data["geo_point"] != null) {
+      lat = data["geo_point"]["lat"] != null
+          ? (data["geo_point"]["lat"] as num).toDouble()
+          : null;
+      lng = data["geo_point"]["lng"] != null
+          ? (data["geo_point"]["lng"] as num).toDouble()
+          : null;
+    }
+    city = data["city"];
+    country = data["country"];
+    directions = data["directions"];
+    displayTitle = data["displayTitle"] ?? data["display_title"];
+    otherInformation = data["otherInformation"] ?? data["other_information"];
+    photoUrl = data["photoUrl"] ?? data["photo"];
+    placeId = data["placeId"] ?? data["place_id"];
+    plusCode = data["plusCode"] ?? data["plus_code"];
+    propertyName = data["propertyName"] ?? data["property_name"];
+    propertyNumber = data["propertyNumber"] ?? data["property_number"];
+    state = data["state"];
+    streetName = data["streetName"] ?? data["street_name"];
+    // Native plugins send flat keys; backend API nests under street_view
+    if (data.containsKey("streetViewPanoId") ||
+        data.containsKey("streetViewPanoUrl")) {
+      streetViewPanoId = data["streetViewPanoId"];
+      streetViewPanoUrl = data["streetViewPanoUrl"];
+    } else if (data["street_view"] != null) {
+      streetViewPanoId = data["street_view"]["pano_id"];
+      streetViewPanoUrl = data["street_view"]["url"];
+    }
+    subtitle = data["subtitle"];
+    title = data["title"];
+    url = data["url"];
+    userId = data["userId"] ?? data["user_id"];
+    neighborhood = data["neighborhood"];
+    countryCode = data["countryCode"] ?? data["country_code"];
+    final rawUsageTypes = data["usageTypes"] ?? data["usage_types"];
+    appDebugPrint("RawUsageTypes : $rawUsageTypes");
+    usageTypes = rawUsageTypes != null ? (rawUsageTypes as List) : [];
+    ward = data["ward"];
+    formattedAddress = data["formattedAddress"] ?? data["formatted_address"];
+    postCode = data["postCode"] ?? data["post_code"];
+    lga = data["lga"];
+    lgaCode = data["lgaCode"] ?? data["lga_code"];
+    unit = data["unit"];
+    final rawAccuracy = data["gpsAccuracy"] ?? data["gps_accuracy"];
+    gpsAccuracy = rawAccuracy?.toString();
+    businessName = data["businessName"] ?? data["business_name"];
+    type = data["type"];
+    district = data["district"];
+    addressLine = data["addressLine"] ?? data["address_line_1"];
   }
 
   @override

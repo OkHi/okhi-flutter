@@ -36,6 +36,7 @@ import io.okhi.android.core.model.OkHiException
 import io.okhi.android.core.model.OkHiUser
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import org.json.JSONArray
 import org.json.JSONObject
 
 class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -357,7 +358,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         locationObject.put("userId",response.location.userId)
         locationObject.put("neighborhood",response.location.neighborhood)
         locationObject.put("countryCode",response.location.countryCode)
-        locationObject.put("usageTypes",response.location.usageTypes)
+        locationObject.put("usageTypes", JSONArray(response.location.usageTypes ?: emptyArray<String>()))
         locationObject.put("ward",response.location.ward)
         locationObject.put("formattedAddress",response.location.formattedAddress)
         locationObject.put("postCode",response.location.postCode)

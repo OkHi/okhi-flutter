@@ -36,7 +36,8 @@ class OkHi {
     return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
       appDebugPrint('Received event: $event');
       final Map<String, dynamic> map = jsonDecode(event);
-      return OkHiEvent.fromMap(map);
+      var mapDetails = OkHiEvent.fromMap(map);
+      return mapDetails;
     });
   }
 

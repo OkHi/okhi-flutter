@@ -1,0 +1,133 @@
+name: OkHi Flutter CI/CD 2026
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+permissions:
+  contents: write   # allow creating/updating Releases & uploading assets
+  actions:  read
+
+jobs:
+  build-ios:
+    name: Build iOS for TestFlight
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🦋 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: 📥 Navigate to example and Get dependencies
+        run:  |
+          cd example
+          flutter pub get
+
+      - name: ☄️ Analyze code
+        run: |
+          cd example
+          flutter analyze
+
+      - name: ✅ Run tests
+        run: |
+          cd example
+          flutter test
+
+      - name: 🏗️ Build iOS
+        run:   |
+          cd example
+          flutter build ios -t lib/main_workspace.dart --release --no-codesign
+
+      - name: 📦 Prepare & Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ipa
+          path: example/build/ios/iphoneos/OkHiFlutterForIOS.app
+
+      - name: 💎 Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+#      todo: Get the certificate repo then give access
+#      - name: ⚙️ Fastlane Match Setup
+#        env:
+#          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+#        run: |
+#          cd example/ios
+#          bundle install
+#          bundle exec fastlane match appstore
+#      todo: Get testflight credentials
+#      - name: 🚀 Deploy to TestFlight
+#        run: |
+#          cd example/ios
+#          fastlane beta
+#        env:
+#          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+#          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+#          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📂 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Cache pub deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: ${{ runner.os }}-pub-
+
+      - name: ☕️ Setup Java (Temurin 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 🦋 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: 🧭 Navigate to example app and Get dependencies
+        run: |
+          cd example
+          flutter pub get
+
+      - name: ☄️ Analyze code
+        run: |
+          cd example
+          flutter analyze
+
+      - name: ✅ Run tests
+        run: |
+          cd example
+          flutter test
+
+      - name: 🏗️ Build APKs
+        run:  |
+          cd example
+          flutter build apk --release
+
+      - name: 📦 Prepare & Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: example/build/app/outputs/flutter-apk/app-release.apk
+
+##         For firebase distribution configuration
+#      - name: 🔥 Distribute APK via Firebase
+#        run: |
+#          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+#            --app ${{ secrets.FIREBASE_APP_ID }} \
+#            --groups testers \
+#            --token ${{ secrets.FIREBASE_TOKEN }}

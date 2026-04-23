@@ -7,8 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:okhi_flutter_example/main.dart';
+import 'package:okhi_flutter_example/mainDefault.dart';
 
 void main() {
   testWidgets('Verify Platform version', (WidgetTester tester) async {
