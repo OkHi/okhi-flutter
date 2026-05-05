@@ -46,7 +46,7 @@ android {
     }
 
     dependencies {
-        implementation("io.okhi.android:okhi:1.0.11")
+        implementation("io.okhi.android:okhi:1.0.12")
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }

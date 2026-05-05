@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
-void main() async {
+void mainWorkSpace() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const OkHiDemoApp());
 }
@@ -60,8 +60,15 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
   final _lastNameCtrl = TextEditingController();
   final _appUserIdCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _branchIdCtrl = TextEditingController();
-  final _clientKeyCtrl = TextEditingController();
+  final _branchIdCtrl = TextEditingController(text: "bGlA1qWeiB");
+  final _clientKeyCtrl = TextEditingController(
+    text: "c728dcef-bc6b-4e0f-b6f2-b29df973366d",
+  );
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -312,7 +319,12 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                   children: [
                     // ── Status chip ──────────────────────────────────────
                     _StatusChip(isLoggedIn: _isUserSet, appUserId: _appUserId),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
+                    // _ServiceStatusChip(
+                    //   isRunning: _isServiceRunning,
+                    //   onRefresh: _checkVerificationStatus,
+                    // ),
+                    // const SizedBox(height: 12),
 
                     // ── Credentials section ──────────────────────────────
                     if (!_isUserSet) ...[
@@ -374,36 +386,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                         label: const Text('Login'),
                         style: _primaryButtonStyle(),
                       ),
-                      const SizedBox(height: 24),
                     ],
-
-                    // ── Permissions section ──────────────────────────────
-                    _SectionHeader('Permissions'),
-                    _PermissionRow(
-                      label: 'Enable Location Services',
-                      icon: Icons.location_on_outlined,
-                      onTap: _isLoading ? null : _requestLocationServices,
-                    ),
-                    const SizedBox(height: 8),
-                    _PermissionRow(
-                      label: 'Request Location Permission',
-                      icon: Icons.my_location,
-                      onTap: _isLoading ? null : _requestLocationPermission,
-                    ),
-                    const SizedBox(height: 8),
-                    _PermissionRow(
-                      label: 'Request Background Location',
-                      icon: Icons.gps_fixed,
-                      onTap: _isLoading ? null : _requestBackgroundPermission,
-                    ),
-                    const SizedBox(height: 8),
-                    _PermissionRow(
-                      label: 'Request Protected Apps Permission',
-                      icon: Icons.shield_outlined,
-                      onTap: _isLoading
-                          ? null
-                          : _requestProtectedAppsPermission,
-                    ),
 
                     if (_isUserSet) ...[
                       const SizedBox(height: 24),
@@ -463,7 +446,6 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                         ),
                       ),
                     ],
-
                     const SizedBox(height: 32),
                   ],
                 ),
