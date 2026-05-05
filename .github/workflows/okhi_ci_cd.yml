@@ -14,6 +14,7 @@ jobs:
   build-ios:
     name: Build iOS for TestFlight
     runs-on: macos-latest
+    needs: build-android
 
     steps:
       - uses: actions/checkout@v4
@@ -29,14 +30,10 @@ jobs:
           flutter pub get
 
       - name: ☄️ Analyze code
-        run: |
-          cd example
-          flutter analyze
+        run: flutter analyze
 
       - name: ✅ Run tests
-        run: |
-          cd example
-          flutter test
+        run: flutter test
 
       - name: 🏗️ Build iOS
         run:   |
@@ -104,14 +101,10 @@ jobs:
           flutter pub get
 
       - name: ☄️ Analyze code
-        run: |
-          cd example
-          flutter analyze
+        run: flutter analyze
 
       - name: ✅ Run tests
-        run: |
-          cd example
-          flutter test
+        run: flutter test
 
       - name: 🏗️ Build APKs
         run:  |
