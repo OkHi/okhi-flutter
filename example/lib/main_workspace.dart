@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
 import 'package:okhi_flutter/okhi_flutter.dart';
 
-void mainWorkSpace() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const OkHiDemoApp());
 }
