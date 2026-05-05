@@ -9,7 +9,7 @@ android {
 
     namespace = "io.okhi.flutter.okhi_flutter_example"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "30.0.14904198" // flutter.ndkVersion
+    ndkVersion = flutter.ndkVersion // "30.0.14904198" //
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
