@@ -137,6 +137,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
 
   // ── Permission actions ────────────────────────────────────────────────────
 
+  // ignore: unused_element comments.
   Future<void> _requestLocationServices() async {
     _setLoading(true);
     final granted = await OkHi.requestEnableLocationServices();
@@ -144,6 +145,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
     _showSnackBar(granted ? 'Location services enabled' : 'Not enabled');
   }
 
+  // ignore: unused_element comments.
   Future<void> _requestLocationPermission() async {
     _setLoading(true);
     final granted = await OkHi.requestLocationPermission();
@@ -153,6 +155,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
     );
   }
 
+  // ignore: unused_element comments.
   Future<void> _requestBackgroundPermission() async {
     _setLoading(true);
     final granted = await OkHi.requestBackgroundLocationPermission();
@@ -162,6 +165,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
     );
   }
 
+  // ignore: unused_element comments.
   Future<void> _requestProtectedAppsPermission() async {
     _setLoading(true);
     final canOpen = await OkHi.canOpenProtectedApps();
@@ -565,6 +569,7 @@ class _EnvSelector extends StatelessWidget {
   }
 }
 
+// ignore: unused_element comments.
 class _PermissionRow extends StatelessWidget {
   final String label;
   final IconData icon;
