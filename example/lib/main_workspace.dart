@@ -52,6 +52,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
   String _appUserId = '';
   String _userId = '';
   String _savedAddressId = '';
+  OkHiLocation? _savedLocation;
 
   // ── Text controllers ──────────────────────────────────────────────────────
   final _phoneCtrl = TextEditingController(text: '+254');
@@ -59,8 +60,15 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
   final _lastNameCtrl = TextEditingController();
   final _appUserIdCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _branchIdCtrl = TextEditingController();
-  final _clientKeyCtrl = TextEditingController();
+  final _branchIdCtrl = TextEditingController(text: "bGlA1qWeiB");
+  final _clientKeyCtrl = TextEditingController(
+    text: "c728dcef-bc6b-4e0f-b6f2-b29df973366d",
+  );
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -129,6 +137,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
 
   // ── Permission actions ────────────────────────────────────────────────────
 
+  // ignore: unused_element comments.
   Future<void> _requestLocationServices() async {
     _setLoading(true);
     final granted = await OkHi.requestEnableLocationServices();
@@ -136,6 +145,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
     _showSnackBar(granted ? 'Location services enabled' : 'Not enabled');
   }
 
+  // ignore: unused_element comments.
   Future<void> _requestLocationPermission() async {
     _setLoading(true);
     final granted = await OkHi.requestLocationPermission();
@@ -145,12 +155,28 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
     );
   }
 
+  // ignore: unused_element comments.
   Future<void> _requestBackgroundPermission() async {
     _setLoading(true);
     final granted = await OkHi.requestBackgroundLocationPermission();
     _setLoading(false);
     _showSnackBar(
       granted ? 'Background permission granted' : 'Permission denied',
+    );
+  }
+
+  // ignore: unused_element comments.
+  Future<void> _requestProtectedAppsPermission() async {
+    _setLoading(true);
+    final canOpen = await OkHi.canOpenProtectedApps();
+    bool granted = false;
+    if (canOpen) {
+      await OkHi.openProtectedApps();
+      granted = true;
+    }
+    _setLoading(false);
+    _showSnackBar(
+      granted ? 'Protected Apps permission granted' : 'Permission denied',
     );
   }
 
@@ -203,6 +229,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
             _appUserId = '';
             _userId = '';
             _savedAddressId = '';
+            _savedLocation = null;
           });
           _setLoading(false);
           _showSnackBar('Logged out');
@@ -220,8 +247,12 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
   // ── Address operations ────────────────────────────────────────────────────
 
   void _onAddressSuccess(dynamic user, dynamic location) {
-    final locationId = location.id as String? ?? '';
-    setState(() => _savedAddressId = locationId);
+    final loc = location as OkHiLocation;
+    final locationId = loc.id ?? '';
+    setState(() {
+      _savedAddressId = locationId;
+      _savedLocation = loc;
+    });
     _setLoading(false);
     _copyToClipboard(locationId, 'Location ID');
     _showSnackBar('Success — Location ID: $locationId');
@@ -292,7 +323,12 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                   children: [
                     // ── Status chip ──────────────────────────────────────
                     _StatusChip(isLoggedIn: _isUserSet, appUserId: _appUserId),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
+                    // _ServiceStatusChip(
+                    //   isRunning: _isServiceRunning,
+                    //   onRefresh: _checkVerificationStatus,
+                    // ),
+                    // const SizedBox(height: 12),
 
                     // ── Credentials section ──────────────────────────────
                     if (!_isUserSet) ...[
@@ -354,28 +390,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                         label: const Text('Login'),
                         style: _primaryButtonStyle(),
                       ),
-                      const SizedBox(height: 24),
                     ],
-
-                    // ── Permissions section ──────────────────────────────
-                    _SectionHeader('Permissions'),
-                    _PermissionRow(
-                      label: 'Enable Location Services',
-                      icon: Icons.location_on_outlined,
-                      onTap: _isLoading ? null : _requestLocationServices,
-                    ),
-                    const SizedBox(height: 8),
-                    _PermissionRow(
-                      label: 'Request Location Permission',
-                      icon: Icons.my_location,
-                      onTap: _isLoading ? null : _requestLocationPermission,
-                    ),
-                    const SizedBox(height: 8),
-                    _PermissionRow(
-                      label: 'Request Background Location',
-                      icon: Icons.gps_fixed,
-                      onTap: _isLoading ? null : _requestBackgroundPermission,
-                    ),
 
                     if (_isUserSet) ...[
                       const SizedBox(height: 24),
@@ -412,31 +427,12 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                       ),
 
                       // ── Saved address ────────────────────────────────
-                      if (_savedAddressId.isNotEmpty) ...[
+                      if (_savedLocation != null) ...[
                         const SizedBox(height: 24),
                         _SectionHeader('Saved Address'),
-                        Card(
-                          child: ListTile(
-                            leading: const Icon(
-                              Icons.bookmark_outline,
-                              color: Color(0xFF008080),
-                            ),
-                            title: const Text('Location ID'),
-                            subtitle: Text(
-                              _savedAddressId,
-                              style: const TextStyle(
-                                fontFamily: 'monospace',
-                                fontSize: 12,
-                              ),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.copy_outlined),
-                              onPressed: () => _copyToClipboard(
-                                _savedAddressId,
-                                'Location ID',
-                              ),
-                            ),
-                          ),
+                        _OkHiLocationCard(
+                          location: _savedLocation!,
+                          onCopy: _copyToClipboard,
                         ),
                       ],
 
@@ -454,7 +450,6 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                         ),
                       ),
                     ],
-
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -574,6 +569,7 @@ class _EnvSelector extends StatelessWidget {
   }
 }
 
+// ignore: unused_element comments.
 class _PermissionRow extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -626,5 +622,128 @@ class _ActionButton extends StatelessWidget {
         onTap: onTap,
       ),
     );
+  }
+}
+
+class _OkHiLocationCard extends StatelessWidget {
+  final OkHiLocation location;
+  final Future<void> Function(String text, String label) onCopy;
+
+  const _OkHiLocationCard({required this.location, required this.onCopy});
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = _buildRows();
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.location_on, color: Color(0xFF008080)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    location.title ?? location.id ?? 'Location',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                if (location.id != null)
+                  IconButton(
+                    icon: const Icon(Icons.copy_outlined, size: 18),
+                    tooltip: 'Copy location ID',
+                    onPressed: () => onCopy(location.id!, 'Location ID'),
+                  ),
+              ],
+            ),
+            const Divider(),
+            ...rows.map(
+              (row) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 130,
+                      child: Text(
+                        row.$1,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(row.$2, style: const TextStyle(fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<(String, String)> _buildRows() {
+    String fmt(double? v) => v?.toStringAsFixed(6) ?? '—';
+
+    return [
+      ('ID', location.id ?? '—'),
+      ('Lat / Lng', '${fmt(location.lat)}, ${fmt(location.lng)}'),
+      if (location.title != null) ('Title', location.title!),
+      if (location.subtitle != null) ('Subtitle', location.subtitle!),
+      if (location.displayTitle != null)
+        ('Display Title', location.displayTitle!),
+      if (location.formattedAddress != null)
+        ('Formatted Address', location.formattedAddress!),
+      if (location.addressLine != null) ('Address Line', location.addressLine!),
+      if (location.propertyNumber != null)
+        ('Property No.', location.propertyNumber!),
+      if (location.propertyName != null)
+        ('Property Name', location.propertyName!),
+      if (location.streetName != null) ('Street', location.streetName!),
+      if (location.neighborhood != null)
+        ('Neighborhood', location.neighborhood!),
+      if (location.ward != null && location.ward!.isNotEmpty)
+        ('Ward', location.ward!),
+      if (location.lga != null) ('LGA', location.lga!),
+      if (location.lgaCode != null) ('LGA Code', location.lgaCode!),
+      if (location.district != null && location.district!.isNotEmpty)
+        ('District', location.district!),
+      if (location.city != null) ('City', location.city!),
+      if (location.state != null) ('State', location.state!),
+      if (location.country != null) ('Country', location.country!),
+      if (location.countryCode != null) ('Country Code', location.countryCode!),
+      if (location.postCode != null) ('Post Code', location.postCode!),
+      if (location.plusCode != null) ('Plus Code', location.plusCode!),
+      if (location.directions != null && location.directions!.isNotEmpty)
+        ('Directions', location.directions!),
+      if (location.otherInformation != null)
+        ('Other Info', location.otherInformation!),
+      if (location.businessName != null)
+        ('Business Name', location.businessName!),
+      if (location.unit != null && location.unit!.isNotEmpty)
+        ('Unit', location.unit!),
+      if (location.type != null && location.type!.isNotEmpty)
+        ('Type', location.type!),
+      if (location.gpsAccuracy != null) ('GPS Accuracy', location.gpsAccuracy!),
+      if (location.usageTypes != null && location.usageTypes!.isNotEmpty)
+        ('Usage Types', location.usageTypes!.join(', ')),
+      if (location.placeId != null) ('Place ID', location.placeId!),
+      if (location.url != null) ('URL', location.url!),
+      if (location.photoUrl != null) ('Photo URL', location.photoUrl!),
+      if (location.streetViewPanoId != null)
+        ('Street View Pano ID', location.streetViewPanoId!),
+      if (location.userId != null) ('User ID', location.userId!),
+    ];
   }
 }

@@ -1,3 +1,8 @@
+## 2.0.4
+
+- Fix Null entries for address location response.
+- Added protected Apps flow
+
 ## 2.0.3
 
 - Fix for first + last name not showing on okdash
