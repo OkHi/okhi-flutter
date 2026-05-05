@@ -29,7 +29,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
-        ndkVersion = "29.0.13599879" // Added this for my local environment.
+        ndkVersion = flutter.ndkVersion // "29.0.13599879" // Added this for my local environment.
     }
 
     buildTypes {
