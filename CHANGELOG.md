@@ -1,3 +1,8 @@
+## 1.1.37
+
+- security: restrict OkHi location-manager WebView navigation to trusted OkHi hosts
+- test: add coverage for the WebView navigation allow-list
+
 ## 1.1.36
 
 - fix: Android 16KB page size compatibility

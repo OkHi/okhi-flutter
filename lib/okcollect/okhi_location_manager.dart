@@ -9,6 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../okhi_flutter.dart';
 import '../models/okhi_constant.dart';
 import '../models/okhi_native_methods.dart';
+import 'okhi_webview_policy.dart';
 
 /// The OkHiLocationManager enables you to launch OkHi from your app and collect accurate addresses from your users.
 class OkHiLocationManager extends StatefulWidget {
@@ -116,14 +117,27 @@ class _OkHiLocationManagerState extends State<OkHiLocationManager> {
 
       setState(() {
         _controller = WebViewController()
-          ..loadRequest(Uri.parse(_locationManagerUrl))
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageFinished: _handlePageLoaded,
+              onNavigationRequest: (request) {
+                if (isAllowedOkHiWebViewNavigation(request.url)) {
+                  return NavigationDecision.navigate;
+                }
+                if (kDebugMode) {
+                  debugPrint(
+                    'Blocked navigation away from OkHi WebView: ${request.url}',
+                  );
+                }
+                return NavigationDecision.prevent;
+              },
+            ),
+          )
           ..setJavaScriptMode(JavaScriptMode.unrestricted)
           ..addJavaScriptChannel("FlutterOkHi",
               onMessageReceived: _handleMessageReceived)
           ..setBackgroundColor(Colors.white)
-          ..setNavigationDelegate(
-            NavigationDelegate(onPageFinished: _handlePageLoaded),
-          );
+          ..loadRequest(Uri.parse(_locationManagerUrl));
       });
       if (_locationPermissionLevel != "denied") {
         _coords = await _fetchCoords();
