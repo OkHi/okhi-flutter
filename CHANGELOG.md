@@ -1,3 +1,7 @@
+## 2.0.6
+
+- security: remove unused WebView policy scaffold and sanitize iOS debug logging
+
 ## 2.0.5
 
 - security: remove token from `OkHiUser.toString()` and stop logging full verification payloads
