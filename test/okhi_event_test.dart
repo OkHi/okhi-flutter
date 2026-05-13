@@ -21,9 +21,9 @@ void main() {
     final user = event.user;
 
     expect(user, isNotNull);
-    expect(user!.phone, '2348012345678');
-    expect(user.token, 'secret-token');
-    expect(user.toString(), isNot(contains('secret-token')));
+    expect(user?.phone, '2348012345678');
+    expect(user?.token, 'secret-token');
+    expect(user?.toString(), isNot(contains('secret-token')));
     expect(event.location?.id, 'location-123');
   });
 }
