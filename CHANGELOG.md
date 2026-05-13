@@ -1,6 +1,7 @@
 ## 2.0.6
 
-- security: remove unused WebView policy scaffold and sanitize iOS debug logging
+- security: sanitize iOS debug logging
+- security: avoid returning native exception objects over Android method channels
 
 ## 2.0.5
 

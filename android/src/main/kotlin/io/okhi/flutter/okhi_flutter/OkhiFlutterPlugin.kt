@@ -9,7 +9,6 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import android.os.Handler
 import android.os.Looper
 
@@ -515,7 +514,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 OkHiMainThreadResult(result).success(true)
             }
         } catch (e: Exception) {
-            OkHiMainThreadResult(result).error("unknown_error", "initialization failed", e)
+            OkHiMainThreadResult(result).error("unknown_error", "initialization failed", null)
         }
     }
 
@@ -528,7 +527,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             OkHi.openProtectedApps(context)
             OkHiMainThreadResult(result).success(true)
         } catch (e: OkHiException) {
-            OkHiMainThreadResult(result).error(e.code, e.message, e)
+            OkHiMainThreadResult(result).error(e.code, e.message, null)
         }
     }
 
