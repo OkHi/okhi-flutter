@@ -1,3 +1,7 @@
+## 2.0.5
+
+- security: remove token from `OkHiUser.toString()` and stop logging full verification payloads
+
 ## 2.0.4
 
 - Fix Null entries for address location response.
