@@ -80,7 +80,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 }
             }
         } catch {
+            #if DEBUG
             print("Error serializing JSON: \(error)")
+            #endif
         }
     }
 
@@ -279,21 +281,20 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     }
 
     private func handleInitialize(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-
         let arguments = call.arguments as? [String: Any] ?? [String: Any]()
         let branchId = arguments["branchId"] as? String
         let clientKey = arguments["clientKey"] as? String
         let envRaw = arguments["environment"] as? String ?? "sandbox"
 
-
         let locationManagerConfiguration = arguments["locationManagerConfiguration"] as? [String: Any] ?? [String: Any]()
-        print("OkHi Initialized locationManagerConfiguration: \(locationManagerConfiguration)")
-        
-        
+        #if DEBUG
+        print("OkHi initialization received location manager configuration")
+        #endif
+
         let phoneNumber = arguments["phoneNumber"] as? String
         let firstName = arguments["firstName"] as? String
         let lastName = arguments["lastName"] as? String
-        
+
         let email = arguments["email"] as? String
         let userId = arguments["userId"] as? String
         let appUserId = arguments["appUserId"] as? String
@@ -331,8 +332,10 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 .with(logoUrl: locationManagerConfiguration["logoUrl"] as? String ?? "")
 
             do {
-                OK.shared.login(auth: auth, user: user){ list in
-                    print("OkHi Initialized successfully on iOS platform: \(list)")
+                OK.shared.login(auth: auth, user: user) { _ in
+                    #if DEBUG
+                    print("OkHi initialized successfully on iOS platform")
+                    #endif
                     result(true)
                 }
             } catch {

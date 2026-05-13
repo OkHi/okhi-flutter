@@ -34,10 +34,10 @@ class OkHi {
 
   static Stream<OkHiEvent> get okhiVerificationStream {
     return _okhiVerificationEvents.receiveBroadcastStream().map((event) {
-      appDebugPrint('Received event: $event');
       final Map<String, dynamic> map = jsonDecode(event);
-      var mapDetails = OkHiEvent.fromMap(map);
-      return mapDetails;
+      // Log only the event type so verification payloads stay out of logs.
+      appDebugPrint('Received OkHi verification event: ${map['type']}');
+      return OkHiEvent.fromMap(map);
     });
   }
 

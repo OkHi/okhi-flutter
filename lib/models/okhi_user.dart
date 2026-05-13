@@ -25,32 +25,36 @@ class OkHiUser {
     firstName = data.containsKey("firstName")
         ? data["firstName"]
         : data.containsKey("first_name")
-            ? data["first_name"]
-            : null;
+        ? data["first_name"]
+        : null;
     lastName = data.containsKey("lastName")
         ? data["lastName"]
         : data.containsKey("last_name")
-            ? data["last_name"]
-            : null;
+        ? data["last_name"]
+        : null;
     email = data.containsKey("email") ? data["email"] : null;
     appUserId = data.containsKey("app_user_id")
         ? data["app_user_id"]
         : data.containsKey("appUserId")
-            ? data["appUserId"]
-            : null;
+        ? data["appUserId"]
+        : null;
     token = data.containsKey("token") ? data["token"] : null;
   }
 
-  @override
-  String toString() {
-    return jsonEncode({
+  Map<String, dynamic> toMap() {
+    // Keep auth tokens out of implicit debug serialization.
+    return {
       "firstName": firstName,
       "lastName": lastName,
       "id": id,
       "phone": phone,
       "email": email,
       "appUserId": appUserId,
-      "token": token
-    });
+    };
+  }
+
+  @override
+  String toString() {
+    return jsonEncode(toMap());
   }
 }

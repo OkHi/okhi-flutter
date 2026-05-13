@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:okhi_flutter/utils/utilities.dart';
-
 /// Defines the structure of the OkHi location object once an address has been successfully created by the user.
 class OkHiLocation {
   String? id;
@@ -120,7 +118,6 @@ class OkHiLocation {
     neighborhood = data["neighborhood"];
     countryCode = data["countryCode"] ?? data["country_code"];
     final rawUsageTypes = data["usageTypes"] ?? data["usage_types"];
-    appDebugPrint("RawUsageTypes : $rawUsageTypes");
     usageTypes = rawUsageTypes != null ? (rawUsageTypes as List) : [];
     ward = data["ward"];
     formattedAddress = data["formattedAddress"] ?? data["formatted_address"];

@@ -1,3 +1,12 @@
+## 2.0.6
+
+- security: sanitize iOS debug logging
+- security: avoid returning native exception objects over Android method channels
+
+## 2.0.5
+
+- security: remove token from `OkHiUser.toString()` and stop logging full verification payloads
+
 ## 2.0.4
 
 - Fix Null entries for address location response.
