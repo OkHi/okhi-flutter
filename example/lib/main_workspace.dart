@@ -48,7 +48,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
   bool _isUserSet = false;
 
   // ── OkHi state ───────────────────────────────────────────────────────────
-  OkHiEnv _selectedEnv = OkHiEnv.sandbox;
+  OkHiEnv _selectedEnv = OkHiEnv.prod;
   String _appUserId = '';
   String _userId = '';
   String _savedAddressId = '';
@@ -60,10 +60,23 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
   final _lastNameCtrl = TextEditingController();
   final _appUserIdCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _branchIdCtrl = TextEditingController(text: "bGlA1qWeiB");
-  final _clientKeyCtrl = TextEditingController(
-    text: "c728dcef-bc6b-4e0f-b6f2-b29df973366d",
-  );
+  final _branchIdCtrl = TextEditingController(text: "");
+  final _clientKeyCtrl = TextEditingController(text: "");
+
+  static const _envCredentials = {
+    OkHiEnv.dev: (branchId: '', clientKey: ''),
+    OkHiEnv.sandbox: (branchId: '', clientKey: ''),
+    OkHiEnv.prod: (branchId: '', clientKey: ''),
+  };
+
+  void _onEnvChanged(OkHiEnv env) {
+    final creds = _envCredentials[env]!;
+    setState(() {
+      _selectedEnv = env;
+      _branchIdCtrl.text = creds.branchId;
+      _clientKeyCtrl.text = creds.clientKey;
+    });
+  }
 
   @override
   void initState() {
@@ -335,7 +348,7 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
                       _SectionHeader('Environment'),
                       _EnvSelector(
                         selected: _selectedEnv,
-                        onChanged: (env) => setState(() => _selectedEnv = env),
+                        onChanged: _onEnvChanged,
                       ),
                       const SizedBox(height: 16),
                       _SectionHeader('App Credentials'),
