@@ -201,6 +201,11 @@ class OkHi {
           : null,
     };
 
+    await streamSubscription?.cancel();
+    streamSubscription = null;
+    onVerificationSuccess = null;
+    onVerificationError = null;
+
     streamSubscription = okhiVerificationStream.listen((dynamic event) {
       if (event.resultType == "success") {
         if (event.user != null && event.location != null) {

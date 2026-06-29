@@ -50,6 +50,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var cachedLocation: Location
     private var eventSink: EventChannel.EventSink? = null
     private var isFetchingLocation = false
+    private var activeOperationToken: Int = 0
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         context = flutterPluginBinding.applicationContext
@@ -163,16 +164,19 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         call: MethodCall,
         result: Result
     ) {
+        val token = activeOperationToken
         OkHi.createAddress(
             activity,
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
+                    if (activeOperationToken != token) return
                     val eventObject = getSuccessEventObject("createAddress", response)
                     sendEvent(eventObject)
                 }
 
                 override fun onClose() {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","createAddress")
                     eventObject.put("type","closed")
@@ -180,6 +184,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 override fun onError(e: OkHiException) {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","createAddress")
                     eventObject.put("type","error")
@@ -188,22 +193,26 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     sendEvent(eventObject)
                 }
             })
+        result.success(null)
     }
 
     private fun handleStartDigitalAndPhysicalVerification(
         call: MethodCall,
         result: Result
     ) {
+        val token = activeOperationToken
         OkHi.startDigitalAndPhysicalAddressVerification(
             activity,
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
+                    if (activeOperationToken != token) return
                     val eventObject = getSuccessEventObject("startDigitalAndPhysicalAddressVerification", response)
                     sendEvent(eventObject)
                 }
 
                 override fun onClose() {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startDigitalAndPhysicalAddressVerification")
                     eventObject.put("type","closed")
@@ -211,6 +220,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 override fun onError(e: OkHiException) {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startDigitalAndPhysicalAddressVerification")
                     eventObject.put("type","error")
@@ -219,22 +229,26 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     sendEvent(eventObject)
                 }
             })
+        result.success(null)
     }
 
     private fun handleStartPhysicalVerification(
         call: MethodCall,
         result: Result
     ) {
+        val token = activeOperationToken
         OkHi.startPhysicalAddressVerification(
             activity,
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
+                    if (activeOperationToken != token) return
                     val eventObject = getSuccessEventObject("startPhysicalAddressVerification", response)
                     sendEvent(eventObject)
                 }
 
                 override fun onClose() {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startPhysicalAddressVerification")
                     eventObject.put("type","closed")
@@ -242,6 +256,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 override fun onError(e: OkHiException) {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startPhysicalAddressVerification")
                     eventObject.put("type","error")
@@ -250,22 +265,26 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     sendEvent(eventObject)
                 }
             })
+        result.success(null)
     }
 
     private fun handleStartDigitalVerification(
         call: MethodCall,
         result: Result
     ) {
+        val token = activeOperationToken
         OkHi.startDigitalAddressVerification(
             activity,
             collect,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
+                    if (activeOperationToken != token) return
                     val eventObject = getSuccessEventObject("startDigitalAddressVerification", response)
                     sendEvent(eventObject)
                 }
 
                 override fun onClose() {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startDigitalAddressVerification")
                     eventObject.put("type","closed")
@@ -273,6 +292,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 override fun onError(e: OkHiException) {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startDigitalAddressVerification")
                     eventObject.put("type","error")
@@ -282,23 +302,27 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
             }
         )
+        result.success(null)
     }
 
     private fun handleStartSavedVerification(
         locationId: String,
         result: Result
     ) {
+        val token = activeOperationToken
         val collectInstance = OkCollect(collect.style, collect.config, OkHiLocation(locationId))
         OkHi.startAddressVerification(
             activity,
             collectInstance,
             object : OkHiAddressVerificationCallback() {
                 override fun onSuccess(response: OkHiSuccessResponse) {
+                    if (activeOperationToken != token) return
                     val eventObject = getSuccessEventObject("startSavedAddressVerification", response)
                     sendEvent(eventObject)
                 }
 
                 override fun onClose() {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startSavedAddressVerification")
                     eventObject.put("type","closed")
@@ -306,6 +330,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 override fun onError(e: OkHiException) {
+                    if (activeOperationToken != token) return
                     val eventObject= JSONObject()
                     eventObject.put("methodCall","startSavedAddressVerification")
                     eventObject.put("type","error")
@@ -316,6 +341,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
             }
         )
+        result.success(null)
     }
 
     private fun getSuccessEventObject(methodCall: String, response: OkHiSuccessResponse): JSONObject {
@@ -508,6 +534,8 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     okhiUserId = userId,
                     token = token
                 )
+                activeOperationToken++
+
                 OkHi.login(context, auth, okHiUser) { locationIds ->
                     // todo: handle login
                 }
