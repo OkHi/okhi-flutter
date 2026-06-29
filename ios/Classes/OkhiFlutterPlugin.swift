@@ -323,8 +323,8 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
             appConfig = OkHiConfig()
                 .withAddressTypes(
-                    work: locationManagerConfiguration["withWorkAddressType"] as? Int == 1,
-                    home: locationManagerConfiguration["withHomeAddressType"] as? Int == 1
+                    work: locationManagerConfiguration["withWorkAddressType"] as? Bool == true,
+                    home: locationManagerConfiguration["withHomeAddressType"] as? Bool == true
                 )
 
             theme = OkHiTheme()

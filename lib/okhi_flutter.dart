@@ -189,6 +189,7 @@ class OkHi {
       "locationManagerConfiguration": locationManagerConfiguration != null
           ? {
               "color": locationManagerConfiguration.color,
+              "appName": locationManagerConfiguration.appName,
               "logoUrl": locationManagerConfiguration.logoUrl,
               "withAppBar": locationManagerConfiguration.withAppBar,
               "withCreateMode": locationManagerConfiguration.withCreateMode,

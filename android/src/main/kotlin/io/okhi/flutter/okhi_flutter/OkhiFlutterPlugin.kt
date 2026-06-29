@@ -496,7 +496,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val branchId: String? = call.argument("branchId")
             val clientKey: String? = call.argument("clientKey")
             val mode: String? = call.argument("environment")
-            val locationManagerConfiguration: Map<String, String>? = call.argument("locationManagerConfiguration")
+            val locationManagerConfiguration: Map<String, Any>? = call.argument("locationManagerConfiguration")
 
             if (branchId == null || clientKey == null || mode == null) {
                 result.error("unauthorized", "invalid initialization credentials provided", null)
@@ -506,12 +506,17 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 var config = OkCollectConfig(true, true, false, true)
 
                 if(locationManagerConfiguration != null) {
-                    style = OkCollectStyle(locationManagerConfiguration["color"].toString(), locationManagerConfiguration["appName"].toString(), locationManagerConfiguration["logoUrl"].toString())
+                    style = OkCollectStyle(
+                        (locationManagerConfiguration["color"] as? String) ?: "#263238",
+                        (locationManagerConfiguration["appName"] as? String) ?: "OkHi",
+                        (locationManagerConfiguration["logoUrl"] as? String) ?: "https://cdn.okhi.co/icon.png"
+                    )
                     config = OkCollectConfig(
-                        locationManagerConfiguration["withStreetView"] == "true",
-                        locationManagerConfiguration["withHomeAddressType"] == "true",
-                        locationManagerConfiguration["withWorkAddressType"] == "true",
-                        locationManagerConfiguration["withAppBar"] == "true")
+                        (locationManagerConfiguration["withStreetView"] as? Boolean) ?: true,
+                        (locationManagerConfiguration["withHomeAddressType"] as? Boolean) ?: true,
+                        (locationManagerConfiguration["withWorkAddressType"] as? Boolean) ?: false,
+                        (locationManagerConfiguration["withAppBar"] as? Boolean) ?: true
+                    )
                 }
 
                 collect = OkCollect(style, config)
