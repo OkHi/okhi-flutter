@@ -502,12 +502,12 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.error("unauthorized", "invalid initialization credentials provided", null)
             } else {
 
-                var style = OkCollectStyle("#263238", "OkHi", "https://cdn.okhi.co/icon.png")
+                var style = OkCollectStyle("#005D67", "OkHi", "https://cdn.okhi.co/icon.png")
                 var config = OkCollectConfig(true, true, false, true)
 
                 if(locationManagerConfiguration != null) {
                     style = OkCollectStyle(
-                        (locationManagerConfiguration["color"] as? String) ?: "#263238",
+                        (locationManagerConfiguration["color"] as? String) ?: "#005D67",
                         (locationManagerConfiguration["appName"] as? String) ?: "OkHi",
                         (locationManagerConfiguration["logoUrl"] as? String) ?: "https://cdn.okhi.co/icon.png"
                     )

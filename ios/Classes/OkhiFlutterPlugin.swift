@@ -328,7 +328,8 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 )
 
             theme = OkHiTheme()
-                .with(primaryColor: locationManagerConfiguration["color"] as? String ?? "")
+                .with(appBarColor: locationManagerConfiguration["color"] as? String ?? "#005D67")
+                .with(primaryColor: locationManagerConfiguration["color"] as? String ?? "#005D67")
                 .with(logoUrl: locationManagerConfiguration["logoUrl"] as? String ?? "")
 
             do {
