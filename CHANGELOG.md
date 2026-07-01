@@ -1,3 +1,14 @@
+## 2.0.5
+
+- Fix: Prevent stale verification callbacks from previous sessions by tracking active operation tokens on Android and iOS
+- Fix: Cancel and reset existing stream subscriptions and callbacks before re-initializing verification
+- Fix: Correct address type casting on iOS (`withWorkAddressType`/`withHomeAddressType` now read as `Bool` instead of `Int`)
+- Fix: Handle `locationManagerConfiguration` casting and defaults for `OkCollectStyle`/`OkCollectConfig` on Android
+- Added: `appName` support to `OkHiLocationManagerConfiguration`
+- Added: `appBarColor` support to iOS theme configuration
+- Updated: default branding color to `#005D67` across Android and iOS
+- Upgrade: Bumped native SDKs - Android `okhi` to 1.0.13, iOS `OkHi` to 1.10.16
+
 ## 2.0.4
 
 - Fix Null entries for address location response.
