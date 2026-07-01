@@ -60,9 +60,9 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
   final _lastNameCtrl = TextEditingController();
   final _appUserIdCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _branchIdCtrl = TextEditingController(text: "bGlA1qWeiB");
+  final _branchIdCtrl = TextEditingController(text: "B0lKOrJaUN");
   final _clientKeyCtrl = TextEditingController(
-    text: "c728dcef-bc6b-4e0f-b6f2-b29df973366d",
+    text: "73957af9-faef-4c9f-ad27-e0abe969f76a",
   );
 
   @override
