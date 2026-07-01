@@ -18,6 +18,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
     private var verificationSuccessResult: ((Any) -> Void)?
     private var verificationErrorResult: ((FlutterError) -> Void)?
+    private var activeOperationToken: Int = 0
 
     private func topViewController() -> UIViewController? {
         let keyWindow = UIApplication.shared.windows.first { $0.isKeyWindow }
@@ -322,15 +323,17 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
             appConfig = OkHiConfig()
                 .withAddressTypes(
-                    work: locationManagerConfiguration["withWorkAddressType"] as? Int == 1,
-                    home: locationManagerConfiguration["withHomeAddressType"] as? Int == 1
+                    work: locationManagerConfiguration["withWorkAddressType"] as? Bool == true,
+                    home: locationManagerConfiguration["withHomeAddressType"] as? Bool == true
                 )
 
             theme = OkHiTheme()
-                .with(primaryColor: locationManagerConfiguration["color"] as? String ?? "")
+                .with(appBarColor: locationManagerConfiguration["color"] as? String ?? "#005D67")
+                .with(primaryColor: locationManagerConfiguration["color"] as? String ?? "#005D67")
                 .with(logoUrl: locationManagerConfiguration["logoUrl"] as? String ?? "")
 
             do {
+                self.activeOperationToken += 1
                 OK.shared.login(auth: auth, user: user){ list in
                     print("OkHi Initialized successfully on iOS platform: \(list)")
                     result(true)
@@ -381,7 +384,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
 
-        OK.shared.startAddressVerification(vc: viewController, theme: theme, config: appConfigInstance, location: okhiLocation) { response, error in
+        let token = activeOperationToken
+        OK.shared.startAddressVerification(vc: viewController, theme: theme, config: appConfigInstance, location: okhiLocation) { [weak self] response, error in
+            guard let self = self, self.activeOperationToken == token else { return }
             if let validResponse = response {
                 self.emit(self.getSuccessEvent(methodCall: method, response: validResponse))
             } else if let error = error {
@@ -395,6 +400,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 )
             }
         }
+        result(nil)
     }
 
     private func handleStartPhysicalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -410,7 +416,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             return
         }
 
-        OK.shared.startPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
+        let token = activeOperationToken
+        OK.shared.startPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { [weak self] response, error in
+            guard let self = self, self.activeOperationToken == token else { return }
             if let validResponse = response {
                 self.emit(self.getSuccessEvent(methodCall: "startPhysicalAddressVerification", response: validResponse))
             } else if let error = error {
@@ -424,6 +432,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 )
             }
         }
+        result(nil)
     }
 
     private func handleStartDigitalAndPhysicalVerification(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -438,7 +447,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             )
             return
         }
-        OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { response, error in
+        let token = activeOperationToken
+        OK.shared.startDigitalAndPhysicalAddressVerification(vc: viewController, theme: theme, config: appConfig) { [weak self] response, error in
+            guard let self = self, self.activeOperationToken == token else { return }
             if let validResponse = response {
                 self.emit(self.getSuccessEvent(methodCall: "startDigitalAndPhysicalAddressVerification", response: validResponse))
             } else if let error = error {
@@ -452,6 +463,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 )
             }
         }
+        result(nil)
     }
 
     private func handleCreateAddress(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -466,7 +478,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             )
             return
         }
-        OK.shared.createAddress(vc: viewController, theme: theme, config: appConfig) { response, error in
+        let token = activeOperationToken
+        OK.shared.createAddress(vc: viewController, theme: theme, config: appConfig) { [weak self] response, error in
+            guard let self = self, self.activeOperationToken == token else { return }
             if let validResponse = response {
                 self.emit(self.getSuccessEvent(methodCall: "createAddress", response: validResponse))
             } else if let error = error {
@@ -480,6 +494,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
                 )
             }
         }
+        result(nil)
     }
 
     private func getSuccessEvent(methodCall: String, response: OkHiSuccessResponse) -> [String : Any?] {

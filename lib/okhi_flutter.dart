@@ -189,6 +189,7 @@ class OkHi {
       "locationManagerConfiguration": locationManagerConfiguration != null
           ? {
               "color": locationManagerConfiguration.color,
+              "appName": locationManagerConfiguration.appName,
               "logoUrl": locationManagerConfiguration.logoUrl,
               "withAppBar": locationManagerConfiguration.withAppBar,
               "withCreateMode": locationManagerConfiguration.withCreateMode,
@@ -200,6 +201,11 @@ class OkHi {
             }
           : null,
     };
+
+    await streamSubscription?.cancel();
+    streamSubscription = null;
+    onVerificationSuccess = null;
+    onVerificationError = null;
 
     streamSubscription = okhiVerificationStream.listen((dynamic event) {
       if (event.resultType == "success") {

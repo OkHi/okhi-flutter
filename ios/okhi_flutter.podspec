@@ -20,5 +20,5 @@ The official OkHi Flutter plugin for collecting and verifying user addresses on 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.swift_version = '5.0'
-  s.dependency 'OkHi', '1.10.14'
+  s.dependency 'OkHi', '1.10.16'
 end
