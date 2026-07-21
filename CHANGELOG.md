@@ -1,3 +1,8 @@
+## 2.0.6
+
+- Added: `OkHi.closeAddressCollection()` method to programmatically close the address collection UI from the Flutter layer, implemented across Android and iOS
+- Upgrade: Bumped native SDKs - Android `okhi` to 1.0.16, iOS `OkHi` to 1.10.18
+
 ## 2.0.5
 
 - Fix: Prevent stale verification callbacks from previous sessions by tracking active operation tokens on Android and iOS
