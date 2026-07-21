@@ -148,6 +148,7 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             "startPhysicalAddressVerification" -> handleStartPhysicalVerification(call, result)
             "startDigitalAndPhysicalAddressVerification" -> handleStartDigitalAndPhysicalVerification(call, result)
             "createAddress" -> handleCreateAddress(call, result)
+            "closeAddressCollection" -> handleCloseAddressCollection(call, result)
 
             "canOpenProtectedApps" -> handleCanOpenProtectedApps(call, result)
             "openProtectedApps" -> handleOpenProtectedApps(call, result)
@@ -342,6 +343,16 @@ class OkhiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         )
         result.success(null)
+    }
+
+    private fun handleCloseAddressCollection(call: MethodCall, result: Result) {
+        OkHi.closeAddressCollection { exception ->
+            if (exception != null) {
+                OkHiMainThreadResult(result).error(exception.code, exception.message, exception)
+            } else {
+                OkHiMainThreadResult(result).success(null)
+            }
+        }
     }
 
     private fun getSuccessEventObject(methodCall: String, response: OkHiSuccessResponse): JSONObject {

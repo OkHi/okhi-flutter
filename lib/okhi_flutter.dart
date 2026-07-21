@@ -384,4 +384,11 @@ class OkHi {
       message: "Unexpected logout payload type: ${raw.runtimeType}",
     );
   }
+
+  /// Closes the address collection UI if currently open.
+  static Future<void> closeAddressCollection() async {
+    await _channel.invokeMethod(
+        OkHiNativeMethod.closeAddressCollection
+    );
+  }
 }

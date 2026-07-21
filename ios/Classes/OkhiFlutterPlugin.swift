@@ -137,6 +137,9 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
         case "stopVerification":
             handleStopVerification(call, result)
             break
+        case "closeAddressCollection":
+            handleCloseAddressCollection(call, result)
+            break
         case "getCurrentLocation":
             handleGetCurrentLocation(call, result)
             break
@@ -351,6 +354,18 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
             let ids = locationIds as? [String] ?? []
             DispatchQueue.main.async {
                 result(ids)
+            }
+        }
+    }
+
+    private func handleCloseAddressCollection(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        OK.shared.closeAddressCollection { exception in
+            DispatchQueue.main.async {
+                if let exception = exception {
+                    result(FlutterError(code: exception.code, message: exception.message, details: nil))
+                } else {
+                    result(nil)
+                }
             }
         }
     }
