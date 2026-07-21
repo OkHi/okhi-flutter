@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:okhi_flutter/models/okhi_location_manager_configuration.dart';
@@ -265,6 +268,15 @@ class _OkHiHomePageState extends State<OkHiHomePage> {
 
   Future<void> _startDigitalVerification() async {
     _setLoading(true);
+    // todo: Uncomment for closeAddressCollection testing
+    // Timer.periodic(Duration(seconds: 15), (timer) {
+    //   OkHi.closeAddressCollection().catchError((error) {
+    //     if (kDebugMode) {
+    //       print("Close address collection failed! Error: $error");
+    //     }
+    //   });
+    //   setState(() {_isLoading = false;});
+    // });
     OkHi.startDigitalAddressVerification(
       locationId: _savedAddressId.isEmpty ? null : _savedAddressId,
       onSuccess: _onAddressSuccess,
