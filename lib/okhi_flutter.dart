@@ -387,8 +387,6 @@ class OkHi {
 
   /// Closes the address collection UI if currently open.
   static Future<void> closeAddressCollection() async {
-    await _channel.invokeMethod(
-        OkHiNativeMethod.closeAddressCollection
-    );
+    await _channel.invokeMethod(OkHiNativeMethod.closeAddressCollection);
   }
 }
