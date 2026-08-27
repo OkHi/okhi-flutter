@@ -1,3 +1,14 @@
+## 2.0.8
+
+- Bump io.okhi.android:okhi from 1.0.18 to 1.0.19
+
+## 2.0.7
+
+- Version Bump: Updated pubspec.yaml to 2.0.7.
+- Android Dependency: Updated io.okhi.android:okhi from 1.0.16 to 1.0.18 in android/build.gradle.
+- New Scripts: Added publish-full.bash and publish_dry_run.bash to automate formatting, analysis, testing, and the publishing process.
+- Formatting: Applied dart format changes to lib/okhi_flutter_method_channel.dart, lib/models/okhi_user.dart, lib/okhi_flutter.dart, and test/okhi_flutter_method_channel_test.dart.
+
 ## 2.0.6
 
 - Added: `OkHi.closeAddressCollection()` method to programmatically close the address collection UI from the Flutter layer, implemented across Android and iOS
