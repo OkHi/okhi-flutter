@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - OkHi (1.10.18)
-  - okhi_flutter (2.0.4):
+  - OkHi (1.10.19)
+  - okhi_flutter (2.0.9):
     - Flutter
-    - OkHi (= 1.10.18)
+    - OkHi (= 1.10.19)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -21,9 +21,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  OkHi: e603719709587be222ca5c4a20f008db2400a721
-  okhi_flutter: 1f2d961a0b3d3902b80c63f7e1d06c186db3defb
+  OkHi: 6ddd4ee46b748fde3acc1d8b14f27568ee601e54
+  okhi_flutter: ce3566efa90bcdb8bdc758c449154a925de2d35d
 
-PODFILE CHECKSUM: 53a6aebc29ccee84c41f92f409fc20cd4ca011f1
+PODFILE CHECKSUM: 4b015915ec662986b54bf30ab778da63f7dda016
 
 COCOAPODS: 1.16.2
