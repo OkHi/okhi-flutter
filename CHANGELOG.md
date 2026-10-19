@@ -1,3 +1,9 @@
+## 2.0.9
+
+- Upgrade: Bumped native SDKs - Android `okhi` to 1.0.21, iOS `OkHi` to 1.10.19
+- Updated: iOS deployment target to 15.0
+- Fix: `OkHiConstant.libraryVersion` now reports the plugin version (2.0.9)
+
 ## 2.0.6
 
 - Added: `OkHi.closeAddressCollection()` method to programmatically close the address collection UI from the Flutter layer, implemented across Android and iOS
