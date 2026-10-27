@@ -1,3 +1,10 @@
+## Unversioned
+
+- Added: Swift Package Manager support for iOS (`ios/okhi_flutter/Package.swift`); the CocoaPods podspec is kept as a fallback
+- Fix: `PrivacyInfo.xcprivacy` was an empty file; replaced with a valid manifest
+- Changed: iOS minimum deployment target is now 15.0 (matches the native OkHi SDK)
+- Upgrade: Bumped native iOS `OkHi` to 1.10.19
+
 ## 2.0.6
 
 - Added: `OkHi.closeAddressCollection()` method to programmatically close the address collection UI from the Flutter layer, implemented across Android and iOS
