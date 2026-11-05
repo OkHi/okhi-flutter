@@ -15,9 +15,18 @@ jobs:
     name: Build iOS for TestFlight
     runs-on: macos-latest
     needs: build-android
+    # Check out into a folder named after the plugin. For a plugin's example app,
+    # Flutter adds the plugin's own Swift package (ios/okhi_flutter) to the Xcode
+    # project; SwiftPM then fails with "unable to override package 'okhi_flutter'"
+    # unless the repo folder name matches the plugin name.
+    defaults:
+      run:
+        working-directory: okhi_flutter
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: okhi_flutter
 
       - name: 🦋 Setup Flutter
         uses: subosito/flutter-action@v2
@@ -51,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-ipa
-          path: example/build/ios/iphoneos/OkHiFlutterForIOS.app
+          path: okhi_flutter/example/build/ios/iphoneos/OkHiFlutterForIOS.app
 
       - name: 💎 Setup Ruby
         uses: ruby/setup-ruby@v1

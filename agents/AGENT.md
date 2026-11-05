@@ -314,6 +314,8 @@ platform :ios, '15.0'
 
 The plugin ships both `ios/okhi_flutter/Package.swift` (Swift Package Manager, preferred) and `ios/okhi_flutter.podspec` (CocoaPods fallback). Keep the `OkHi` native version identical in both.
 
+**Running `example/` with SPM:** clone this repo into a folder named `okhi_flutter` (e.g. `git clone git@github.com:OkHi/okhi-flutter.git okhi_flutter`). For a plugin's example app, Flutter adds the plugin's own package (`ios/okhi_flutter`) to the Xcode project, and SwiftPM fails with `unable to override package 'okhi_flutter' because its identity '<folder>' doesn't match override's identity (directory name) 'okhi_flutter'` when the repo folder has any other name. This only affects the example app; apps consuming the plugin from pub.dev are unaffected. CI checks out into `okhi_flutter/` for the same reason.
+
 ### `Info.plist`
 ```xml
 <key>NSLocationAlwaysUsageDescription</key>
