@@ -15,7 +15,7 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "okhi_flutter", path: "../.packages/ios15-base"),
+        .package(name: "okhi_flutter", path: "../.packages/okhi_flutter"),
         .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
