@@ -10,13 +10,15 @@ let package = Package(
         .library(name: "okhi-flutter", targets: ["okhi_flutter"])
     ],
     dependencies: [
-        .package(url: "https://github.com/OkHi/ios-okhi.git", exact: "1.10.19")
+        .package(url: "https://github.com/OkHi/ios-okhi.git", exact: "1.10.19"),
+        .package(name: "FlutterFramework", path: "../FlutterFramework")
     ],
     targets: [
         .target(
             name: "okhi_flutter",
             dependencies: [
-                .product(name: "OkHi", package: "ios-okhi")
+                .product(name: "OkHi", package: "ios-okhi"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
             ],
             resources: [
                 .process("PrivacyInfo.xcprivacy")

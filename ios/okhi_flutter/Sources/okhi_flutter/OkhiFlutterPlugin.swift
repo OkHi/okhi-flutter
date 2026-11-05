@@ -21,7 +21,12 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     private var activeOperationToken: Int = 0
 
     private func topViewController() -> UIViewController? {
-        let keyWindow = UIApplication.shared.windows.first { $0.isKeyWindow }
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let activeScenes = windowScenes.filter { $0.activationState == .foregroundActive }
+        let keyWindow = (activeScenes + windowScenes)
+            .lazy
+            .compactMap { scene in scene.windows.first { $0.isKeyWindow } ?? scene.windows.first }
+            .first
         var topController = keyWindow?.rootViewController
         while let presentedViewController = topController?.presentedViewController {
             topController = presentedViewController
