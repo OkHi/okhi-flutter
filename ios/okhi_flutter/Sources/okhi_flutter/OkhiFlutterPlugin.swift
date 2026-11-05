@@ -38,9 +38,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     public override init() {
         coreLocationManager = CLLocationManager()
         coreLocationManager.desiredAccuracy = kCLLocationAccuracyBest
-        if #available(iOS 9.0, *) {
-            coreLocationManager.allowsBackgroundLocationUpdates = true
-        }
+        coreLocationManager.allowsBackgroundLocationUpdates = true
         okverify = OkVerify()
         appConfig = OkHiConfig()
         theme = OkHiTheme()
@@ -612,11 +610,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     }
 
     private func getLocationAuthorizationStatus(manager: CLLocationManager) -> CLAuthorizationStatus {
-        if #available(iOS 14.0, *) {
-            return manager.authorizationStatus
-        } else {
-            return CLLocationManager.authorizationStatus()
-        }
+        return manager.authorizationStatus
     }
 
     private func fetchLocationPermissionStatus(status: CLAuthorizationStatus) -> String {
