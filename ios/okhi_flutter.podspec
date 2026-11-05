@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'okhi_flutter'
-  s.version          = '2.0.7'
+  s.version          = '2.0.10'
   s.summary          = 'The OkHi Flutter library enables you to collect and verify your user addresses.'
   s.description      = <<-DESC
 The official OkHi Flutter plugin for collecting and verifying user addresses on iOS and Android.
