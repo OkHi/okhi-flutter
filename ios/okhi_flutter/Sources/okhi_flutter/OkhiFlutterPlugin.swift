@@ -21,7 +21,12 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     private var activeOperationToken: Int = 0
 
     private func topViewController() -> UIViewController? {
-        let keyWindow = UIApplication.shared.windows.first { $0.isKeyWindow }
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let activeScenes = windowScenes.filter { $0.activationState == .foregroundActive }
+        let keyWindow = (activeScenes + windowScenes)
+            .lazy
+            .compactMap { scene in scene.windows.first { $0.isKeyWindow } ?? scene.windows.first }
+            .first
         var topController = keyWindow?.rootViewController
         while let presentedViewController = topController?.presentedViewController {
             topController = presentedViewController
@@ -38,9 +43,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     public override init() {
         coreLocationManager = CLLocationManager()
         coreLocationManager.desiredAccuracy = kCLLocationAccuracyBest
-        if #available(iOS 9.0, *) {
-            coreLocationManager.allowsBackgroundLocationUpdates = true
-        }
+        coreLocationManager.allowsBackgroundLocationUpdates = true
         okverify = OkVerify()
         appConfig = OkHiConfig()
         theme = OkHiTheme()
@@ -612,11 +615,7 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     }
 
     private func getLocationAuthorizationStatus(manager: CLLocationManager) -> CLAuthorizationStatus {
-        if #available(iOS 14.0, *) {
-            return manager.authorizationStatus
-        } else {
-            return CLLocationManager.authorizationStatus()
-        }
+        return manager.authorizationStatus
     }
 
     private func fetchLocationPermissionStatus(status: CLAuthorizationStatus) -> String {
