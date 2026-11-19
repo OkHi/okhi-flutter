@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = "2.1.0"
+    ext.kotlin_version = "2.4.0"
     repositories {
         google()
         mavenCentral()
@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("com.android.tools.build:gradle:9.1.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -21,7 +21,19 @@ rootProject.allprojects {
 }
 
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
+
+// Kotlin support:
+// - AGP 9+ with built-in Kotlin (the default) compiles Kotlin itself; kotlin-android must not be applied.
+// - Flutter 3.47+ applies kotlin-android to plugins itself when built-in Kotlin is off (AGP 8, or
+//   android.builtInKotlin=false), so it is normally already applied by the time this script runs.
+// - Older Flutter versions don't, so apply it here only if nothing else has.
+def agpMajorVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize(".")[0].toInteger()
+def builtInKotlinProperty = project.findProperty("android.builtInKotlin")
+def builtInKotlinEnabled = agpMajorVersion >= 9 &&
+        (builtInKotlinProperty == null || builtInKotlinProperty.toString().toBoolean())
+if (!builtInKotlinEnabled && !project.pluginManager.hasPlugin("org.jetbrains.kotlin.android")) {
+    project.pluginManager.apply("org.jetbrains.kotlin.android")
+}
 
 android {
     namespace = "io.okhi.flutter.okhi_flutter"
@@ -30,10 +42,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11
     }
 
     sourceSets {
@@ -46,7 +54,7 @@ android {
     }
 
     dependencies {
-        implementation("io.okhi.android:okhi:1.0.22")
+        implementation("io.okhi.android:okhi:1.0.24")
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }
@@ -61,5 +69,11 @@ android {
                 showStandardStreams = true
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
