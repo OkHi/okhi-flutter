@@ -48,6 +48,13 @@ jobs:
         run:   |
           cd example
           flutter config --no-enable-swift-package-manager
+          # Flutter's SPM migration adds the plugin's own Swift package
+          # (../../ios/okhi_flutter, ID 78DABEA22ED26510000E7860) to the example's
+          # Xcode project as a local override. With SPM off, Flutter doesn't generate
+          # the FlutterFramework package that override depends on, so xcodebuild fails
+          # with "ios/FlutterFramework doesn't exist". Remove the override for this
+          # build only; the SPM step below adds it back.
+          sed -i '' '/78DABEA22ED26510000E7860/d' ios/Runner.xcodeproj/project.pbxproj
           flutter build ios -t lib/main_workspace.dart --release --no-codesign
 
       - name: 🏗️ Build iOS (Swift Package Manager)
