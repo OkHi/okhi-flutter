@@ -117,7 +117,7 @@ ios/
   Runner/
     AppDelegate.swift     # OkHi.OK.startMonitoring() on launch
     Info.plist            # NSLocation* usage descriptions
-  Podfile                 # platform :ios, '13.0'
+  Podfile                 # platform :ios, '15.0' (Flutter 3.47+ minimum; plugin itself supports 13.0)
 ```
 
 ---
@@ -309,7 +309,8 @@ Required if `minifyEnabled = true`:
 
 ### `Podfile`
 ```ruby
-platform :ios, '13.0'
+# Flutter 3.47+ requires apps to target iOS 15.0+; the plugin itself supports 13.0.
+platform :ios, '15.0'
 ```
 
 The plugin ships both `ios/okhi_flutter/Package.swift` (Swift Package Manager, preferred) and `ios/okhi_flutter.podspec` (CocoaPods fallback). Keep the `OkHi` native version identical in both.

@@ -2,8 +2,10 @@
 
 - Added: Swift Package Manager support for iOS (`ios/okhi_flutter/Package.swift`); the CocoaPods podspec is kept as a fallback
 - Fix: `PrivacyInfo.xcprivacy` was an empty file; replaced with a valid manifest
-- Changed: iOS minimum deployment target is 13.0 (native OkHi 1.10.21 requires 13.0). Host apps need `platform :ios, '13.0'` in their Podfile and `IPHONEOS_DEPLOYMENT_TARGET = 13.0` (or higher) on the Runner target
-- Changed: Example app Runner target aligned to iOS 13.0
+- Changed: The plugin's minimum iOS version is 13.0 (podspec and `Package.swift`), matching native OkHi 1.10.21. Apps built with Flutter 3.47+ must still target iOS 15.0+, because the Flutter engine requires it
+- Changed: Example app Runner target is iOS 15.0, as set by Flutter 3.47's deployment target migration
+- Upgrade: Android build tooling raised to the Flutter 3.47 template versions: Gradle 9.3.1, Android Gradle Plugin 9.1.0, Kotlin 2.4.0. The plugin no longer applies the Kotlin Gradle Plugin itself on current Flutter, which removes Flutter's "plugins that apply KGP" warning. It uses AGP's built-in Kotlin, or the Kotlin plugin Flutter 3.47+ applies when built-in Kotlin is off. It applies `kotlin-android` itself only as a fallback for older Flutter versions
+- Changed: Replaced the deprecated `kotlinOptions` block with `kotlin { compilerOptions { ... } }` in the plugin and example app
 - Upgrade: Bumped native iOS `OkHi` to 1.10.19
 
 ## 2.0.6
