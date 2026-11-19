@@ -1,3 +1,74 @@
+## 2.0.10
+
+- Added: Swift Package Manager support for iOS (`ios/okhi_flutter/Package.swift`); the CocoaPods podspec is kept as a fallback
+- Fix: `PrivacyInfo.xcprivacy` was an empty file; replaced with a valid manifest
+- Changed: The plugin's minimum iOS version is 13.0 (podspec and `Package.swift`), matching native OkHi 1.10.21. Apps built with Flutter 3.47+ must still target iOS 15.0+, because the Flutter engine requires it
+- Changed: Example app Runner target is iOS 15.0, as set by Flutter 3.47's deployment target migration
+- Upgrade: Android build tooling raised to the Flutter 3.47 template versions: Gradle 9.5.0, Android Gradle Plugin 9.1.1 (the minimum Flutter now requires), Kotlin 2.4.0. The plugin no longer applies the Kotlin Gradle Plugin itself on current Flutter, which removes Flutter's "plugins that apply KGP" warning. It uses AGP's built-in Kotlin, or the Kotlin plugin Flutter 3.47+ applies when built-in Kotlin is off. It applies `kotlin-android` itself only as a fallback for older Flutter versions
+- Changed: Replaced the deprecated `kotlinOptions` block with `kotlin { compilerOptions { ... } }` in the plugin and example app
+- Upgrade: Bumped native SDKs - Android `okhi` to 1.0.24 (includes an OkHttp security patch), iOS `OkHi` to 1.10.21
+
+## 2.0.9
+
+- Upgrade: Bumped native SDKs - Android `okhi` to 1.0.21, iOS `OkHi` to 1.10.19
+- Changed: The podspec's minimum iOS version was raised from 12.0 to 15.0
+
+## 2.0.8
+
+- Upgrade: Bumped native Android `okhi` to 1.0.19
+
+## 2.0.7
+
+- Upgrade: Bumped native Android `okhi` to 1.0.18
+
+## 2.0.6
+
+- Added: `OkHi.closeAddressCollection()` method to programmatically close the address collection UI from the Flutter layer, implemented across Android and iOS
+- Upgrade: Bumped native SDKs - Android `okhi` to 1.0.16, iOS `OkHi` to 1.10.18
+
+## 2.0.5
+
+- Fix: Prevent stale verification callbacks from previous sessions by tracking active operation tokens on Android and iOS
+- Fix: Cancel and reset existing stream subscriptions and callbacks before re-initializing verification
+- Fix: Correct address type casting on iOS (`withWorkAddressType`/`withHomeAddressType` now read as `Bool` instead of `Int`)
+- Fix: Handle `locationManagerConfiguration` casting and defaults for `OkCollectStyle`/`OkCollectConfig` on Android
+- Added: `appName` support to `OkHiLocationManagerConfiguration`
+- Added: `appBarColor` support to iOS theme configuration
+- Updated: default branding color to `#005D67` across Android and iOS
+- Upgrade: Bumped native SDKs - Android `okhi` to 1.0.13, iOS `OkHi` to 1.10.16
+
+## 2.0.4
+
+- Fix Null entries for address location response.
+- Added protected Apps flow
+
+## 2.0.3
+
+- Fix for first + last name not showing on okdash
+
+## 2.0.2
+
+- Added logout for iOS
+- Added return list object on logout
+- Added Agent.md file for Agentic AI builds
+
+## 2.0.1
+
+- Added OkHiUser and OkHiLocation object to success callback
+- Removed UserId hard requirement on iOS
+
+## 2.0.0
+
+- Major update: Refactored the plugin to provide a more streamlined and efficient experience for developers.
+- Easy to integrate and use with a more intuitive callback-based approach.
+- Improved and Type-Safe Error Handling with OkHiException .
+- Updated documentation and examples to reflect the new changes.
+- Upgrade: Bumped up native libraries to the latest versions for improved performance and stability.
+
+- Breaking changes: The API has been significantly changed, and existing implementations will need to be updated to work with the new version. Please refer to the updated documentation for migration guidelines.
+- We recommend testing the new version in a staging environment before deploying it to production to ensure compatibility and to take advantage of the new features and improvements.
+- Thank you for using our plugin, and we look forward to seeing how you utilize the new features and improvements in version 2.0.0!
+
 ## 1.1.36
 
 - fix: Android 16KB page size compatibility

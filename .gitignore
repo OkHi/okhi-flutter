@@ -240,3 +240,9 @@ android/.idea
 okhi_flutter.iml
 example/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 pubspec.lock
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build

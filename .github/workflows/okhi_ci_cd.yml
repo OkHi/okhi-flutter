@@ -1,0 +1,149 @@
+name: OkHi Flutter CI/CD 2026
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+permissions:
+  contents: write   # allow creating/updating Releases & uploading assets
+  actions:  read
+
+jobs:
+  build-ios:
+    name: Build iOS for TestFlight
+    runs-on: macos-latest
+    needs: build-android
+    # Check out into a folder named after the plugin. For a plugin's example app,
+    # Flutter adds the plugin's own Swift package (ios/okhi_flutter) to the Xcode
+    # project; SwiftPM then fails with "unable to override package 'okhi_flutter'"
+    # unless the repo folder name matches the plugin name.
+    defaults:
+      run:
+        working-directory: okhi_flutter
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: okhi_flutter
+
+      - name: 🦋 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: 📥 Navigate to example and Get dependencies
+        run:  |
+          cd example
+          flutter pub get
+
+      - name: ☄️ Analyze code
+        run: flutter analyze
+
+      - name: ✅ Run tests
+        run: flutter test
+
+      - name: 🏗️ Build iOS (CocoaPods fallback)
+        run:   |
+          cd example
+          flutter config --no-enable-swift-package-manager
+          # Flutter's SPM migration adds the plugin's own Swift package
+          # (../../ios/okhi_flutter, ID 78DABEA22ED26510000E7860) to the example's
+          # Xcode project as a local override. With SPM off, Flutter doesn't generate
+          # the FlutterFramework package that override depends on, so xcodebuild fails
+          # with "ios/FlutterFramework doesn't exist". Remove the override for this
+          # build only; the SPM step below adds it back.
+          sed -i '' '/78DABEA22ED26510000E7860/d' ios/Runner.xcodeproj/project.pbxproj
+          flutter build ios -t lib/main_workspace.dart --release --no-codesign
+
+      - name: 🏗️ Build iOS (Swift Package Manager)
+        run:   |
+          cd example
+          flutter config --enable-swift-package-manager
+          flutter build ios -t lib/main_workspace.dart --release --no-codesign
+
+      - name: 📦 Prepare & Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ipa
+          path: okhi_flutter/example/build/ios/iphoneos/OkHiFlutterForIOS.app
+
+      - name: 💎 Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+#      todo: Get the certificate repo then give access
+#      - name: ⚙️ Fastlane Match Setup
+#        env:
+#          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+#        run: |
+#          cd example/ios
+#          bundle install
+#          bundle exec fastlane match appstore
+#      todo: Get testflight credentials
+#      - name: 🚀 Deploy to TestFlight
+#        run: |
+#          cd example/ios
+#          fastlane beta
+#        env:
+#          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+#          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+#          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📂 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Cache pub deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: ${{ runner.os }}-pub-
+
+      - name: ☕️ Setup Java (Temurin 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 🦋 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: 🧭 Navigate to example app and Get dependencies
+        run: |
+          cd example
+          flutter pub get
+
+      - name: ☄️ Analyze code
+        run: flutter analyze
+
+      - name: ✅ Run tests
+        run: flutter test
+
+      - name: 🏗️ Build APKs
+        run:  |
+          cd example
+          flutter build apk --release
+
+      - name: 📦 Prepare & Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: example/build/app/outputs/flutter-apk/app-release.apk
+
+##         For firebase distribution configuration
+#      - name: 🔥 Distribute APK via Firebase
+#        run: |
+#          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+#            --app ${{ secrets.FIREBASE_APP_ID }} \
+#            --groups testers \
+#            --token ${{ secrets.FIREBASE_TOKEN }}

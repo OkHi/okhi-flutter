@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "ios-okhi",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/OkHi/ios-okhi.git",
+      "state" : {
+        "revision" : "277e8c6db571b952a1a964b4ce599d9d4aead794",
+        "version" : "1.10.20"
+      }
+    }
+  ],
+  "version" : 2
+}
