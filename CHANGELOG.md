@@ -2,8 +2,8 @@
 
 - Added: Swift Package Manager support for iOS (`ios/okhi_flutter/Package.swift`); the CocoaPods podspec is kept as a fallback
 - Fix: `PrivacyInfo.xcprivacy` was an empty file; replaced with a valid manifest
-- Breaking: iOS minimum deployment target is now 15.0 (required by native OkHi 1.10.19). Host apps must set `platform :ios, '15.0'` in their Podfile and `IPHONEOS_DEPLOYMENT_TARGET = 15.0` on the Runner target
-- Changed: Example app Runner target aligned to iOS 15.0; removed iOS 9/14 availability checks that are now always true
+- Changed: iOS minimum deployment target is 13.0 (native OkHi 1.10.21 requires 13.0). Host apps need `platform :ios, '13.0'` in their Podfile and `IPHONEOS_DEPLOYMENT_TARGET = 13.0` (or higher) on the Runner target
+- Changed: Example app Runner target aligned to iOS 13.0
 - Upgrade: Bumped native iOS `OkHi` to 1.10.19
 
 ## 2.0.6

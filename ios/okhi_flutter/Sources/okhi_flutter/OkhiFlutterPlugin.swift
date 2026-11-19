@@ -615,7 +615,11 @@ public class OkhiFlutterPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     }
 
     private func getLocationAuthorizationStatus(manager: CLLocationManager) -> CLAuthorizationStatus {
-        return manager.authorizationStatus
+        if #available(iOS 14.0, *) {
+            return manager.authorizationStatus
+        } else {
+            return CLLocationManager.authorizationStatus()
+        }
     }
 
     private func fetchLocationPermissionStatus(status: CLAuthorizationStatus) -> String {
