@@ -4,13 +4,13 @@ import PackageDescription
 let package = Package(
     name: "okhi_flutter",
     platforms: [
-        .iOS("15.0")
+        .iOS("13.0")
     ],
     products: [
         .library(name: "okhi-flutter", targets: ["okhi_flutter"])
     ],
     dependencies: [
-        .package(url: "https://github.com/OkHi/ios-okhi.git", exact: "1.10.19"),
+        .package(url: "https://github.com/OkHi/ios-okhi.git", exact: "1.10.21"),
         .package(name: "FlutterFramework", path: "../FlutterFramework")
     ],
     targets: [

@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'okhi_flutter'
-  s.version          = '2.0.10'
+  s.version          = '2.0.11'
   s.summary          = 'The OkHi Flutter library enables you to collect and verify your user addresses.'
   s.description      = <<-DESC
 The official OkHi Flutter plugin for collecting and verifying user addresses on iOS and Android.
@@ -15,11 +15,11 @@ The official OkHi Flutter plugin for collecting and verifying user addresses on 
   s.source           = { :path => '.' }
   s.source_files = 'okhi_flutter/Sources/okhi_flutter/**/*.swift'
   s.dependency 'Flutter'
-  s.platform = :ios, '15.0'
+  s.platform = :ios, '13.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.swift_version = '5.0'
   s.resource_bundles = { 'okhi_flutter_privacy' => ['okhi_flutter/Sources/okhi_flutter/PrivacyInfo.xcprivacy'] }
-  s.dependency 'OkHi', '1.10.19'
+  s.dependency 'OkHi', '1.10.21'
 end
